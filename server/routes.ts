@@ -1068,6 +1068,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Eroare la ștergerea conținutului CMS" });
     }
   });
+  
+  // Endpoint pentru statisticile organizatorilor - Numai pentru administratori
+  app.get("/api/admin/organizer-stats", isAdmin, async (req, res) => {
+    try {
+      // Obținem toți utilizatorii care sunt organizatori
+      const users = await storage.getAllUsers();
+      const organizers = users.filter(user => 
+        user.role === "operator" || user.role === "monastery"
+      );
+      
+      // Pentru fiecare organizator, compilăm statisticile
+      const organizerStats = await Promise.all(organizers.map(async (organizer) => {
+        // Obținem toate pelerinajele organizatorului
+        const pilgrimages = await storage.getPilgrimages({ organizerId: organizer.id });
+        
+        // Obținem toate rezervările pentru pelerinajele organizatorului
+        let totalBookings = 0;
+        let totalRevenue = 0;
+        let totalRatings = 0;
+        let ratingCount = 0;
+        let lastActivity = organizer.lastLogin || organizer.createdAt;
+        
+        // Numărăm pelerinajele promovate
+        const promotedPilgrimages = pilgrimages.filter(p => p.promoted);
+        
+        // Procesăm fiecare pelerinaj pentru a calcula statisticile
+        for (const pilgrimage of pilgrimages) {
+          // Obținem rezervările pentru acest pelerinaj
+          const bookings = await storage.getBookingsByPilgrimageId(pilgrimage.id);
+          
+          // Obținem recenziile pentru acest pelerinaj
+          const reviews = await storage.getReviews(pilgrimage.id);
+          
+          // Actualizăm statisticile
+          totalBookings += bookings.length;
+          totalRevenue += bookings.reduce((sum, b) => sum + b.totalPrice, 0);
+          
+          // Calculăm rating-ul mediu
+          if (reviews.length > 0) {
+            totalRatings += reviews.reduce((sum, r) => sum + r.rating, 0);
+            ratingCount += reviews.length;
+          }
+          
+          // Actualizăm ultima activitate dacă există o actualizare mai recentă
+          if (pilgrimage.updatedAt && new Date(pilgrimage.updatedAt) > new Date(lastActivity)) {
+            lastActivity = pilgrimage.updatedAt;
+          }
+        }
+        
+        // Calculăm rating-ul mediu
+        const averageRating = ratingCount > 0 ? totalRatings / ratingCount : 0;
+        
+        // Returnăm statisticile pentru acest organizator
+        return {
+          id: organizer.id,
+          username: organizer.username,
+          email: organizer.email,
+          firstName: organizer.firstName,
+          lastName: organizer.lastName,
+          pilgrimagesCount: pilgrimages.length,
+          promotedPilgrimagesCount: promotedPilgrimages.length,
+          totalBookings,
+          totalRevenue,
+          averageRating,
+          lastActivity: new Date(lastActivity).toISOString(),
+          profileImage: organizer.profileImage
+        };
+      }));
+      
+      // Sortăm rezultatele după numărul de rezervări (descrescător)
+      organizerStats.sort((a, b) => b.totalBookings - a.totalBookings);
+      
+      res.json(organizerStats);
+    } catch (error) {
+      console.error("Error fetching organizer stats:", error);
+      res.status(500).json({ message: "Eroare la obținerea statisticilor organizatorilor" });
+    }
+  });
 
   const httpServer = createServer(app);
 
