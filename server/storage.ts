@@ -404,6 +404,12 @@ export class MemStorage implements IStorage {
     );
   }
   
+  async getBookingsByPilgrimageId(pilgrimageId: number): Promise<Booking[]> {
+    return Array.from(this.bookings.values()).filter(
+      (booking) => booking.pilgrimageId === pilgrimageId
+    );
+  }
+  
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
     const id = this.currentBookingId++;
     const now = new Date();
@@ -895,6 +901,10 @@ export class DatabaseStorage implements IStorage {
   // Booking operations
   async getBookings(userId: number): Promise<Booking[]> {
     return await db.select().from(bookings).where(eq(bookings.userId, userId));
+  }
+  
+  async getBookingsByPilgrimageId(pilgrimageId: number): Promise<Booking[]> {
+    return await db.select().from(bookings).where(eq(bookings.pilgrimageId, pilgrimageId));
   }
 
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
