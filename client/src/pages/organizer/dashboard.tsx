@@ -5,6 +5,7 @@ import { Pilgrimage, Booking } from "@shared/schema";
 import { Link } from "wouter";
 import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import PromotionStats from "@/components/organizer/promotion-stats";
 import {
   Card,
   CardContent,
@@ -115,6 +116,55 @@ export default function OrganizerDashboard() {
     queryKey: ["/api/organizer/pilgrimages", selectedPilgrimageId, "financial-report"],
     queryFn: getQueryFn({ on401: "throw" }),
     enabled: !!selectedPilgrimageId && !!isOrganizer,
+  });
+  
+  // Obținem statisticile de promovare pentru un pelerinaj selectat
+  const {
+    data: promotionStats,
+    isLoading: promotionStatsLoading,
+    error: promotionStatsError,
+  } = useQuery<any>({
+    queryKey: ["/api/organizer/pilgrimages", selectedPilgrimageId, "promotion-stats"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: !!selectedPilgrimageId && !!isOrganizer,
+    // Placeholder pentru date de test, în mod real acestea vor veni de la server
+    placeholderData: {
+      impressions: [
+        { date: '2025-03-01', count: 45 },
+        { date: '2025-03-02', count: 73 },
+        { date: '2025-03-03', count: 58 },
+        { date: '2025-03-04', count: 96 },
+        { date: '2025-03-05', count: 112 },
+        { date: '2025-03-06', count: 84 },
+        { date: '2025-03-07', count: 120 }
+      ],
+      clicks: [
+        { date: '2025-03-01', count: 12 },
+        { date: '2025-03-02', count: 18 },
+        { date: '2025-03-03', count: 15 },
+        { date: '2025-03-04', count: 24 },
+        { date: '2025-03-05', count: 32 },
+        { date: '2025-03-06', count: 19 },
+        { date: '2025-03-07', count: 27 }
+      ],
+      bookings: [
+        { date: '2025-03-01', count: 1 },
+        { date: '2025-03-02', count: 2 },
+        { date: '2025-03-03', count: 0 },
+        { date: '2025-03-04', count: 3 },
+        { date: '2025-03-05', count: 5 },
+        { date: '2025-03-06', count: 2 },
+        { date: '2025-03-07', count: 4 }
+      ],
+      conversionRate: 14.73,
+      roi: 243.5,
+      activePromotion: {
+        level: 'premium',
+        startDate: '2025-03-01',
+        endDate: '2025-03-14',
+        cost: 60
+      }
+    }
   });
 
   // Funcție pentru publicarea unui pelerinaj
