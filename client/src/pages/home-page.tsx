@@ -7,17 +7,29 @@ import Testimonials from "@/components/home/testimonials";
 import CTASection from "@/components/home/cta-section";
 import { useQuery } from "@tanstack/react-query";
 import { Pilgrimage } from "@shared/schema";
+import { Separator } from "@/components/ui/separator";
 
 export default function HomePage() {
-  const { data: pilgrimages = [] } = useQuery<Pilgrimage[]>({
-    queryKey: ['/api/pilgrimages'],
+  // Obținem pelerinajele promovate (featured)
+  const { data: featuredPilgrimages = [] } = useQuery<Pilgrimage[]>({
+    queryKey: ['/api/pilgrimages', 'featured'],
     select: (pilgrimages) => pilgrimages.filter(p => p.featured).slice(0, 3)
   });
 
   return (
     <div>
       <HeroSection />
-      <FeaturedPilgrimages pilgrimages={pilgrimages} />
+      
+      {featuredPilgrimages.length > 0 && (
+        <>
+          <Separator className="my-4" />
+          <div className="bg-amber-50 py-2">
+            <FeaturedPilgrimages pilgrimages={featuredPilgrimages} />
+          </div>
+          <Separator className="my-4" />
+        </>
+      )}
+      
       <DestinationsSection />
       <HowItWorks />
       <Testimonials />

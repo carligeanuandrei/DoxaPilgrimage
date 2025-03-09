@@ -910,6 +910,13 @@ export class DatabaseStorage implements IStorage {
     if (filters.guide) {
       query = query.where(ilike(pilgrimages.guide, `%${filters.guide}%`));
     }
+    if (filters.organizerId) {
+      query = query.where(eq(pilgrimages.organizerId, filters.organizerId));
+    }
+    // Folosim doar featured pentru a determina promoțiile
+    if (filters.featured !== undefined) {
+      query = query.where(eq(pilgrimages.featured, filters.featured));
+    }
 
     return await query;
   }
