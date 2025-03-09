@@ -66,6 +66,12 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
   markMessageAsRead(id: number): Promise<Message | undefined>;
   
+  // CMS operations
+  getCmsContent(key?: string): Promise<CmsContent[] | CmsContent | undefined>;
+  createCmsContent(content: InsertCmsContent): Promise<CmsContent>;
+  updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined>;
+  deleteCmsContent(key: string): Promise<boolean>;
+  
   // Session store
   sessionStore: any;
 }
@@ -447,6 +453,56 @@ export class MemStorage implements IStorage {
     const updatedMessage = { ...message, read: true };
     this.messages.set(id, updatedMessage);
     return updatedMessage;
+  }
+
+  // CMS operations
+  private cmsContent: Map<string, CmsContent> = new Map();
+  private currentCmsId: number = 1;
+
+  async getCmsContent(key?: string): Promise<CmsContent[] | CmsContent | undefined> {
+    if (key) {
+      // Returnează un singur element după cheie
+      return Array.from(this.cmsContent.values()).find((item) => item.key === key);
+    } else {
+      // Returnează toate elementele
+      return Array.from(this.cmsContent.values());
+    }
+  }
+
+  async createCmsContent(content: InsertCmsContent): Promise<CmsContent> {
+    const id = this.currentCmsId++;
+    const now = new Date();
+    const cmsItem: CmsContent = {
+      ...content,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    this.cmsContent.set(content.key, cmsItem);
+    return cmsItem;
+  }
+
+  async updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined> {
+    const existingContent = Array.from(this.cmsContent.values()).find((item) => item.key === key);
+    if (!existingContent) return undefined;
+
+    const updatedContent = { 
+      ...existingContent, 
+      ...content, 
+      updatedAt: new Date() 
+    };
+    
+    this.cmsContent.set(key, updatedContent);
+    return updatedContent;
+  }
+
+  async deleteCmsContent(key: string): Promise<boolean> {
+    const content = Array.from(this.cmsContent.values()).find((item) => item.key === key);
+    if (!content) return false;
+
+    this.cmsContent.delete(key);
+    return true;
   }
   
   // Helper method to add demo pilgrimages
@@ -884,6 +940,44 @@ export class DatabaseStorage implements IStorage {
       .where(eq(messages.id, id))
       .returning();
     return updatedMessage;
+  }
+
+  // CMS operations
+  async getCmsContent(key?: string): Promise<CmsContent[] | CmsContent | undefined> {
+    if (key) {
+      // Returnează un singur element după cheie
+      const [content] = await db.select().from(cmsContent).where(eq(cmsContent.key, key));
+      return content;
+    } else {
+      // Returnează toate elementele
+      return await db.select().from(cmsContent);
+    }
+  }
+
+  async createCmsContent(content: InsertCmsContent): Promise<CmsContent> {
+    const [cmsItem] = await db.insert(cmsContent).values({
+      ...content,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    return cmsItem;
+  }
+
+  async updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined> {
+    const [updatedContent] = await db.update(cmsContent)
+      .set({
+        ...content,
+        updatedAt: new Date()
+      })
+      .where(eq(cmsContent.key, key))
+      .returning();
+    return updatedContent;
+  }
+
+  async deleteCmsContent(key: string): Promise<boolean> {
+    const result = await db.delete(cmsContent)
+      .where(eq(cmsContent.key, key));
+    return result.count > 0;
   }
 }
 
