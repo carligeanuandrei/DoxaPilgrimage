@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#91a3b0"/>
+  
+  <!-- Mountains and hills -->
+  <path d="M0,300 Q200,150 400,250 Q600,100 800,350 L800,600 L0,600 Z" fill="#3f5c68"/>
+  
+  <!-- Monastery -->
+  <rect x="300" y="300" width="200" height="100" fill="#d3b17d"/>
+  <rect x="370" y="250" width="60" height="50" fill="#d3b17d"/>
+  
+  <!-- Dome and cross -->
+  <path d="M370,250 Q400,220 430,250" stroke="#d3b17d" stroke-width="8" fill="none"/>
+  <circle cx="400" cy="220" r="10" fill="#d3b17d"/>
+  <path d="M400,210 L400,180 M390,195 L410,195" stroke="#d3b17d" stroke-width="3" fill="none"/>
+  
+  <!-- Trees -->
+  <path d="M150,350 L150,420 M140,420 Q150,400 160,420 Q170,370 180,420 Q150,400 120,420 Z" fill="#2d4c39"/>
+  <path d="M650,380 L650,450 M640,450 Q650,430 660,450 Q670,400 680,450 Q650,430 620,450 Z" fill="#2d4c39"/>
+  
+  <!-- Text label - would be removed for real image -->
+  <text x="400" y="500" font-family="serif" font-size="30" text-anchor="middle" fill="white">Putna Monastery</text>
+</svg>

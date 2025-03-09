@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#b8c4d0"/>
+  
+  <!-- Sky gradient -->
+  <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" style="stop-color:#7a9ebf;stop-opacity:1" />
+    <stop offset="100%" style="stop-color:#b8c4d0;stop-opacity:1" />
+  </linearGradient>
+  <rect width="800" height="350" fill="url(#skyGradient)"/>
+  
+  <!-- St. Peter's Basilica simplified -->
+  <rect x="250" y="200" width="300" height="150" fill="#e9e2d3"/>
+  
+  <!-- Main dome -->
+  <ellipse cx="400" cy="200" rx="120" ry="40" fill="#e9e2d3"/>
+  <path d="M280,200 Q400,100 520,200" stroke="#e9e2d3" stroke-width="15" fill="none"/>
+  
+  <!-- Cross on top -->
+  <path d="M400,100 L400,60 M380,80 L420,80" stroke="#e9e2d3" stroke-width="5" fill="none"/>
+  
+  <!-- Columns -->
+  <rect x="300" y="250" width="10" height="100" fill="#d6cfc0"/>
+  <rect x="330" y="250" width="10" height="100" fill="#d6cfc0"/>
+  <rect x="360" y="250" width="10" height="100" fill="#d6cfc0"/>
+  <rect x="390" y="250" width="10" height="100" fill="#d6cfc0"/>
+  <rect x="420" y="250" width="10" height="100" fill="#d6cfc0"/>
+  <rect x="450" y="250" width="10" height="100" fill="#d6cfc0"/>
+  <rect x="480" y="250" width="10" height="100" fill="#d6cfc0"/>
+  
+  <!-- Steps -->
+  <rect x="250" y="350" width="300" height="10" fill="#d6cfc0"/>
+  <rect x="270" y="360" width="260" height="10" fill="#d6cfc0"/>
+  <rect x="290" y="370" width="220" height="10" fill="#d6cfc0"/>
+  
+  <!-- Square in front -->
+  <rect x="150" y="380" width="500" height="50" fill="#c7c3b8"/>
+  
+  <!-- Obelisk -->
+  <rect x="400" y="360" width="10" height="70" fill="#d6cfc0"/>
+  
+  <!-- Text label - would be removed for real image -->
+  <text x="400" y="500" font-family="serif" font-size="30" text-anchor="middle" fill="#333">Vatican City</text>
+</svg>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#c2a278"/>
+  
+  <!-- Sand and hills -->
+  <path d="M0,350 Q200,320 400,340 Q600,280 800,330 L800,600 L0,600 Z" fill="#e8d6b0"/>
+  
+  <!-- Jerusalem skyline -->
+  <rect x="150" y="250" width="500" height="100" fill="#d6bc8e"/>
+  
+  <!-- Dome of the Rock -->
+  <rect x="350" y="200" width="100" height="50" fill="#d6bc8e"/>
+  <path d="M350,200 Q400,150 450,200" stroke="#daaf3f" stroke-width="10" fill="#daaf3f"/>
+  
+  <!-- Holy Sepulchre Church -->
+  <rect x="200" y="220" width="80" height="30" fill="#d6bc8e"/>
+  <path d="M200,220 Q240,190 280,220" stroke="#d6bc8e" stroke-width="8" fill="none"/>
+  <path d="M240,190 L240,170 M225,180 L255,180" stroke="#d6bc8e" stroke-width="3" fill="none"/>
+  
+  <!-- Other buildings and structures -->
+  <rect x="500" y="230" width="100" height="20" fill="#d6bc8e"/>
+  <rect x="540" y="210" width="20" height="20" fill="#d6bc8e"/>
+  
+  <!-- Ancient city walls -->
+  <path d="M100,300 L700,300" stroke="#a09078" stroke-width="20" fill="none" stroke-dasharray="40,20"/>
+  
+  <!-- Sun in the sky -->
+  <circle cx="650" cy="120" r="60" fill="#f7d06b" opacity="0.8"/>
+  
+  <!-- Text label - would be removed for real image -->
+  <text x="400" y="500" font-family="serif" font-size="30" text-anchor="middle" fill="#5c4b35">Jerusalem Holy Land</text>
+</svg>

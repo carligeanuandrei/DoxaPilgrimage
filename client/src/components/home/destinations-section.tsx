@@ -8,7 +8,7 @@ export default function DestinationsSection() {
           {/* Terra Sfântă */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
             <img 
-              src="/images/demo/placeholder-4.svg" 
+              src="/images/demo/destination-card-3.svg" 
               alt="Terra Sfântă" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -28,7 +28,7 @@ export default function DestinationsSection() {
           {/* Grecia Ortodoxă */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
             <img 
-              src="/images/demo/placeholder-3.svg" 
+              src="/images/demo/destination-card-2.svg" 
               alt="Grecia Ortodoxă" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -48,7 +48,7 @@ export default function DestinationsSection() {
           {/* România Creștină */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
             <img 
-              src="/images/demo/placeholder-2.svg" 
+              src="/images/demo/destination-card-1.svg" 
               alt="România Creștină" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -68,7 +68,7 @@ export default function DestinationsSection() {
           {/* Italia Catolică */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
             <img 
-              src="/images/demo/placeholder-5.svg" 
+              src="/images/demo/destination-card-4.svg" 
               alt="Italia Catolică" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />

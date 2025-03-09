@@ -1,6 +1,40 @@
-<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
-  <rect width="300" height="200" fill="#e0f2f1"/>
-  <text x="150" y="100" font-family="Arial" font-size="16" text-anchor="middle" fill="#009688">Nicula Monastery</text>
-  <rect x="70" y="120" width="160" height="10" fill="#009688"/>
-  <circle cx="150" cy="150" r="20" fill="#009688" opacity="0.6"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#e3f0f5"/>
+  
+  <!-- Sea and coastline -->
+  <path d="M0,400 Q200,380 400,410 Q600,380 800,420 L800,600 L0,600 Z" fill="#3b7ea0"/>
+  
+  <!-- Mount Athos peninsula -->
+  <path d="M100,350 Q250,100 400,350 Q550,200 700,400 L700,600 L100,600 Z" fill="#7a9b76"/>
+  
+  <!-- Main monastery -->
+  <rect x="300" y="320" width="200" height="100" fill="#d9c3a9"/>
+  
+  <!-- Monastery towers -->
+  <rect x="340" y="250" width="30" height="70" fill="#d9c3a9"/>
+  <path d="M340,250 Q355,220 370,250" fill="#a52f2c"/>
+  
+  <rect x="430" y="240" width="30" height="80" fill="#d9c3a9"/>
+  <path d="M430,240 Q445,210 460,240" fill="#a52f2c"/>
+  
+  <!-- Monastery church -->
+  <rect x="380" y="280" width="40" height="40" fill="#d9c3a9"/>
+  <circle cx="400" cy="270" r="10" fill="#a52f2c"/>
+  <path d="M395,265 L405,265 M400,260 L400,268" stroke="#d9c3a9" stroke-width="2"/>
+  
+  <!-- Trees -->
+  <path d="M200,350 C180,300 220,300 200,350 Z" fill="#3c573b"/>
+  <path d="M550,380 C530,330 570,330 550,380 Z" fill="#3c573b"/>
+  <path d="M600,400 C580,350 620,350 600,400 Z" fill="#3c573b"/>
+  <path d="M170,370 C150,320 190,320 170,370 Z" fill="#3c573b"/>
+  <path d="M250,360 C230,310 270,310 250,360 Z" fill="#3c573b"/>
+  
+  <!-- Fishing boat -->
+  <path d="M650,450 L670,450 L665,460 L655,460 Z" fill="#8b4513"/>
+  <line x1="662" y1="435" x2="662" y2="450" stroke="#8b4513" stroke-width="1"/>
+  <path d="M662,435 L668,442" stroke="#8b4513" stroke-width="1"/>
+  
+  <!-- Pilgrimage label -->
+  <text x="400" y="530" font-family="serif" font-size="28" text-anchor="middle" fill="#263238">Mount Athos Pilgrimage</text>
 </svg>
