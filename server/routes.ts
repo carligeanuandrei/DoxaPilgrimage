@@ -11,8 +11,7 @@ import {
   insertReviewSchema, 
   insertBookingSchema,
   insertMessageSchema,
-  insertCmsContentSchema,
-  pilgrimages
+  insertCmsContentSchema
 } from "@shared/schema";
 import Stripe from "stripe";
 
@@ -307,7 +306,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log(">>> Date primite pentru crearea pelerinajului:", JSON.stringify(req.body));
       console.log(">>> Schema validare:", insertPilgrimageSchema);
-      console.log(">>> Schema definită în shared/schema.ts:", pilgrimages.status);
       
       // Validăm datele de intrare
       let validData;
@@ -343,7 +341,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Convertim date pentru a ne asigura că sunt obiecte Date
         startDate: new Date(validData.startDate),
         endDate: new Date(validData.endDate)
-        // NU setăm status aici - este setat în storage.createPilgrimage
       };
       
       console.log(">>> Date finale pentru creare pelerinaj:", JSON.stringify(pilgrimageData, null, 2));
@@ -722,10 +719,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Nu aveți permisiunea de a publica acest pelerinaj" });
       }
       
-      // Actualizăm statusul pelerinajului la verificat (publicat)
+      // Actualizăm pelerinajul la verificat (publicat)
       const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
-        verified: true,
-        status: "published" 
+        verified: true
       });
       
       res.json(updatedPilgrimage);
@@ -750,10 +746,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Nu aveți permisiunea de a depublica acest pelerinaj" });
       }
       
-      // Actualizăm statusul pelerinajului la neverificat (nepublicat)
+      // Actualizăm pelerinajul la neverificat (nepublicat)
       const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
-        verified: false,
-        status: "unpublished"
+        verified: false
       });
       
       res.json(updatedPilgrimage);
@@ -778,10 +773,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Nu aveți permisiunea de a modifica acest pelerinaj" });
       }
       
-      // Actualizăm statusul pelerinajului la draft (neverificat și marcat ca draft)
+      // Actualizăm pelerinajul ca neverificat
       const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
-        verified: false,
-        status: "draft" 
+        verified: false
       });
       
       res.json(updatedPilgrimage);
@@ -874,9 +868,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Nu aveți permisiunea de a promova acest pelerinaj" });
       }
       
-      // Verificăm dacă pelerinajul este publicat
-      if (pilgrimage.status !== "published" || !pilgrimage.verified) {
-        return res.status(400).json({ message: "Doar pelerinajele publicate pot fi promovate" });
+      // Verificăm dacă pelerinajul este verificat
+      if (!pilgrimage.verified) {
+        return res.status(400).json({ message: "Doar pelerinajele verificate pot fi promovate" });
       }
       
       // Calculăm data de expirare a promovării
