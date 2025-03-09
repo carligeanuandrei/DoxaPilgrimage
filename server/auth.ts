@@ -48,6 +48,44 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Strategie pentru autentificarea administratorului
+  passport.use('admin', 
+    new LocalStrategy(async (username, password, done) => {
+      try {
+        // Verificare cu credențiale hardcodate pentru admin
+        if (username === 'avatour' && password === 'parola123') {
+          // Creăm un utilizator admin virtual
+          const adminUser: SelectUser = {
+            id: 9999, // ID special pentru admin
+            username: 'avatour',
+            password: 'protected',
+            email: 'admin@doxa.ro',
+            firstName: 'Admin',
+            lastName: 'Doxa',
+            phone: null,
+            role: 'admin',
+            verified: true,
+            verificationToken: null,
+            tokenExpiry: null,
+            resetToken: null,
+            resetTokenExpiry: null,
+            twoFactorSecret: null,
+            twoFactorEnabled: false,
+            bio: null,
+            profileImage: null,
+            createdAt: new Date()
+          };
+          return done(null, adminUser);
+        }
+        
+        return done(null, false, { message: "Credențiale de admin incorecte" });
+      } catch (error) {
+        return done(error);
+      }
+    })
+  );
+
+  // Strategie normală pentru utilizatori
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
@@ -115,10 +153,24 @@ export function setupAuth(app: Express) {
     }
   });
 
+  // Rută pentru login normal
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err: Error, user: any, info: { message: string }) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info?.message || "Credențiale incorecte" });
+      
+      req.login(user, (err) => {
+        if (err) return next(err);
+        return res.status(200).json(user);
+      });
+    })(req, res, next);
+  });
+  
+  // Rută pentru login admin
+  app.post("/api/admin/login", (req, res, next) => {
+    passport.authenticate("admin", (err: Error, user: any, info: { message: string }) => {
+      if (err) return next(err);
+      if (!user) return res.status(401).json({ message: info?.message || "Credențiale de admin incorecte" });
       
       req.login(user, (err) => {
         if (err) return next(err);

@@ -5,9 +5,11 @@ import { Redirect } from "wouter";
 export function ProtectedRoute({
   component: Component,
   path,
+  adminOnly = false,
 }: {
   path: string;
   component: () => React.JSX.Element;
+  adminOnly?: boolean;
 }) {
   const { user, isLoading } = useAuth();
 
@@ -20,7 +22,12 @@ export function ProtectedRoute({
   }
 
   if (!user) {
-    return <Redirect to="/auth" />;
+    return <Redirect to={adminOnly ? "/admin/login" : "/auth"} />;
+  }
+
+  // Verificare pentru rute de admin
+  if (adminOnly && user.role !== 'admin') {
+    return <Redirect to="/" />;
   }
 
   return <Component />;
