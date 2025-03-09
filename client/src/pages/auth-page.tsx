@@ -58,14 +58,24 @@ export default function AuthPage() {
 
   // Handle login submit
   const onLoginSubmit = (data: LoginData) => {
-    loginMutation.mutate(data);
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        // Reîmprospătăm pagina după autentificare
+        window.location.href = '/';
+      }
+    });
   };
 
   // Handle register submit
   const onRegisterSubmit = (data: RegisterFormData) => {
     // Remove confirmPassword as it's not in our schema
     const { confirmPassword, ...registerData } = data;
-    registerMutation.mutate(registerData);
+    registerMutation.mutate(registerData, {
+      onSuccess: () => {
+        // Redirecționăm către pagina principală cu refresh
+        window.location.href = '/';
+      }
+    });
   };
 
   // Redirect if user is already logged in
