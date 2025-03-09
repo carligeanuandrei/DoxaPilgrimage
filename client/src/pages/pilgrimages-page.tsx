@@ -17,13 +17,20 @@ export default function PilgrimagesPage() {
   const [filters, setFilters] = useState<PilgrimageFilters>({});
 
   // Build query string from filters
-  const queryString = Object.entries(filters)
-    .filter(([_, value]) => value !== undefined && value !== '')
-    .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`)
-    .join('&');
+  // Construiește string-ul de query pentru request API
+  const getQueryString = (filters: PilgrimageFilters) => {
+    return Object.entries(filters)
+      .filter(([_, value]) => value !== undefined && value !== '')
+      .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`)
+      .join('&');
+  };
+
+  const queryStr = getQueryString(filters);
+  const apiUrl = `/api/pilgrimages${queryStr ? `?${queryStr}` : ''}`;
 
   const { data: pilgrimages = [], isLoading, error } = useQuery<Pilgrimage[]>({
-    queryKey: [`/api/pilgrimages${queryString ? `?${queryString}` : ''}`],
+    queryKey: ['/api/pilgrimages', filters],
+    queryFn: () => fetch(apiUrl).then(res => res.json())
   });
 
   const handleFilterChange = (newFilters: PilgrimageFilters) => {

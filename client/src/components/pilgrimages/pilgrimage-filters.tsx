@@ -40,13 +40,8 @@ export default function PilgrimageFiltersComponent({ onFilterChange }: Pilgrimag
     onFilterChange({});
   };
   
-  useEffect(() => {
-    // If filters are all empty, notify parent
-    const allEmpty = Object.values(filters).every(value => value === "");
-    if (allEmpty) {
-      onFilterChange({});
-    }
-  }, [filters, onFilterChange]);
+  // Eliminăm useEffect pentru a evita bucla infinită
+  // Resetarea filtrelor este gestionată explicit prin resetFilters()
 
   return (
     <Card>

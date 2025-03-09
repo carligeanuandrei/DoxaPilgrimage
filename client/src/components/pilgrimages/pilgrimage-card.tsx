@@ -91,10 +91,8 @@ export default function PilgrimageCard({ pilgrimage }: PilgrimageCardProps) {
             <span className="text-sm text-neutral-500">/{pilgrimage.currency}</span>
           </div>
           
-          <Link href={`/pilgrimages/${pilgrimage.id}`}>
-            <a className="bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 px-4 rounded transition duration-300">
-              Detalii
-            </a>
+          <Link href={`/pilgrimages/${pilgrimage.id}`} className="bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 px-4 rounded transition duration-300">
+            Detalii
           </Link>
         </div>
       </CardContent>
