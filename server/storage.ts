@@ -1,13 +1,14 @@
 import { 
   users, pilgrimages, reviews, bookings, messages,
-  products, orders, orderItems, productReviews
+  products, orders, orderItems, productReviews, cmsContent
 } from "@shared/schema";
 import type { 
   User, InsertUser, Pilgrimage, InsertPilgrimage, 
   Review, InsertReview, Booking, InsertBooking,
   Message, InsertMessage, VerificationData,
   Product, InsertProduct, Order, InsertOrder,
-  OrderItem, InsertOrderItem, ProductReview, InsertProductReview
+  OrderItem, InsertOrderItem, ProductReview, InsertProductReview,
+  CmsContent, InsertCmsContent
 } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
@@ -955,18 +956,23 @@ export class DatabaseStorage implements IStorage {
 
   // CMS operations
   async getCmsContent(key?: string): Promise<CmsContent[] | CmsContent | undefined> {
-    if (key) {
-      // Returnează un singur element după cheie
-      const [content] = await db.select().from(cmsContent).where(eq(cmsContent.key, key));
-      return content;
-    } else {
-      // Returnează toate elementele
-      return await db.select().from(cmsContent);
+    try {
+      if (key) {
+        // Returnează un singur element după cheie
+        const [content] = await db.select().from(schema.cmsContent).where(eq(schema.cmsContent.key, key));
+        return content;
+      } else {
+        // Returnează toate elementele
+        return await db.select().from(schema.cmsContent);
+      }
+    } catch (error) {
+      console.error("Error fetching CMS content:", error);
+      throw error;
     }
   }
 
   async createCmsContent(content: InsertCmsContent): Promise<CmsContent> {
-    const [cmsItem] = await db.insert(cmsContent).values({
+    const [cmsItem] = await db.insert(schema.cmsContent).values({
       ...content,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -975,19 +981,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined> {
-    const [updatedContent] = await db.update(cmsContent)
+    const [updatedContent] = await db.update(schema.cmsContent)
       .set({
         ...content,
         updatedAt: new Date()
       })
-      .where(eq(cmsContent.key, key))
+      .where(eq(schema.cmsContent.key, key))
       .returning();
     return updatedContent;
   }
 
   async deleteCmsContent(key: string): Promise<boolean> {
-    const result = await db.delete(cmsContent)
-      .where(eq(cmsContent.key, key));
+    const result = await db.delete(schema.cmsContent)
+      .where(eq(schema.cmsContent.key, key));
     return result.count > 0;
   }
 }
