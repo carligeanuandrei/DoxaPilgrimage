@@ -55,10 +55,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.query.transportation) filters.transportation = req.query.transportation as string;
       if (req.query.guide) filters.guide = req.query.guide as string;
       
+      console.log("Trying to fetch pilgrimages with filters:", filters);
       const pilgrimages = await storage.getPilgrimages(filters);
       res.json(pilgrimages);
     } catch (error) {
-      res.status(500).json({ message: "Eroare la preluarea pelerinajelor" });
+      console.error("Error fetching pilgrimages:", error);
+      res.status(500).json({ message: "Eroare la preluarea pelerinajelor", error: String(error) });
     }
   });
 
