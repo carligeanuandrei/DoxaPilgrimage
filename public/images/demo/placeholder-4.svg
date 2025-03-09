@@ -1,0 +1,7 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#f0f8f4"/>
+  <text x="400" y="200" font-family="Arial" font-size="32" text-anchor="middle" fill="#546e7a">Jerusalem Holy Sites</text>
+  <rect x="150" y="240" width="500" height="30" fill="#7c6d4a"/>
+  <path d="M400 90 L480 190 L320 190 Z" fill="#7c6d4a"/>
+  <circle cx="400" cy="300" r="40" fill="#7c6d4a" opacity="0.7"/>
+</svg>
