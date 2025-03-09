@@ -78,7 +78,7 @@ export default function CreatePilgrimagePage() {
       guide: "",
       images: [],
       featured: false,
-      verified: falsee
+      verified: false
     }
   });
 
