@@ -146,10 +146,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.query.saint) filters.saint = req.query.saint as string;
       if (req.query.transportation) filters.transportation = req.query.transportation as string;
       if (req.query.guide) filters.guide = req.query.guide as string;
+      if (req.query.featured) filters.featured = req.query.featured === 'true';
       
       console.log("Trying to fetch pilgrimages with filters:", filters);
       const pilgrimages = await storage.getPilgrimages(filters);
-      res.json(pilgrimages);
+      
+      // Sortăm pelerinajele - featured first
+      const featuredPilgrimages = pilgrimages.filter(p => p.featured);
+      const regularPilgrimages = pilgrimages.filter(p => !p.featured);
+      
+      // Combinăm cele două liste, cu pelerinajele featured la început
+      const sortedPilgrimages = [...featuredPilgrimages, ...regularPilgrimages];
+      
+      res.json(sortedPilgrimages);
     } catch (error) {
       console.error("Error fetching pilgrimages:", error);
       res.status(500).json({ message: "Eroare la preluarea pelerinajelor", error: String(error) });
@@ -363,6 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint pentru a marca un pelerinaj ca "featured" (recomandat)
   app.put("/api/pilgrimages/:id/feature", isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -376,6 +386,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedPilgrimage);
     } catch (error) {
       res.status(500).json({ message: "Eroare la setarea pelerinajului ca și recomandat" });
+    }
+  });
+  
+  // Endpoint pentru a promova un pelerinaj (poziție superioară în listă)
+  app.put("/api/pilgrimages/:id/promote", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pilgrimage = await storage.getPilgrimage(id);
+      
+      if (!pilgrimage) {
+        return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
+      }
+      
+      // În această etapă, folosim doar câmpul "featured" pentru a simula promovarea,
+      // până când schema bazei de date va fi actualizată
+      const updatedPilgrimage = await storage.updatePilgrimage(id, { 
+        featured: true
+      });
+      
+      res.json(updatedPilgrimage);
+    } catch (error) {
+      res.status(500).json({ message: "Eroare la promovarea pelerinajului" });
     }
   });
 

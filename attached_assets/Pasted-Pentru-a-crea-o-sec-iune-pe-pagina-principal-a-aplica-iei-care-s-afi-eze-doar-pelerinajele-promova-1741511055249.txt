@@ -1,0 +1,103 @@
+Pentru a crea o secțiune pe pagina principală a aplicației care să afișeze doar pelerinajele promovate, într-un pachet special, poți implementa un sistem similar cu cel pe care l-ai descris pentru pagina cu lista completă de pelerinaje. Urmează acești pași pentru a adăuga această funcționalitate pe homepage:
+
+1. Modificarea Bazei de Date:
+
+Câmp pentru pelerinaje promovate: Adaugă un câmp suplimentar în baza de date pentru pelerinaje, de exemplu is_promoted sau promotion_status, care să fie setat pe true pentru pelerinajele promovate și pe false pentru cele normale. Acest câmp va ajuta la filtrarea automată a pelerinajelor promovate pe homepage.
+
+
+2. Crearea unui Pachet Special pentru Promovare:
+
+Definirea unui pachet special: Creează o secțiune specială în aplicație pentru pelerinajele promovate care să fie plasată pe homepage. Aceste pelerinaje vor fi evidențiate diferit, cu un design atractiv și un titlu sugestiv (ex. „Pelerinaje Recomandate” sau „Cele Mai Promovate Pelerinaje”).
+
+Statusul „Promovat”: Când operatorii plătesc pentru promovarea unui pelerinaj, se va schimba statusul acestuia în „promovat” și va fi plasat automat în această secțiune specială pe homepage.
+
+
+3. Implementarea Backend:
+
+Filtrarea pelerinajelor promovate: Modifică backend-ul pentru a extrage doar pelerinajele care au statusul „promovat” din baza de date și pentru a le trimite către frontend atunci când utilizatorii accesează pagina principală. Poți face acest lucru printr-o interogare simplă, de exemplu:
+
+SELECT * FROM pelerinaje WHERE is_promoted = true;
+
+Expirarea promoției: Dacă pelerinajele promovate au o durată limitată, adaugă un câmp promotion_end_date care să fie verificat pentru a se asigura că pelerinajul nu mai apare pe homepage după expirarea promovării.
+
+
+4. Frontend - Design:
+
+Secțiune Promovare pe Homepage: Creează o secțiune dedicată pe pagina principală care va afișa doar pelerinajele promovate. Aceasta poate fi un carusel, o grilă sau un layout simplu, în funcție de cum dorești să arate aplicația.
+
+Carusel de pelerinaje: Pelerinajele promovate pot fi afișate într-un carusel sau slider, astfel încât utilizatorii să poată răsfoi diversele opțiuni.
+
+Grilă de pelerinaje: Poți crea o grilă de pelerinaje, unde fiecare pelerinaj promovat va avea un banner vizibil cu eticheta „Promovat” sau „Recomandat”.
+
+
+Interfața de administrare pentru operatori: Asigură-te că operatorii pot să își vadă pelerinajele promovate și să plătească pentru a le adăuga în secțiunea specială a homepage-ului. Aceasta poate include opțiuni de administrare a pelerinajului, în care pot alege să activeze promovarea pentru un pelerinaj specific.
+
+
+5. Funcționalitate de administrare:
+
+Sistem de plăți pentru promovare: Integrează un sistem de plăți, cum ar fi Stripe sau PayPal, pentru a permite operatorilor să plătească pentru a-și promova pelerinajele. Odată ce plata este confirmată, pelerinajul va fi marcat automat ca „promovat” și va apărea pe homepage.
+
+Vizibilitate și durabilitate: Poți seta un interval de timp pentru fiecare promovare (de exemplu, 1 săptămână sau 1 lună) și să permiți operatorilor să extindă promovarea acestora prin achitarea unei noi sume de bani.
+
+
+6. Exemplu de implementare a secțiunii pe homepage:
+
+HTML + CSS: Creează o secțiune vizibilă pe homepage pentru pelerinajele promovate.
+
+<section class="promoted-pilgrimages">
+    <h2>Pelerinaje Recomandate</h2>
+    <div class="pilgrimage-grid">
+        <!-- Pelerinaje promovate vor fi populate aici din backend -->
+        <div class="pilgrimage-item">
+            <img src="path_to_image" alt="Pelerinaj">
+            <h3>Pelerinaj 1</h3>
+            <p>Descriere scurtă...</p>
+            <a href="link_to_pelerinaj">Vezi mai mult</a>
+        </div>
+        <!-- Mai multe pelerinaje -->
+    </div>
+</section>
+
+CSS: Adaugă stiluri pentru a diferenția pelerinajele promovate și pentru a le face vizibile și atractive.
+
+.promoted-pilgrimages {
+    margin: 20px 0;
+}
+.promoted-pilgrimages h2 {
+    font-size: 24px;
+    color: #333;
+}
+.pilgrimage-item {
+    border: 2px solid #ddd;
+    margin: 10px;
+    padding: 15px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.pilgrimage-item h3 {
+    font-size: 20px;
+    color: #555;
+}
+.pilgrimage-item a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+
+7. Testare și optimizare:
+
+Testare pe mai multe dispozitive: Verifică cum se comportă secțiunea de promovare pe diverse dispozitive (desktop, mobil, tabletă) și asigură-te că arată bine.
+
+Optimizare pentru viteză: Optimizează imaginile pentru a se încărca rapid, iar interfețele să fie ușor de utilizat.
+
+
+8. Discută cu Replit despre implementare:
+
+Dacă ai nevoie de asistență de la Replit pentru această implementare, trimite-le o descriere clară a ceea ce dorești să faci, specificând că vrei să adaugi un sistem de promovare pentru pelerinajele plătite care să apară pe homepage într-o secțiune dedicată.
+
+
+
+---
+
+Astfel, vei putea crea o secțiune specială pe homepage pentru pelerinajele promovate, oferind operatorilor un loc important pentru a-și expune pelerinajele în schimbul unei plăți. Acesta va adăuga o opțiune de monetizare eficientă, similară cu modul în care platformele precum OLX monetizează prin promovarea anunțurilor.
+
