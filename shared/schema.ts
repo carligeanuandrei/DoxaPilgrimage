@@ -13,6 +13,8 @@ export const users = pgTable("users", {
   phone: text("phone"),
   role: text("role", { enum: ["pilgrim", "operator", "monastery", "admin"] }).notNull().default("pilgrim"),
   verified: boolean("verified").default(false),
+  verificationToken: text("verification_token"),
+  tokenExpiry: timestamp("token_expiry"),
   profileImage: text("profile_image"),
   bio: text("bio"),
   createdAt: timestamp("created_at").defaultNow()
@@ -80,6 +82,8 @@ export const messages = pgTable("messages", {
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   verified: true,
+  verificationToken: true,
+  tokenExpiry: true,
   createdAt: true
 });
 
@@ -126,4 +130,11 @@ export type Message = typeof messages.$inferSelect;
 export type LoginData = {
   username: string;
   password: string;
+};
+
+// Email verification type
+export type VerificationData = {
+  token: string;
+  userId: number;
+  email: string;
 };

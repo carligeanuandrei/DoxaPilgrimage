@@ -2,7 +2,7 @@ import { users, pilgrimages, reviews, bookings, messages } from "@shared/schema"
 import type { 
   User, InsertUser, Pilgrimage, InsertPilgrimage, 
   Review, InsertReview, Booking, InsertBooking,
-  Message, InsertMessage 
+  Message, InsertMessage, VerificationData
 } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
@@ -17,6 +17,11 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, userData: Partial<User>): Promise<User | undefined>;
+  
+  // Verification operations
+  createVerificationToken(userId: number, email: string): Promise<string>;
+  verifyUserEmail(token: string): Promise<boolean>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
   
   // Pilgrimage operations
   getPilgrimage(id: number): Promise<Pilgrimage | undefined>;
@@ -149,6 +154,53 @@ export class MemStorage implements IStorage {
     const updatedUser = { ...user, ...userData };
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+  
+  // Verification operations
+  async createVerificationToken(userId: number, email: string): Promise<string> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+    
+    // Create a random token
+    const token = require('crypto').randomBytes(32).toString('hex');
+    
+    // Set expiry for 24 hours
+    const tokenExpiry = new Date();
+    tokenExpiry.setHours(tokenExpiry.getHours() + 24);
+    
+    // Update user with token and expiry
+    await this.updateUser(userId, {
+      verificationToken: token,
+      tokenExpiry
+    });
+    
+    return token;
+  }
+  
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.verificationToken === token
+    );
+  }
+  
+  async verifyUserEmail(token: string): Promise<boolean> {
+    const user = await this.getUserByVerificationToken(token);
+    if (!user) return false;
+    
+    // Check if token expired
+    const now = new Date();
+    if (user.tokenExpiry && user.tokenExpiry < now) {
+      return false;
+    }
+    
+    // Verify the user
+    await this.updateUser(user.id, {
+      verified: true,
+      verificationToken: null,
+      tokenExpiry: null
+    });
+    
+    return true;
   }
   
   // Pilgrimage operations
