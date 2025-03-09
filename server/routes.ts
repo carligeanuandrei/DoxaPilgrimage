@@ -679,6 +679,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Eroare la confirmarea plății" });
     }
   });
+  
+  // Endpoint pentru promovarea unui pelerinaj
+  app.post("/api/pilgrimage/:id/promote", isOrganizer, async (req, res) => {
+    try {
+      const pilgrimageId = parseInt(req.params.id);
+      const { promotionLevel, durationDays } = req.body;
+      
+      if (!promotionLevel || !durationDays) {
+        return res.status(400).json({ message: "Lipsesc datele necesare promovării" });
+      }
+      
+      // Validăm nivelul de promovare
+      if (!['basic', 'premium', 'exclusive'].includes(promotionLevel)) {
+        return res.status(400).json({ message: "Nivel de promovare invalid" });
+      }
+      
+      // Validăm durata promovării (minimum 1 zi, maximum 90 zile)
+      const duration = parseInt(durationDays);
+      if (isNaN(duration) || duration < 1 || duration > 90) {
+        return res.status(400).json({ message: "Durata promovării trebuie să fie între 1 și 90 de zile" });
+      }
+      
+      // Verifică dacă pelerinajul există
+      const pilgrimage = await storage.getPilgrimage(pilgrimageId);
+      if (!pilgrimage) {
+        return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
+      }
+      
+      // Verificăm dacă pelerinajul aparține organizatorului
+      if (pilgrimage.organizerId !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu aveți permisiunea de a promova acest pelerinaj" });
+      }
+      
+      // Verificăm dacă pelerinajul este publicat
+      if (pilgrimage.draft || !pilgrimage.verified) {
+        return res.status(400).json({ message: "Doar pelerinajele publicate pot fi promovate" });
+      }
+      
+      // Calculăm data de expirare a promovării
+      const promotionStartedAt = new Date();
+      const promotionExpiry = new Date();
+      promotionExpiry.setDate(promotionExpiry.getDate() + duration);
+      
+      // Calculăm prețul promovării (vom implementa sistemul de plată mai târziu)
+      const pricePerDay = {
+        'basic': 5,
+        'premium': 10,
+        'exclusive': 15
+      };
+      
+      const totalPrice = pricePerDay[promotionLevel] * duration;
+      
+      // Actualizăm pelerinajul cu informațiile de promovare
+      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, {
+        promoted: true,
+        promotionLevel,
+        promotionStartedAt,
+        promotionExpiry
+      });
+      
+      // Aici ar fi implementată integrarea cu sistemul de plată
+      // Pentru moment, doar returnăm pelerinajul actualizat
+      
+      res.json({
+        success: true,
+        message: `Pelerinajul a fost promovat cu succes pentru ${duration} zile`,
+        pilgrimage: updatedPilgrimage,
+        promotionDetails: {
+          level: promotionLevel,
+          startDate: promotionStartedAt,
+          endDate: promotionExpiry,
+          durationDays: duration,
+          totalPrice: totalPrice,
+          currency: 'EUR'
+        }
+      });
+    } catch (error) {
+      console.error("Error promoting pilgrimage:", error);
+      res.status(500).json({ message: "Eroare la promovarea pelerinajului" });
+    }
+  });
+  
+  // Endpoint pentru anularea promovării unui pelerinaj
+  app.post("/api/pilgrimage/:id/cancel-promotion", isOrganizer, async (req, res) => {
+    try {
+      const pilgrimageId = parseInt(req.params.id);
+      
+      // Verifică dacă pelerinajul există
+      const pilgrimage = await storage.getPilgrimage(pilgrimageId);
+      if (!pilgrimage) {
+        return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
+      }
+      
+      // Verificăm dacă pelerinajul aparține organizatorului
+      if (pilgrimage.organizerId !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu aveți permisiunea de a gestiona acest pelerinaj" });
+      }
+      
+      // Verificăm dacă pelerinajul este promovat
+      if (!pilgrimage.promoted) {
+        return res.status(400).json({ message: "Acest pelerinaj nu este promovat în prezent" });
+      }
+      
+      // Actualizăm pelerinajul pentru a anula promovarea
+      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, {
+        promoted: false,
+        promotionLevel: 'none',
+        promotionStartedAt: null,
+        promotionExpiry: null
+      });
+      
+      res.json({
+        success: true,
+        message: "Promovarea pelerinajului a fost anulată",
+        pilgrimage: updatedPilgrimage
+      });
+    } catch (error) {
+      console.error("Error cancelling promotion:", error);
+      res.status(500).json({ message: "Eroare la anularea promovării pelerinajului" });
+    }
+  });
 
   // CMS routes
   app.get("/api/cms", async (req, res) => {

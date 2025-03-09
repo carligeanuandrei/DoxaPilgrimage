@@ -58,7 +58,9 @@ import {
   Users, 
   ChevronDown, 
   CheckCircle, 
-  XCircle 
+  XCircle,
+  Star,
+  Award
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -74,6 +76,10 @@ export default function OrganizerDashboard() {
   const { toast } = useToast();
   const [selectedPilgrimageId, setSelectedPilgrimageId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("pilgrimages");
+  const [showPromoteDialog, setShowPromoteDialog] = useState(false);
+  const [selectedPromotionLevel, setSelectedPromotionLevel] = useState("basic");
+  const [promotionDuration, setPromotionDuration] = useState(7); // 7 zile default
+  const [promotingPilgrimageId, setPromotingPilgrimageId] = useState<number | null>(null);
 
   // Verificăm dacă utilizatorul este organizator sau admin
   const isOrganizer = user && (user.role === "operator" || user.role === "monastery" || user.role === "admin");
