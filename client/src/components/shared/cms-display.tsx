@@ -124,10 +124,10 @@ export function CmsText({ contentKey, fallback = '', className = '', refreshInte
   }, [contentKey, fallback, refreshInterval]);
 
   if (isLoading) {
-    return <span className={className}>{fallback}</span>;
+    return <span className={className} data-key={contentKey}>{fallback}</span>;
   }
 
-  return <span className={className}>{value}</span>;
+  return <span className={className} data-key={contentKey}>{value}</span>;
 }
 
 /**
@@ -180,10 +180,10 @@ export function CmsHtml({ contentKey, fallback = '', className = '', refreshInte
   }, [contentKey, fallback, refreshInterval]);
 
   if (isLoading) {
-    return <div className={className} dangerouslySetInnerHTML={{ __html: fallback }} />;
+    return <div className={className} data-key={contentKey} dangerouslySetInnerHTML={{ __html: fallback }} />;
   }
 
-  return <div className={className} dangerouslySetInnerHTML={{ __html: value }} />;
+  return <div className={className} data-key={contentKey} dangerouslySetInnerHTML={{ __html: value }} />;
 }
 
 /**
@@ -237,12 +237,12 @@ export function CmsImage({ contentKey, fallbackSrc = '', alt = '', className = '
   }, [contentKey, fallbackSrc, refreshInterval]);
 
   if (isLoading) {
-    return fallbackSrc ? <img src={fallbackSrc} alt={alt} className={className} /> : null;
+    return fallbackSrc ? <img src={fallbackSrc} alt={alt} className={className} data-key={contentKey} /> : null;
   }
 
   if (!src) {
     return null;
   }
 
-  return <img src={src} alt={alt} className={className} />;
+  return <img src={src} alt={alt} className={className} data-key={contentKey} />;
 }
