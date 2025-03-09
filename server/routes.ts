@@ -306,16 +306,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Date primite pentru crearea pelerinajului:", req.body);
       
-      const validData = insertPilgrimageSchema.parse(req.body);
+      // Validăm datele de intrare
+      let validData;
+      try {
+        validData = insertPilgrimageSchema.parse(req.body);
+        console.log("Date validate cu success prin Zod:", validData);
+      } catch (validationError) {
+        console.error("Eroare de validare Zod:", validationError);
+        return res.status(400).json({ 
+          message: "Date invalide pentru creare pelerinaj", 
+          errors: validationError instanceof z.ZodError ? validationError.errors : validationError.message 
+        });
+      }
       
-      // Verificăm organizerId pentru debugging
+      // Verificăm organizerId pentru debugging și ne asigurăm că există
       const organizerId = req.user?.id || req.body.organizerId;
+      
+      if (!organizerId) {
+        return res.status(400).json({ message: "ID organizator lipsă" });
+      }
+      
       console.log("OrganizerId folosit:", organizerId);
       
-      const pilgrimage = await storage.createPilgrimage({
+      // Creăm pelerinajul
+      const pilgrimageData = {
         ...validData,
         organizerId: organizerId
-      });
+      };
+      
+      console.log("Date finale pentru creare pelerinaj:", pilgrimageData);
+      
+      const pilgrimage = await storage.createPilgrimage(pilgrimageData);
       
       console.log("Pelerinaj creat cu succes:", pilgrimage.id);
       res.status(201).json(pilgrimage);

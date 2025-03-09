@@ -87,13 +87,15 @@ export default function CreatePilgrimagePage() {
   // Mutație pentru adăugarea unui pelerinaj nou
   const createPilgrimageMutation = useMutation({
     mutationFn: async (pilgrimageData: z.infer<typeof formSchema>) => {
-      console.log('Trimit date:', pilgrimageData); // debugging
+      console.log('Trimit date către server:', pilgrimageData); // debugging
       
       // Verificăm dacă user?.id există
       if (!user?.id) {
+        console.error('User ID lipsește - utilizatorul nu este autentificat sau nu s-au încărcat datele utilizatorului');
         throw new Error("Trebuie să fiți autentificat ca organizator pentru a crea un pelerinaj");
       }
       
+      // Asigurăm-ne că toate câmpurile sunt formatate corect pentru server
       const modifiedData = {
         ...pilgrimageData,
         organizerId: user.id, // Id-ul e garantat acum
@@ -105,12 +107,24 @@ export default function CreatePilgrimagePage() {
         images: Array.isArray(pilgrimageData.images) ? pilgrimageData.images : []
       };
 
-      const res = await apiRequest('POST', '/api/pilgrimages', modifiedData);
-      return await res.json();
+      console.log('Date modificate pentru API:', modifiedData);
+
+      try {
+        const res = await apiRequest('POST', '/api/pilgrimages', modifiedData);
+        const responseData = await res.json();
+        console.log('Răspuns de la server:', responseData);
+        return responseData;
+      } catch (error) {
+        console.error('Eroare la trimiterea datelor către server:', error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Pelerinaj creat cu succes:', data);
       // Invalidăm cache-ul pentru a reîncărca lista de pelerinaje
       queryClient.invalidateQueries({ queryKey: ['/api/pilgrimages'] });
+      // Invalidăm și lista de pelerinaje a organizatorului
+      queryClient.invalidateQueries({ queryKey: ['/api/organizer/pilgrimages'] });
 
       toast({
         title: "Pelerinaj creat",
@@ -121,6 +135,7 @@ export default function CreatePilgrimagePage() {
       navigate('/organizer/dashboard');
     },
     onError: (error: Error) => {
+      console.error('Eroare la crearea pelerinajului:', error);
       toast({
         title: "Eroare",
         description: `Nu s-a putut crea pelerinajul: ${error.message}`,
@@ -131,23 +146,43 @@ export default function CreatePilgrimagePage() {
 
   // Funcția de submit a formularului
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log('Date originale formular:', data); // debugging
+    console.log('Date originale formular:', data);
     
-    // Logică pentru convertirea datelor de formular
-    const formattedData = {
-      ...data,
-      // Asigurăm-ne că numerele sunt parsate corect
-      price: Number(data.price),
-      duration: Number(data.duration),
-      availableSpots: Number(data.availableSpots),
-      // Asigurăm-ne că și imaginile sunt procesate corect
-      images: Array.isArray(data.images) ? data.images : [],
-      // Includerea organizatorului - verificăm dacă există
-      ...(user?.id ? { organizerId: user.id } : {})
-    };
-
-    console.log('Date formatate formular:', formattedData); // debugging
-    createPilgrimageMutation.mutate(formattedData);
+    if (!user?.id) {
+      toast({
+        title: "Eroare",
+        description: "Trebuie să fiți autentificat pentru a crea un pelerinaj",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      // Logică pentru convertirea datelor de formular
+      const formattedData = {
+        ...data,
+        // Asigurăm-ne că numerele sunt parsate corect
+        price: Number(data.price),
+        duration: Number(data.duration),
+        availableSpots: Number(data.availableSpots),
+        // Asigurăm-ne că și imaginile sunt procesate corect
+        images: Array.isArray(data.images) 
+          ? data.images.filter((img: unknown) => img !== null && img !== undefined && img !== "") 
+          : [],
+        // Includerea obligatorie a organizatorului
+        organizerId: user.id
+      };
+  
+      console.log('Date formatate formular pentru trimitere:', formattedData);
+      createPilgrimageMutation.mutate(formattedData);
+    } catch (error) {
+      console.error('Eroare la formatarea datelor:', error);
+      toast({
+        title: "Eroare",
+        description: "A apărut o eroare la procesarea formularului. Verificați datele introduse.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!user) {
@@ -627,6 +662,20 @@ export default function CreatePilgrimagePage() {
                     size="lg" 
                     className="w-full"
                     disabled={createPilgrimageMutation.isPending}
+                    id="create-pilgrimage-button"
+                    onClick={(e) => {
+                      if (!form.formState.isValid) {
+                        e.preventDefault();
+                        console.log('Formular invalid:', form.formState.errors);
+                        toast({
+                          title: "Verificați formularul",
+                          description: "Vă rugăm să completați toate câmpurile obligatorii corect.",
+                          variant: "destructive",
+                        });
+                      } else {
+                        console.log('Formular valid, se trimite...');
+                      }
+                    }}
                   >
                     {createPilgrimageMutation.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
