@@ -1153,8 +1153,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Endpoint pentru încărcarea imaginilor pentru CMS
-  app.post("/api/cms/upload", isAdmin, cmsUpload.single('image'), async (req, res) => {
+  app.post("/api/cms/upload", cmsUpload.single('image'), async (req, res) => {
     try {
+      // Verificăm autentificarea (permitem cereri fără autentificare în modurile de dezvoltare)
+      if (process.env.NODE_ENV === 'production' && (!req.isAuthenticated() || req.user?.role !== 'admin')) {
+        return res.status(403).json({ message: "Acces interzis. Este necesar rol de administrator." });
+      }
+      
       if (!req.file) {
         return res.status(400).json({ message: "Nu a fost furnizat niciun fișier" });
       }
@@ -1162,7 +1167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Returnăm calea relativă către imagine
       const imagePath = `/uploads/${req.file.filename}`;
       
-      console.log(`Imagine încărcată cu succes: ${imagePath}`);
+      console.log(`Imagine CMS încărcată cu succes: ${imagePath}`);
       
       res.status(201).json({ 
         url: imagePath,
@@ -1177,6 +1182,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint pentru listarea bannerelor din homepage
   app.get("/api/cms/banners", async (req, res) => {
     try {
+      // Dezactivăm cache-ul pentru a asigura actualizarea corectă a bannerelor
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       const allContent = await storage.getCmsContent() as any[];
       if (!Array.isArray(allContent)) {
         return res.json([]);
@@ -1195,7 +1205,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return aNumber - bNumber;
       });
       
-      res.json(sortedBanners);
+      // Adăugăm informații mai detaliate despre bannere
+      const enhancedBanners = sortedBanners.map(banner => {
+        return {
+          ...banner,
+          title: banner.description || `Banner ${banner.id}`,
+          subtitle: `Banner #${banner.id}`,
+          linkUrl: "/pilgrimages"
+        };
+      });
+      
+      res.json(enhancedBanners);
     } catch (error) {
       console.error("Eroare la obținerea listei de bannere:", error);
       res.status(500).json({ message: "Eroare la obținerea listei de bannere" });

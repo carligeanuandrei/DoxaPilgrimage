@@ -114,16 +114,17 @@ export default function DestinationsSection() {
               <div key={banner.id} className="relative rounded-lg overflow-hidden group shadow-md h-64">
                 <img
                   src={banner.value}
-                  alt={`Banner ${banner.id}`}
+                  alt={banner.title || `Banner ${banner.id}`}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark to-transparent opacity-80"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-white text-xl font-bold mb-1">
                     {/* Titlul din CMS sau unul predefinit */}
-                    {banner.key.replace('homepage_banner_', 'Banner ')}
+                    {banner.title || banner.key.replace('homepage_banner_', 'Banner ')}
                   </h3>
-                  <a href="/pilgrimages" className="text-white flex items-center text-sm">
+                  <p className="text-white text-sm mb-3">{banner.subtitle || ''}</p>
+                  <a href={banner.linkUrl || '/pilgrimages'} className="text-white flex items-center text-sm">
                     Explorează
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />

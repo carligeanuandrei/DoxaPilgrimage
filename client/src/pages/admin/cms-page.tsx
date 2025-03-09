@@ -174,7 +174,21 @@ export default function CmsPage() {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: (data: CmsFormValues) => apiRequest('PUT', `/api/cms/${data.key}`, data),
+    mutationFn: async (data: CmsFormValues) => {
+      // Dacă avem o imagine pentru upload, mai întâi o încărcăm
+      if (data.contentType === 'image' && uploadImage) {
+        try {
+          const imageUrl = await handleImageUpload(uploadImage);
+          // Actualizăm valoarea cu URL-ul imaginii încărcate
+          data.value = imageUrl;
+        } catch (error) {
+          // Eroarea este deja tratată în handleImageUpload
+          throw new Error('Încărcarea imaginii a eșuat');
+        }
+      }
+      
+      return apiRequest('PUT', `/api/cms/${data.key}`, data);
+    },
     onSuccess: () => {
       // Invalidează specific interogările CMS pentru a re-încărca datele
       queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
@@ -186,6 +200,11 @@ export default function CmsPage() {
       setTimeout(() => {
         refetch();
       }, 300);
+      
+      // Resetează starea formularului și a încărcării
+      setUploadImage(null);
+      setImagePreview(null);
+      setUploadProgress(0);
       
       toast({
         title: 'Succes!',
@@ -365,17 +384,80 @@ export default function CmsPage() {
                       <FormControl>
                         {form.watch('contentType') === 'html' ? (
                           <Textarea 
-                            placeholder={form.watch('contentType') === 'image' 
-                              ? 'Introduceți URL-ul imaginii' 
-                              : 'Introduceți conținutul HTML'}
+                            placeholder="Introduceți conținutul HTML"
                             className="h-32"
                             {...field} 
                           />
+                        ) : form.watch('contentType') === 'image' ? (
+                          <div className="space-y-4">
+                            {/* Input pentru URL imagine existent */}
+                            <Input 
+                              placeholder="Introduceți URL-ul imaginii sau încărcați una nouă" 
+                              {...field} 
+                              className={uploadImage ? "border-green-300 bg-green-50" : ""}
+                            />
+                            
+                            {/* Secțiunea pentru încărcare directă */}
+                            <div className="border border-dashed border-gray-300 rounded-md p-4">
+                              <p className="text-sm text-gray-500 mb-2">
+                                Sau încărcați o imagine direct:
+                              </p>
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                                onChange={handleFileChange}
+                                className="block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-md file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-primary file:text-white
+                                  hover:file:bg-primary-dark"
+                              />
+                              
+                              {/* Previzualizare imagine încărcată */}
+                              {imagePreview && (
+                                <div className="mt-4">
+                                  <p className="text-sm text-gray-500 mb-2">Previzualizare:</p>
+                                  <div className="relative border rounded-md overflow-hidden" style={{ maxWidth: '300px' }}>
+                                    <img 
+                                      src={imagePreview} 
+                                      alt="Preview" 
+                                      className="max-w-full h-auto"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setUploadImage(null);
+                                        setImagePreview(null);
+                                      }}
+                                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                                      title="Renunță la imagine"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M18 6L6 18M6 6l12 12" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Indicator progres încărcare */}
+                              {uploadProgress > 0 && uploadProgress < 100 && (
+                                <div className="mt-2">
+                                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div 
+                                      className="bg-primary h-2.5 rounded-full" 
+                                      style={{ width: `${uploadProgress}%` }}
+                                    ></div>
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-1">Încărcare: {uploadProgress}%</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         ) : (
                           <Input 
-                            placeholder={form.watch('contentType') === 'image' 
-                              ? 'Introduceți URL-ul imaginii' 
-                              : 'Introduceți textul'} 
+                            placeholder="Introduceți textul" 
                             {...field} 
                           />
                         )}
