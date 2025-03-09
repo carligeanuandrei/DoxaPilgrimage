@@ -69,7 +69,7 @@ export function setupAuth(app: Express) {
             tokenExpiry: null,
             resetToken: null,
             resetTokenExpiry: null,
-            twoFactorSecret: null,
+            twoFactorCode: null,
             twoFactorEnabled: false,
             bio: null,
             profileImage: null,
@@ -106,8 +106,35 @@ export function setupAuth(app: Express) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: number, done) => {
     try {
-      const user = await storage.getUser(id);
-      done(null, user);
+      // Verificăm dacă ID-ul este cel de admin special (9999)
+      if (id === 9999) {
+        // Returnăm utilizatorul admin hardcodat
+        const adminUser: SelectUser = {
+          id: 9999,
+          username: 'avatour',
+          password: 'protected',
+          email: 'admin@doxa.ro',
+          firstName: 'Admin',
+          lastName: 'Doxa',
+          phone: null,
+          role: 'admin',
+          verified: true,
+          verificationToken: null,
+          tokenExpiry: null,
+          resetToken: null,
+          resetTokenExpiry: null,
+          twoFactorCode: null,
+          twoFactorEnabled: false,
+          bio: null,
+          profileImage: null,
+          createdAt: new Date()
+        };
+        done(null, adminUser);
+      } else {
+        // Pentru utilizatorii normali, îi luăm din baza de date
+        const user = await storage.getUser(id);
+        done(null, user);
+      }
     } catch (error) {
       done(error);
     }
