@@ -39,6 +39,9 @@ export default function CmsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
   const [filterPrefix, setFilterPrefix] = useState<string | null>(null);
+  const [uploadImage, setUploadImage] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   // Extract filter from URL query parameters
   useEffect(() => {
@@ -46,6 +49,61 @@ export default function CmsPage() {
     const filter = params.get('filter');
     setFilterPrefix(filter);
   }, [location]);
+
+  // Funcția pentru încărcarea directă a imaginilor
+  const handleImageUpload = async (file: File): Promise<string> => {
+    // Creează un obiect FormData pentru a trimite fișierul
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    setUploadProgress(10);
+
+    try {
+      // Trimite imaginea la server
+      const response = await fetch('/api/cms/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      
+      setUploadProgress(70);
+      
+      if (!response.ok) {
+        throw new Error('Eroare la încărcarea imaginii');
+      }
+      
+      const data = await response.json();
+      setUploadProgress(100);
+      
+      // Returnează URL-ul imaginii încărcate
+      return `${window.location.origin}${data.url}`;
+    } catch (error) {
+      console.error('Eroare la încărcarea imaginii:', error);
+      toast({
+        title: 'Eroare la încărcarea imaginii',
+        description: 'Nu s-a putut încărca imaginea pe server.',
+        variant: 'destructive',
+      });
+      setUploadProgress(0);
+      throw error;
+    }
+  };
+
+  // Gestionează schimbarea fișierului
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      setUploadImage(file);
+      
+      // Creează o previzualizare pentru imagine
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Setup form
   const form = useForm<CmsFormValues>({
@@ -73,10 +131,29 @@ export default function CmsPage() {
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: (data: CmsFormValues) => apiRequest('POST', '/api/cms', data),
+    mutationFn: async (data: CmsFormValues) => {
+      // Dacă avem o imagine pentru upload, mai întâi o încărcăm
+      if (data.contentType === 'image' && uploadImage) {
+        try {
+          const imageUrl = await handleImageUpload(uploadImage);
+          // Actualizăm valoarea cu URL-ul imaginii încărcate
+          data.value = imageUrl;
+        } catch (error) {
+          // Eroarea este deja tratată în handleImageUpload
+          throw new Error('Încărcarea imaginii a eșuat');
+        }
+      }
+      
+      return apiRequest('POST', '/api/cms', data);
+    },
     onSuccess: () => {
       // Invalidează toate interogările pentru a re-încărca datele în toate componentele
       queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+      
+      // Resetează starea formularului și a încărcării
+      setUploadImage(null);
+      setImagePreview(null);
+      setUploadProgress(0);
       // Forțează reîmprospătarea pentru alte componente care utilizează date CMS
       queryClient.invalidateQueries();
       toast({

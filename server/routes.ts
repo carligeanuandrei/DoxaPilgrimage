@@ -1152,6 +1152,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint pentru încărcarea imaginilor pentru CMS
+  app.post("/api/cms/upload", isAdmin, cmsUpload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Nu a fost furnizat niciun fișier" });
+      }
+      
+      // Returnăm calea relativă către imagine
+      const imagePath = `/uploads/${req.file.filename}`;
+      
+      console.log(`Imagine încărcată cu succes: ${imagePath}`);
+      
+      res.status(201).json({ 
+        url: imagePath,
+        message: "Imagine încărcată cu succes" 
+      });
+    } catch (error) {
+      console.error("Eroare la încărcarea imaginii:", error);
+      res.status(500).json({ message: "Eroare la încărcarea imaginii" });
+    }
+  });
+  
+  // Endpoint pentru listarea bannerelor din homepage
+  app.get("/api/cms/banners", async (req, res) => {
+    try {
+      const allContent = await storage.getCmsContent() as any[];
+      if (!Array.isArray(allContent)) {
+        return res.json([]);
+      }
+      
+      // Filtrăm conținutul pentru a obține doar bannerele
+      const banners = allContent.filter(item => 
+        item.key.startsWith('homepage_banner_') && 
+        item.contentType === 'image'
+      );
+      
+      const sortedBanners = banners.sort((a, b) => {
+        // Extrage numărul din cheia banner-ului (ex: homepage_banner_1 -> 1)
+        const aNumber = parseInt(a.key.split('_').pop() || '0');
+        const bNumber = parseInt(b.key.split('_').pop() || '0');
+        return aNumber - bNumber;
+      });
+      
+      res.json(sortedBanners);
+    } catch (error) {
+      console.error("Eroare la obținerea listei de bannere:", error);
+      res.status(500).json({ message: "Eroare la obținerea listei de bannere" });
+    }
+  });
+  
   app.get("/api/cms/:key", async (req, res) => {
     try {
       // Dezactivăm cache-ul pentru toate răspunsurile API CMS
