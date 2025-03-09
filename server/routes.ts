@@ -79,6 +79,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Eroare la actualizarea profilului utilizatorului" });
     }
   });
+  
+  // Modificarea parolei utilizatorului
+  app.put("/api/users/:id/change-password", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { currentPassword, newPassword } = req.body;
+      
+      // Verificăm dacă utilizatorul încearcă să modifice alt cont
+      if (id !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu ai permisiunea să modifici parola pentru acest cont" });
+      }
+      
+      // Verificăm existența utilizatorului
+      const existingUser = await storage.getUser(id);
+      if (!existingUser) {
+        return res.status(404).json({ message: "Utilizator negăsit" });
+      }
+      
+      // Importăm funcțiile pentru hash și comparare parole din auth.ts
+      const { comparePasswords, hashPassword } = await import('./auth');
+      
+      // Verificăm parola actuală (exceptând admin care poate schimba fără verificare)
+      if (req.user.role !== "admin") {
+        const isPasswordValid = await comparePasswords(currentPassword, existingUser.password);
+        if (!isPasswordValid) {
+          return res.status(400).json({ message: "Parola actuală este incorectă" });
+        }
+      }
+      
+      // Generăm hash pentru noua parolă
+      const hashedPassword = await hashPassword(newPassword);
+      
+      // Actualizăm parola
+      const updatedUser = await storage.updateUser(id, { password: hashedPassword });
+      
+      // Dacă utilizatorul este administratorul special, actualizăm și variabila globală
+      if (id === 9999) {
+        global.updatedAdminUser = updatedUser;
+        console.log("Admin password updated in global variable");
+      }
+      
+      res.json({ message: "Parola a fost schimbată cu succes" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Eroare la schimbarea parolei" });
+    }
+  });
 
   // Check organizer role middleware
   const isOrganizer = (req: any, res: any, next: any) => {
