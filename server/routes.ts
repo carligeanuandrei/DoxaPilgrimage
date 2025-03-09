@@ -431,10 +431,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Nu aveți permisiunea de a modifica acest pelerinaj" });
       }
       
-      const updatedPilgrimage = await storage.updatePilgrimage(id, req.body);
+      // Eliminăm explicit orice referință la status pentru a preveni erorile 
+      // legate de coloana care nu mai există în baza de date
+      const updateData = { ...req.body };
+      if ('status' in updateData) {
+        delete updateData.status;
+      }
+      
+      const updatedPilgrimage = await storage.updatePilgrimage(id, updateData);
       res.json(updatedPilgrimage);
     } catch (error) {
-      res.status(500).json({ message: "Eroare la actualizarea pelerinajului" });
+      console.error("Eroare la actualizarea pelerinajului:", error);
+      res.status(500).json({ 
+        message: "Eroare la actualizarea pelerinajului", 
+        details: error.message 
+      });
     }
   });
 

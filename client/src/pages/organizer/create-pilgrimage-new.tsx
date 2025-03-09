@@ -337,7 +337,7 @@ export default function CreatePilgrimageNewPage() {
           <Info className="h-4 w-4" />
           <AlertTitle>Informații importante</AlertTitle>
           <AlertDescription>
-            Completați toate câmpurile obligatorii marcate cu *. După trimitere, pelerinajul va intra în starea "draft" și va fi vizibil doar în dashboard-ul dvs. până la verificare.
+            Completați toate câmpurile obligatorii marcate cu *. După trimitere, pelerinajul va fi vizibil doar în dashboard-ul dvs. până la verificare de către administratori.
           </AlertDescription>
         </Alert>
 

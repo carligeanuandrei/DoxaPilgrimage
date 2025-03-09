@@ -599,12 +599,7 @@ export default function OrganizerDashboard() {
                                 </DropdownMenuContent>
                               </DropdownMenu>
                               
-                              <Button variant="outline" size="sm" asChild>
-                                <Link href={`/pilgrimages/${pilgrimage.id}/edit`}>
-                                  <Edit className="h-4 w-4" />
-                                </Link>
-                              </Button>
-                              
+
                               <Button variant="outline" size="sm" asChild>
                                 <Link href={`/pilgrimages/${pilgrimage.id}`}>
                                   <Eye className="h-4 w-4" />
