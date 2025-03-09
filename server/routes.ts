@@ -1258,13 +1258,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Adăugăm informații mai detaliate despre bannere promoționale
-      const enhancedPromoBanners = sortedPromoBanners.map(banner => {
+      // Obținem descripțiile pentru fiecare banner promoțional
+      const enhancedPromoBanners = await Promise.all(sortedPromoBanners.map(async (banner) => {
+        // Încercăm să obținem descrierea pentru acest banner (dacă există)
+        const descriptionKey = banner.key.replace('_banner_', '_banner_description_');
+        const descriptionItem = allContent.find(item => item.key === descriptionKey);
+        
         return {
           ...banner,
-          title: banner.description || undefined,
+          // Utilizăm descrierea din baza de date dacă există, altfel undefined
+          description: descriptionItem?.value || undefined,
           linkUrl: "/pilgrimages"
         };
-      });
+      }));
+      
+      console.log("Bannere promoționale trimise:", enhancedPromoBanners);
       
       res.json({
         banners: enhancedPromoBanners,
