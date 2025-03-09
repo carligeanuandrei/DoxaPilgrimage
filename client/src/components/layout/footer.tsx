@@ -23,13 +23,16 @@ export default function Footer() {
               />
             </div>
             <div className="flex space-x-4">
-              <a href="#" className="text-neutral-400 hover:text-white transition duration-300">
+              <a href="#" onClick={(e) => { e.preventDefault(); window.open(document.querySelector('[data-key="footer_social_facebook_url"]')?.textContent || 'https://facebook.com', '_blank'); }} className="text-neutral-400 hover:text-white transition duration-300">
+                <CmsText contentKey="footer_social_facebook_url" fallback="https://facebook.com" className="hidden" />
                 <CmsImage contentKey="footer_social_facebook" fallbackSrc="/images/icons/facebook.svg" alt="Facebook" className="h-5 w-5" />
               </a>
-              <a href="#" className="text-neutral-400 hover:text-white transition duration-300">
+              <a href="#" onClick={(e) => { e.preventDefault(); window.open(document.querySelector('[data-key="footer_social_instagram_url"]')?.textContent || 'https://instagram.com', '_blank'); }} className="text-neutral-400 hover:text-white transition duration-300">
+                <CmsText contentKey="footer_social_instagram_url" fallback="https://instagram.com" className="hidden" />
                 <CmsImage contentKey="footer_social_instagram" fallbackSrc="/images/icons/instagram.svg" alt="Instagram" className="h-5 w-5" />
               </a>
-              <a href="#" className="text-neutral-400 hover:text-white transition duration-300">
+              <a href="#" onClick={(e) => { e.preventDefault(); window.open(document.querySelector('[data-key="footer_social_youtube_url"]')?.textContent || 'https://youtube.com', '_blank'); }} className="text-neutral-400 hover:text-white transition duration-300">
+                <CmsText contentKey="footer_social_youtube_url" fallback="https://youtube.com" className="hidden" />
                 <CmsImage contentKey="footer_social_youtube" fallbackSrc="/images/icons/youtube.svg" alt="YouTube" className="h-5 w-5" />
               </a>
             </div>
@@ -40,21 +43,56 @@ export default function Footer() {
               <CmsText contentKey="footer_quicklinks_title" fallback="Linkuri Rapide" />
             </h4>
             <ul className="space-y-3">
-              <li><Link href="/" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_link_home" fallback="Acasă" />
-              </Link></li>
-              <li><Link href="/pilgrimages" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_link_pilgrimages" fallback="Pelerinaje" />
-              </Link></li>
-              <li><Link href="/about" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_link_about" fallback="Despre Noi" />
-              </Link></li>
-              <li><Link href="/contact" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_link_contact" fallback="Contact" />
-              </Link></li>
-              <li><Link href="/auth" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_link_auth" fallback="Autentificare" />
-              </Link></li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_link_home_url"]')?.textContent || '/';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_link_home_url" fallback="/" className="hidden" />
+                  <CmsText contentKey="footer_link_home" fallback="Acasă" />
+                </a>
+              </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_link_pilgrimages_url"]')?.textContent || '/pilgrimages';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_link_pilgrimages_url" fallback="/pilgrimages" className="hidden" />
+                  <CmsText contentKey="footer_link_pilgrimages" fallback="Pelerinaje" />
+                </a>
+              </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_link_about_url"]')?.textContent || '/about';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_link_about_url" fallback="/about" className="hidden" />
+                  <CmsText contentKey="footer_link_about" fallback="Despre Noi" />
+                </a>
+              </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_link_contact_url"]')?.textContent || '/contact';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_link_contact_url" fallback="/contact" className="hidden" />
+                  <CmsText contentKey="footer_link_contact" fallback="Contact" />
+                </a>
+              </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_link_auth_url"]')?.textContent || '/auth';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_link_auth_url" fallback="/auth" className="hidden" />
+                  <CmsText contentKey="footer_link_auth" fallback="Autentificare" />
+                </a>
+              </li>
             </ul>
           </div>
           
@@ -63,21 +101,56 @@ export default function Footer() {
               <CmsText contentKey="footer_destinations_title" fallback="Destinații Populare" />
             </h4>
             <ul className="space-y-3">
-              <li><Link href="/pilgrimages?location=Israel" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_destination_israel" fallback="Israel și Palestina" />
-              </Link></li>
-              <li><Link href="/pilgrimages?location=Grecia" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_destination_athos" fallback="Muntele Athos" />
-              </Link></li>
-              <li><Link href="/pilgrimages?location=România" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_destination_moldova" fallback="Mănăstirile din Moldova" />
-              </Link></li>
-              <li><Link href="/pilgrimages?location=Vatican" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_destination_vatican" fallback="Vatican" />
-              </Link></li>
-              <li><Link href="/pilgrimages?location=Franța" className="text-neutral-400 hover:text-white transition duration-300">
-                <CmsText contentKey="footer_destination_lourdes" fallback="Lourdes" />
-              </Link></li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_destination_israel_url"]')?.textContent || '/pilgrimages?location=Israel';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_destination_israel_url" fallback="/pilgrimages?location=Israel" className="hidden" />
+                  <CmsText contentKey="footer_destination_israel" fallback="Israel și Palestina" />
+                </a>
+              </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_destination_athos_url"]')?.textContent || '/pilgrimages?location=Grecia';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_destination_athos_url" fallback="/pilgrimages?location=Grecia" className="hidden" />
+                  <CmsText contentKey="footer_destination_athos" fallback="Muntele Athos" />
+                </a>
+              </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_destination_moldova_url"]')?.textContent || '/pilgrimages?location=România';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_destination_moldova_url" fallback="/pilgrimages?location=România" className="hidden" />
+                  <CmsText contentKey="footer_destination_moldova" fallback="Mănăstirile din Moldova" />
+                </a>
+              </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_destination_vatican_url"]')?.textContent || '/pilgrimages?location=Vatican';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_destination_vatican_url" fallback="/pilgrimages?location=Vatican" className="hidden" />
+                  <CmsText contentKey="footer_destination_vatican" fallback="Vatican" />
+                </a>
+              </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-key="footer_destination_lourdes_url"]')?.textContent || '/pilgrimages?location=Franța';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <CmsText contentKey="footer_destination_lourdes_url" fallback="/pilgrimages?location=Franța" className="hidden" />
+                  <CmsText contentKey="footer_destination_lourdes" fallback="Lourdes" />
+                </a>
+              </li>
             </ul>
           </div>
           
@@ -114,15 +187,30 @@ export default function Footer() {
           </p>
           
           <div className="flex space-x-6">
-            <Link href="/termeni-si-conditii" className="text-neutral-400 hover:text-white text-sm transition duration-300">
+            <a href="#" onClick={(e) => { 
+              e.preventDefault(); 
+              const href = document.querySelector('[data-key="footer_terms_url"]')?.textContent || '/termeni-si-conditii';
+              window.location.href = href;
+            }} className="text-neutral-400 hover:text-white text-sm transition duration-300">
+              <CmsText contentKey="footer_terms_url" fallback="/termeni-si-conditii" className="hidden" />
               <CmsText contentKey="footer_terms" fallback="Termeni și Condiții" />
-            </Link>
-            <Link href="/politica-de-confidentialitate" className="text-neutral-400 hover:text-white text-sm transition duration-300">
+            </a>
+            <a href="#" onClick={(e) => { 
+              e.preventDefault(); 
+              const href = document.querySelector('[data-key="footer_privacy_url"]')?.textContent || '/politica-de-confidentialitate';
+              window.location.href = href;
+            }} className="text-neutral-400 hover:text-white text-sm transition duration-300">
+              <CmsText contentKey="footer_privacy_url" fallback="/politica-de-confidentialitate" className="hidden" />
               <CmsText contentKey="footer_privacy" fallback="Politica de Confidențialitate" />
-            </Link>
-            <Link href="/cookies" className="text-neutral-400 hover:text-white text-sm transition duration-300">
+            </a>
+            <a href="#" onClick={(e) => { 
+              e.preventDefault(); 
+              const href = document.querySelector('[data-key="footer_cookies_url"]')?.textContent || '/cookies';
+              window.location.href = href;
+            }} className="text-neutral-400 hover:text-white text-sm transition duration-300">
+              <CmsText contentKey="footer_cookies_url" fallback="/cookies" className="hidden" />
               <CmsText contentKey="footer_cookies" fallback="Cookies" />
-            </Link>
+            </a>
           </div>
         </div>
       </div>
