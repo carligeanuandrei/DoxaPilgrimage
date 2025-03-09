@@ -20,10 +20,15 @@ const PromoBannerCard = ({
   title?: string;
   linkUrl?: string; 
 }) => {
+  // Verifică dacă URL-ul imaginii este o cale relativă și adaugă prefixul dacă este necesar
+  const fullImageUrl = imageUrl.startsWith('http') || imageUrl.startsWith('/') 
+    ? imageUrl 
+    : `/${imageUrl}`;
+    
   return (
     <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
       <img
-        src={imageUrl}
+        src={fullImageUrl}
         alt={title || "Banner promoțional"}
         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
       />
@@ -58,6 +63,7 @@ export default function PromoBannersSection() {
         const data = await response.json();
         
         if (data) {
+          console.log("Bannere promoționale primite:", data);
           // Actualizăm bannerele și titlul secțiunii
           setPromoBanners(data.banners || []);
           setSectionTitle(data.sectionTitle || "Oferte și Evenimente Speciale");

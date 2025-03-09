@@ -93,7 +93,7 @@ export default function CmsPage() {
   };
 
   // Gestionează schimbarea fișierului
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
@@ -105,6 +105,15 @@ export default function CmsPage() {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+      
+      // Automat începe încărcarea și actualizează valoarea câmpului
+      try {
+        const imageUrl = await handleImageUpload(file);
+        // URL-ul imaginii va fi setat în handleImageUpload
+      } catch (error) {
+        // Eroarea este deja tratată în handleImageUpload
+        console.error("Eroare la încărcarea automată a imaginii:", error);
+      }
     }
   };
 
