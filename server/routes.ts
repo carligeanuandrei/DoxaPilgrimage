@@ -35,6 +35,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     res.status(403).json({ message: "Acces interzis" });
   };
+  
+  // API pentru a obține toți utilizatorii (pentru admin)
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      // Obținem toți utilizatorii din storage
+      const allUsers = await storage.getAllUsers();
+      res.json(allUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Eroare la obținerea listei de utilizatori" });
+    }
+  });
 
   // Check organizer role middleware
   const isOrganizer = (req: any, res: any, next: any) => {
