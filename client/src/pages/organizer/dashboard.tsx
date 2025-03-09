@@ -185,6 +185,68 @@ export default function OrganizerDashboard() {
       });
     }
   };
+  
+  // Funcție pentru a deschide dialogul de promovare
+  const openPromoteDialog = (pilgrimageId: number) => {
+    setPromotingPilgrimageId(pilgrimageId);
+    setSelectedPromotionLevel("basic");
+    setPromotionDuration(7);
+    setShowPromoteDialog(true);
+  };
+  
+  // Funcție pentru promovarea unui pelerinaj
+  const promotePilgrimage = async () => {
+    if (!promotingPilgrimageId) return;
+    
+    try {
+      await apiRequest("POST", `/api/pilgrimage/${promotingPilgrimageId}/promote`, {
+        promotionLevel: selectedPromotionLevel,
+        durationDays: promotionDuration
+      });
+      
+      // Actualizăm lista de pelerinaje
+      queryClient.invalidateQueries({ queryKey: ["/api/organizer/pilgrimages"] });
+      
+      toast({
+        title: "Pelerinaj promovat",
+        description: `Pelerinajul a fost promovat cu succes pentru ${promotionDuration} zile cu nivelul ${selectedPromotionLevel}.`,
+        variant: "default",
+      });
+      
+      // Închidem dialogul
+      setShowPromoteDialog(false);
+    } catch (error) {
+      console.error("Error promoting pilgrimage:", error);
+      toast({
+        title: "Eroare",
+        description: "Nu s-a putut promova pelerinajul. Încercați din nou.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Funcție pentru anularea promovării unui pelerinaj
+  const cancelPromotion = async (pilgrimageId: number) => {
+    try {
+      await apiRequest("POST", `/api/pilgrimage/${pilgrimageId}/cancel-promotion`);
+      
+      // Actualizăm lista de pelerinaje
+      queryClient.invalidateQueries({ queryKey: ["/api/organizer/pilgrimages"] });
+      
+      toast({
+        title: "Promovare anulată",
+        description: "Promovarea pelerinajului a fost anulată cu succes.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error cancelling promotion:", error);
+      toast({
+        title: "Eroare",
+        description: "Nu s-a putut anula promovarea pelerinajului. Încercați din nou.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Funcție pentru formatarea datelor
   const formatDate = (dateString: string) => {
@@ -222,6 +284,128 @@ export default function OrganizerDashboard() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Panou de administrare - Organizator de pelerinaje</h1>
+      
+      {/* Dialog pentru promovarea pelerinajelor */}
+      <Dialog open={showPromoteDialog} onOpenChange={setShowPromoteDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Star className="h-5 w-5 mr-2 text-yellow-500" />
+              Promovează pelerinajul
+            </DialogTitle>
+            <DialogDescription>
+              Promovarea va face ca pelerinajul tău să fie afișat pe pagina principală și în rezultatele de căutare evidențiate.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Alege nivelul de promovare:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Card 
+                  className={`cursor-pointer border-2 ${selectedPromotionLevel === 'basic' ? 'border-primary' : 'border-border'}`}
+                  onClick={() => setSelectedPromotionLevel('basic')}
+                >
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center">
+                      <Star className="h-4 w-4 mr-1 text-yellow-500" />
+                      Basic
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-xs text-muted-foreground">Vizibilitate crescută în lista de pelerinaje.</p>
+                    <p className="font-bold text-sm mt-2">15 EUR/săptămână</p>
+                  </CardContent>
+                </Card>
+                
+                <Card 
+                  className={`cursor-pointer border-2 ${selectedPromotionLevel === 'premium' ? 'border-primary' : 'border-border'}`}
+                  onClick={() => setSelectedPromotionLevel('premium')}
+                >
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center">
+                      <Award className="h-4 w-4 mr-1 text-yellow-500" />
+                      Premium
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-xs text-muted-foreground">Poziție fixă în partea de sus a listei și pe pagina principală.</p>
+                    <p className="font-bold text-sm mt-2">30 EUR/săptămână</p>
+                  </CardContent>
+                </Card>
+                
+                <Card 
+                  className={`cursor-pointer border-2 ${selectedPromotionLevel === 'exclusive' ? 'border-primary' : 'border-border'}`}
+                  onClick={() => setSelectedPromotionLevel('exclusive')}
+                >
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center">
+                      <Award className="h-4 w-4 mr-1 text-primary" />
+                      Exclusiv
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-xs text-muted-foreground">Prima poziție garantată + banner pe pagina principală.</p>
+                    <p className="font-bold text-sm mt-2">50 EUR/săptămână</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Alege durata promovării:</h3>
+              <div className="grid grid-cols-3 gap-2">
+                <Button 
+                  variant={promotionDuration === 7 ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setPromotionDuration(7)}
+                >
+                  1 săptămână
+                </Button>
+                <Button 
+                  variant={promotionDuration === 14 ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setPromotionDuration(14)}
+                >
+                  2 săptămâni
+                </Button>
+                <Button 
+                  variant={promotionDuration === 30 ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setPromotionDuration(30)}
+                >
+                  1 lună
+                </Button>
+              </div>
+            </div>
+            
+            <div className="rounded-lg bg-muted p-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Cost total:</span>
+                <span className="font-bold">
+                  {
+                    (
+                      (selectedPromotionLevel === 'basic' ? 15 : 
+                       selectedPromotionLevel === 'premium' ? 30 : 50) * 
+                      (promotionDuration === 7 ? 1 : 
+                       promotionDuration === 14 ? 2 : 4)
+                    ).toFixed(2)
+                  } EUR
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPromoteDialog(false)}>
+              Anulează
+            </Button>
+            <Button onClick={promotePilgrimage}>
+              Promovează acum
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <Tabs defaultValue="pilgrimages" className="mb-6" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
@@ -343,6 +527,21 @@ export default function OrganizerDashboard() {
                                   >
                                     <XCircle className="h-4 w-4 mr-2 text-red-500" />
                                     <span>Depublică</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    disabled={!pilgrimage.verified || pilgrimage.promoted}
+                                    onClick={() => openPromoteDialog(pilgrimage.id)}
+                                  >
+                                    <Star className="h-4 w-4 mr-2 text-yellow-500" />
+                                    <span>Promovează</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    disabled={!pilgrimage.promoted}
+                                    onClick={() => cancelPromotion(pilgrimage.id)}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2 text-orange-500" />
+                                    <span>Anulează promovarea</span>
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
