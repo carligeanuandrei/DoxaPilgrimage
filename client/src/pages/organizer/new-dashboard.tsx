@@ -71,6 +71,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export default function OrganizerDashboard() {
   const { user } = useAuth();
@@ -775,114 +776,106 @@ export default function OrganizerDashboard() {
                 </div>
               ) : financialReportError ? (
                 <div className="bg-destructive/10 p-4 rounded-md text-destructive">
-                  Nu s-a putut încărca raportul financiar. Încercați să reîmprospătați pagina.
+                  Nu s-au putut încărca datele financiare. Încercați să reîmprospătați pagina.
                 </div>
               ) : financialReport ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center">
-                        <DollarSign className="h-5 w-5 mr-2" />
-                        Sumar financiar
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <dl className="space-y-2">
-                        <div className="flex justify-between">
-                          <dt>Total încasări:</dt>
-                          <dd className="font-bold">
-                            {financialReport.financial.totalAmount} {financialReport.financial.currency}
-                          </dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt>Încasări confirmate:</dt>
-                          <dd className="text-green-600 font-semibold">
-                            {financialReport.financial.confirmedAmount} {financialReport.financial.currency}
-                          </dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt>Încasări în așteptare:</dt>
-                          <dd className="text-yellow-600">
-                            {financialReport.financial.pendingAmount} {financialReport.financial.currency}
-                          </dd>
-                        </div>
-                        <div className="flex justify-between pt-2 border-t">
-                          <dt>Preț per persoană:</dt>
-                          <dd>
-                            {financialReport.pilgrimage.price} {financialReport.financial.currency}
-                          </dd>
-                        </div>
-                      </dl>
-                    </CardContent>
-                  </Card>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-muted rounded-lg p-4 flex flex-col items-center justify-center">
+                      <div className="text-3xl font-bold">{financialReport.totalBookings}</div>
+                      <div className="text-sm text-muted-foreground mt-1">Rezervări totale</div>
+                    </div>
+                    <div className="bg-muted rounded-lg p-4 flex flex-col items-center justify-center">
+                      <div className="text-3xl font-bold">{financialReport.totalIncome} {pilgrimages?.find(p => p.id === selectedPilgrimageId)?.currency}</div>
+                      <div className="text-sm text-muted-foreground mt-1">Venit total</div>
+                    </div>
+                    <div className="bg-muted rounded-lg p-4 flex flex-col items-center justify-center">
+                      <div className="text-3xl font-bold">{financialReport.confirmedBookings}</div>
+                      <div className="text-sm text-muted-foreground mt-1">Rezervări confirmate</div>
+                    </div>
+                  </div>
                   
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center">
-                        <Users className="h-5 w-5 mr-2" />
-                        Statistici pelerini
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <dl className="space-y-2">
-                        <div className="flex justify-between">
-                          <dt>Total persoane înscrise:</dt>
-                          <dd className="font-bold">{financialReport.persons.total}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt>Locuri confirmate:</dt>
-                          <dd className="text-green-600 font-semibold">{financialReport.persons.confirmed}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt>Locuri rămase:</dt>
-                          <dd>{financialReport.persons.spotsRemaining}</dd>
-                        </div>
-                        <div className="flex justify-between pt-2 border-t">
-                          <dt>Capacitate totală:</dt>
-                          <dd>{financialReport.pilgrimage.availableSpots}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt>Grad de ocupare:</dt>
-                          <dd>
-                            {Math.round((financialReport.persons.spotsFilled / financialReport.pilgrimage.availableSpots) * 100)}%
-                          </dd>
-                        </div>
-                      </dl>
-                    </CardContent>
-                  </Card>
+                  <div className="pt-4">
+                    <h3 className="text-sm font-medium mb-2">Rezervări lunare</h3>
+                    <div className="h-72 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={financialReport.monthlyBookings}
+                          margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="count" name="Rezervări" fill="#8884d8" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                   
-                  <Card className="md:col-span-2">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center">
-                        <FileText className="h-5 w-5 mr-2" />
-                        Statistici rezervări
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div className="border rounded-lg p-3 text-center">
-                          <dt className="text-sm text-muted-foreground">Total rezervări</dt>
-                          <dd className="text-2xl font-bold">{financialReport.bookings.total}</dd>
-                        </div>
-                        <div className="border rounded-lg p-3 text-center">
-                          <dt className="text-sm text-muted-foreground">Confirmate</dt>
-                          <dd className="text-2xl font-bold text-green-600">{financialReport.bookings.confirmed}</dd>
-                        </div>
-                        <div className="border rounded-lg p-3 text-center">
-                          <dt className="text-sm text-muted-foreground">În așteptare</dt>
-                          <dd className="text-2xl font-bold text-yellow-600">{financialReport.bookings.pending}</dd>
-                        </div>
-                        <div className="border rounded-lg p-3 text-center">
-                          <dt className="text-sm text-muted-foreground">Anulate</dt>
-                          <dd className="text-2xl font-bold text-red-600">{financialReport.bookings.cancelled}</dd>
-                        </div>
-                      </dl>
-                    </CardContent>
-                  </Card>
+                  <div className="pt-4">
+                    <h3 className="text-sm font-medium mb-2">Venituri lunare</h3>
+                    <div className="h-72 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={financialReport.monthlyIncome}
+                          margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip formatter={(value) => [`${value} ${pilgrimages?.find(p => p.id === selectedPilgrimageId)?.currency}`, 'Venit']} />
+                          <Legend />
+                          <Line type="monotone" dataKey="amount" name="Venit" stroke="#82ca9d" activeDot={{ r: 8 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center p-4 border rounded-md">
                   <p>Nu există date financiare pentru acest pelerinaj.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="promotions">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex justify-between items-center">
+                <span>Statistici promovare</span>
+                <Button variant="outline" onClick={() => setActiveTab("pilgrimages")}>
+                  Înapoi la pelerinaje
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                {selectedPilgrimageId && pilgrimages ? (
+                  <p>
+                    Pelerinaj: {
+                      pilgrimages.find(p => p.id === selectedPilgrimageId)?.title || "Necunoscut"
+                    }
+                  </p>
+                ) : null}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {selectedPilgrimageId && pilgrimages ? (
+                <PromotionStats 
+                  promotionStats={promotionStats}
+                  loading={promotionStatsLoading}
+                  error={promotionStatsError}
+                  pilgrimageId={selectedPilgrimageId}
+                  onPromote={openPromoteDialog}
+                  onCancelPromotion={cancelPromotion}
+                  isPilgrimageVerified={!!pilgrimages.find(p => p.id === selectedPilgrimageId)?.verified}
+                  formatDate={formatDate}
+                />
+              ) : (
+                <div className="text-center p-4 border rounded-md">
+                  <p>Selectați un pelerinaj pentru a vedea statisticile de promovare.</p>
                 </div>
               )}
             </CardContent>
