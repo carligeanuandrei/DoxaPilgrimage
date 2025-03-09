@@ -1078,15 +1078,24 @@ export class DatabaseStorage implements IStorage {
         // Returnează un singur element după cheie
         console.log(`[DEBUG] Fetching CMS content for key "${key}"`);
         
-        const content = await db.select().from(cmsContent).where(eq(cmsContent.key, key));
+        // Selectăm explicit fiecare coloană pentru a evita eroarea cu coloana description care lipsește
+        const content = await db.select({
+          id: cmsContent.id,
+          key: cmsContent.key,
+          value: cmsContent.value,
+          contentType: cmsContent.contentType,
+          createdAt: cmsContent.createdAt,
+          updatedAt: cmsContent.updatedAt
+        }).from(cmsContent).where(eq(cmsContent.key, key));
         
         console.log(`[DEBUG] Found ${content.length} CMS items for key "${key}"`);
         
         if (content.length > 0) {
-          // Convertim din snake_case în camelCase pentru a respecta interfața
+          // Adăugăm manual proprietatea description care lipsește
           const result = {
             ...content[0],
-            contentType: content[0].contentType // Acest câmp ar trebui să fie mapare corectă în ORM
+            description: undefined, // Adăugam manual acest câmp care nu există încă în BD
+            contentType: content[0].contentType
           };
           
           console.log(`[DEBUG] Returning content for "${key}":`, {
@@ -1100,35 +1109,115 @@ export class DatabaseStorage implements IStorage {
         console.log(`[DEBUG] No content found for key "${key}"`);
         return undefined; // Returnăm undefined dacă nu găsim nimic
       } else {
-        // Returnează toate elementele
-        const results = await db.select().from(cmsContent);
+        // Returnează toate elementele, selectând explicit coloanele
+        const results = await db.select({
+          id: cmsContent.id,
+          key: cmsContent.key,
+          value: cmsContent.value,
+          contentType: cmsContent.contentType,
+          createdAt: cmsContent.createdAt,
+          updatedAt: cmsContent.updatedAt
+        }).from(cmsContent);
+        
+        // Adăugăm manual description pentru compatibilitate
+        const resultsWithDescription = results.map(item => ({
+          ...item,
+          description: undefined
+        }));
+        
         console.log(`[DEBUG] Found ${results.length} total CMS items`);
-        return results;
+        return resultsWithDescription;
       }
     } catch (error) {
       console.error(`[ERROR] Error fetching CMS content for key=${key}:`, error);
-      throw error;
+      console.error('Trying fallback approach...');
+      try {
+        // Abordare alternativă pentru compatibilitate
+        if (key) {
+          const [row] = await db.execute(
+            `SELECT id, key, value, content_type as "contentType", created_at as "createdAt", updated_at as "updatedAt"
+             FROM cms_content WHERE key = $1`, 
+            [key]
+          );
+          
+          if (row) {
+            return { ...row, description: undefined };
+          }
+          return undefined;
+        } else {
+          const rows = await db.execute(
+            `SELECT id, key, value, content_type as "contentType", created_at as "createdAt", updated_at as "updatedAt" 
+             FROM cms_content`
+          );
+          return rows.map(row => ({ ...row, description: undefined }));
+        }
+      } catch (fallbackError) {
+        console.error('Fallback approach also failed:', fallbackError);
+        // Aruncăm eroarea originală
+        throw error;
+      }
     }
   }
 
   async createCmsContent(content: InsertCmsContent): Promise<CmsContent> {
-    const [cmsItem] = await db.insert(cmsContent).values({
-      ...content,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }).returning();
-    return cmsItem;
+    try {
+      // Extragem doar câmpurile care există în baza de date
+      const { key, value, contentType } = content;
+      
+      // Inserăm doar câmpurile care există în baza de date
+      const [cmsItem] = await db.insert(cmsContent).values({
+        key,
+        value,
+        contentType,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning({
+        id: cmsContent.id,
+        key: cmsContent.key,
+        value: cmsContent.value,
+        contentType: cmsContent.contentType,
+        createdAt: cmsContent.createdAt,
+        updatedAt: cmsContent.updatedAt
+      });
+      
+      // Adăugăm câmpul description manual pentru compatibilitate
+      return { ...cmsItem, description: undefined };
+    } catch (error) {
+      console.error('Error creating CMS content:', error);
+      throw error;
+    }
   }
 
   async updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined> {
-    const [updatedContent] = await db.update(cmsContent)
-      .set({
-        ...content,
-        updatedAt: new Date()
-      })
-      .where(eq(cmsContent.key, key))
-      .returning();
-    return updatedContent;
+    try {
+      // Extragem doar câmpurile care există în baza de date
+      const updateData: any = {};
+      
+      if (content.value !== undefined) updateData.value = content.value;
+      if (content.contentType !== undefined) updateData.contentType = content.contentType;
+      
+      // Actualizăm data
+      updateData.updatedAt = new Date();
+      
+      // Facem update doar cu câmpurile care există în BD
+      const [updatedContent] = await db.update(cmsContent)
+        .set(updateData)
+        .where(eq(cmsContent.key, key))
+        .returning({
+          id: cmsContent.id,
+          key: cmsContent.key,
+          value: cmsContent.value,
+          contentType: cmsContent.contentType,
+          createdAt: cmsContent.createdAt,
+          updatedAt: cmsContent.updatedAt
+        });
+      
+      // Adăugăm câmpul description manual pentru compatibilitate
+      return updatedContent ? { ...updatedContent, description: undefined } : undefined;
+    } catch (error) {
+      console.error('Error updating CMS content:', error);
+      throw error;
+    }
   }
 
   async deleteCmsContent(key: string): Promise<boolean> {
