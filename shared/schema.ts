@@ -46,11 +46,11 @@ export const pilgrimages = pgTable("pilgrimages", {
   organizerId: integer("organizer_id").notNull(),
   featured: boolean("featured").default(false),
   verified: boolean("verified").default(false),
-  // Temporar am comentat coloana promoted până facem migrarea bazei de date
+  // Temporar am comentat coloanele de promovare până facem migrarea bazei de date
   // promoted: boolean("promoted").default(false),
-  promotionLevel: text("promotion_level", { enum: ["none", "basic", "premium", "exclusive"] }).notNull().default("none"),
-  promotionExpiry: timestamp("promotion_expiry"),
-  promotionStartedAt: timestamp("promotion_started_at"),
+  // promotionLevel: text("promotion_level", { enum: ["none", "basic", "premium", "exclusive"] }).notNull().default("none"),
+  // promotionExpiry: timestamp("promotion_expiry"),
+  // promotionStartedAt: timestamp("promotion_started_at"),
   availableSpots: integer("available_spots").notNull()
 });
 
