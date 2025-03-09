@@ -500,9 +500,9 @@ export default function CreatePilgrimagePage() {
                       <FormControl>
                         <div className="space-y-4">
                           {/* Afișarea imaginilor încărcate */}
-                          {field.value.length > 0 && (
+                          {field.value && field.value.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-2">
-                              {field.value.map((url, index) => (
+                              {Array.isArray(field.value) && field.value.map((url, index) => (
                                 <div key={index} className="relative group">
                                   <img 
                                     src={url} 
@@ -512,7 +512,7 @@ export default function CreatePilgrimagePage() {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      const newImages = [...field.value];
+                                      const newImages = Array.isArray(field.value) ? [...field.value] : [];
                                       newImages.splice(index, 1);
                                       field.onChange(newImages);
                                     }}
