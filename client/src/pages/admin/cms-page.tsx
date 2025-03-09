@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useLocation } from 'wouter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -359,13 +359,57 @@ export default function CmsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Cheie</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Introduceți cheia unică" 
-                          {...field} 
-                          disabled={isEditing}
-                        />
-                      </FormControl>
+                      {isEditing ? (
+                        <FormControl>
+                          <Input 
+                            placeholder="Cheia unică" 
+                            {...field} 
+                            disabled={true}
+                          />
+                        </FormControl>
+                      ) : (
+                        <div className="flex flex-col space-y-2">
+                          <FormControl>
+                            <Input 
+                              placeholder="Introduceți cheia unică" 
+                              {...field} 
+                              className={field.value ? "border-green-300 bg-green-50" : ""}
+                            />
+                          </FormControl>
+                          
+                          {/* Dropdown cu chei predefinite */}
+                          <div className="flex flex-wrap gap-1">
+                            <Select
+                              onValueChange={(value) => {
+                                if (value) {
+                                  form.setValue('key', value);
+                                }
+                              }}
+                              value=""
+                            >
+                              <FormControl>
+                                <SelectTrigger className="h-8">
+                                  <SelectValue placeholder="Selectați o cheie predefinită" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="">Selectați o cheie predefinită</SelectItem>
+                                <SelectItem value="homepage_banner_1">Banner 1 (homepage_banner_1)</SelectItem>
+                                <SelectItem value="homepage_banner_2">Banner 2 (homepage_banner_2)</SelectItem>
+                                <SelectItem value="homepage_banner_3">Banner 3 (homepage_banner_3)</SelectItem>
+                                <SelectItem value="homepage_banner_4">Banner 4 (homepage_banner_4)</SelectItem>
+                                <SelectItem value="destination_image_romania">Img România (destination_image_romania)</SelectItem>
+                                <SelectItem value="destination_image_greece">Img Grecia (destination_image_greece)</SelectItem>
+                                <SelectItem value="destination_image_israel">Img Israel (destination_image_israel)</SelectItem>
+                                <SelectItem value="destination_image_italy">Img Italia (destination_image_italy)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      )}
+                      <FormDescription className="mt-1 text-xs">
+                        Utilizați un format consistent pentru chei: <code>sectiune_element_detaliu</code>
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -499,6 +543,11 @@ export default function CmsPage() {
                       <FormControl>
                         <Input placeholder="Adăugați o descriere scurtă" {...field} />
                       </FormControl>
+                      <FormDescription className="mt-1 text-xs">
+                        {form.watch('contentType') === 'image' && form.watch('key')?.startsWith('homepage_banner_') && 
+                          "Pentru bannere, descrierea va fi folosită ca titlu afișat pe banner."
+                        }
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
