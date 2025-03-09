@@ -358,8 +358,15 @@ export default function CmsPage() {
                     </TableHeader>
                     <TableBody>
                       {cmsContents.map((content: CmsContent) => (
-                        <TableRow key={content.id}>
-                          <TableCell className="font-medium">{content.key}</TableCell>
+                        <TableRow key={content.id} className={content.key.startsWith('footer_') ? 'bg-amber-50/50' : ''}>
+                          <TableCell className="font-medium">
+                            {content.key.startsWith('footer_') ? (
+                              <span className="flex items-center">
+                                {content.key}
+                                <span className="ml-2 text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">Footer</span>
+                              </span>
+                            ) : content.key}
+                          </TableCell>
                           <TableCell>
                             {content.contentType === "text" && <FileTextIcon className="h-4 w-4" />}
                             {content.contentType === "html" && <Code2Icon className="h-4 w-4" />}
@@ -382,7 +389,7 @@ export default function CmsPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            {new Date(content.updatedAt).toLocaleDateString()}
+                            {content.updatedAt ? new Date(content.updatedAt).toLocaleDateString() : 'N/A'}
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
