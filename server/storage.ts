@@ -1016,17 +1016,37 @@ export class DatabaseStorage implements IStorage {
     try {
       if (key) {
         // Returnează un singur element după cheie
+        console.log(`[DEBUG] Fetching CMS content for key "${key}"`);
+        
         const content = await db.select().from(cmsContent).where(eq(cmsContent.key, key));
+        
+        console.log(`[DEBUG] Found ${content.length} CMS items for key "${key}"`);
+        
         if (content.length > 0) {
-          return content[0]; // Returnăm primul element găsit
+          // Convertim din snake_case în camelCase pentru a respecta interfața
+          const result = {
+            ...content[0],
+            contentType: content[0].contentType // Acest câmp ar trebui să fie mapare corectă în ORM
+          };
+          
+          console.log(`[DEBUG] Returning content for "${key}":`, {
+            id: result.id,
+            contentType: result.contentType
+          });
+          
+          return result;
         }
+        
+        console.log(`[DEBUG] No content found for key "${key}"`);
         return undefined; // Returnăm undefined dacă nu găsim nimic
       } else {
         // Returnează toate elementele
-        return await db.select().from(cmsContent);
+        const results = await db.select().from(cmsContent);
+        console.log(`[DEBUG] Found ${results.length} total CMS items`);
+        return results;
       }
     } catch (error) {
-      console.error("Error fetching CMS content:", error);
+      console.error(`[ERROR] Error fetching CMS content for key=${key}:`, error);
       throw error;
     }
   }

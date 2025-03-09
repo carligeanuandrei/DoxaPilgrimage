@@ -40,6 +40,10 @@ export function DirectCmsText({ contentKey, fallback = '', className = '', refre
         // Încercăm și acest format pentru compatibilitate
         setContent(data.value);
         setError(false);
+      } else if (data && data.content_type === 'text' && typeof data.value === 'string') {
+        // Încercăm și formatul snake_case din baza de date
+        setContent(data.value);
+        setError(false);
       } else {
         console.debug(`CMS content for ${contentKey} has unexpected format:`, data);
         setError(true);
