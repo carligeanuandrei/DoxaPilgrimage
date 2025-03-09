@@ -114,10 +114,10 @@ export default function Footer() {
           </p>
           
           <div className="flex space-x-6">
-            <Link href="/terms" className="text-neutral-400 hover:text-white text-sm transition duration-300">
+            <Link href="/termeni-si-conditii" className="text-neutral-400 hover:text-white text-sm transition duration-300">
               <CmsText contentKey="footer_terms" fallback="Termeni și Condiții" />
             </Link>
-            <Link href="/privacy" className="text-neutral-400 hover:text-white text-sm transition duration-300">
+            <Link href="/politica-de-confidentialitate" className="text-neutral-400 hover:text-white text-sm transition duration-300">
               <CmsText contentKey="footer_privacy" fallback="Politica de Confidențialitate" />
             </Link>
             <Link href="/cookies" className="text-neutral-400 hover:text-white text-sm transition duration-300">

@@ -306,57 +306,69 @@ export default function ContactPage() {
           </h2>
           <div className="bg-white p-4 rounded-lg shadow-md">
             <div className="aspect-video rounded-lg overflow-hidden bg-gray-200 w-full">
-              {/* Doar un placeholder pentru hartă - în aplicația reală aici ar trebui integrată Google Maps sau altă soluție de hărți */}
-              <div className="h-full w-full flex items-center justify-center bg-neutral-200">
-                <p className="text-neutral-500 text-center">
-                  <CmsText contentKey="contact_map_placeholder" fallback="Aici va fi afișată harta cu locația biroului nostru" />
-                </p>
-              </div>
+              <CmsHtml 
+                contentKey="contact_map_embed" 
+                fallback={`
+                <div class="h-full w-full flex items-center justify-center bg-neutral-200">
+                  <p class="text-neutral-500 text-center">Aici va fi afișată harta cu locația biroului nostru</p>
+                </div>
+                `}
+                refreshInterval={5000}
+              />
+            </div>
+            <div className="mt-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+              <h3 className="font-semibold mb-2">
+                <CmsText contentKey="contact_directions_title" fallback="Indicații de Acces" refreshInterval={5000} />
+              </h3>
+              <p className="text-neutral-600">
+                <CmsText contentKey="contact_directions_content" fallback="Pentru a ajunge la noi, puteți folosi transportul public - stația de metrou Biserica Amzei se află la 5 minute de mers pe jos. Este disponibilă și parcarea publică din zonă." refreshInterval={5000} />
+              </p>
             </div>
           </div>
         </div>
 
         {/* FAQ */}
-        <div>
+        <div className="mb-16">
           <h2 className="text-2xl font-bold mb-6 text-center">
-            <CmsText contentKey="contact_faq_title" fallback="Întrebări Frecvente" />
+            <CmsText contentKey="contact_faq_title" fallback="Întrebări Frecvente" refreshInterval={5000} />
           </h2>
+          
+          <div className="mb-6 flex justify-end">
+            <Button 
+              variant="outline" 
+              className="text-sm flex items-center gap-1"
+              onClick={() => window.open('/admin/cms?filter=contact_faq', '_blank')}
+            >
+              <span className="text-primary">Administrare FAQ</span>
+            </Button>
+          </div>
+          
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="font-bold text-lg mb-3">
-                <CmsText contentKey="contact_faq1_question" fallback="Cum pot rezerva un pelerinaj?" />
-              </h3>
-              <p className="text-neutral-600">
-                <CmsText contentKey="contact_faq1_answer" fallback="Pentru a rezerva un pelerinaj, trebuie să vă creați un cont pe platformă, să selectați pelerinajul dorit și să urmați pașii de rezervare. Puteți plăti online sau solicita detalii suplimentare înainte de confirmare." />
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="font-bold text-lg mb-3">
-                <CmsText contentKey="contact_faq2_question" fallback="Care sunt modalitățile de plată acceptate?" />
-              </h3>
-              <p className="text-neutral-600">
-                <CmsText contentKey="contact_faq2_answer" fallback="Acceptăm plăți cu cardul (Visa, Mastercard), transfer bancar și în anumite cazuri, plata în numerar la sediul nostru. Toate plățile online sunt securizate prin protocol SSL." />
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="font-bold text-lg mb-3">
-                <CmsText contentKey="contact_faq3_question" fallback="Pot anula sau reprograma un pelerinaj?" />
-              </h3>
-              <p className="text-neutral-600">
-                <CmsText contentKey="contact_faq3_answer" fallback="Da, puteți anula sau reprograma în funcție de termenii și condițiile specifice fiecărui pelerinaj. De obicei, cu 30 de zile înainte de plecare rambursarea este integrală, iar după această perioadă se pot aplica penalizări." />
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="font-bold text-lg mb-3">
-                <CmsText contentKey="contact_faq4_question" fallback="Cum pot deveni organizator de pelerinaje pe platformă?" />
-              </h3>
-              <p className="text-neutral-600">
-                <CmsText contentKey="contact_faq4_answer" fallback="Pentru a deveni organizator, completați formularul de parteneriat din secțiunea Contact și veți fi contactat de un reprezentant pentru verificarea documentelor și detalii despre procesul de colaborare." />
-              </p>
-            </div>
+            <CmsHtml
+              contentKey="contact_faq_all"
+              fallback={`
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                  <h3 class="font-bold text-lg mb-3">Cum pot rezerva un pelerinaj?</h3>
+                  <p class="text-neutral-600">Pentru a rezerva un pelerinaj, trebuie să vă creați un cont pe platformă, să selectați pelerinajul dorit și să urmați pașii de rezervare. Puteți plăti online sau solicita detalii suplimentare înainte de confirmare.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                  <h3 class="font-bold text-lg mb-3">Care sunt modalitățile de plată acceptate?</h3>
+                  <p class="text-neutral-600">Acceptăm plăți cu cardul (Visa, Mastercard), transfer bancar și în anumite cazuri, plata în numerar la sediul nostru. Toate plățile online sunt securizate prin protocol SSL.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                  <h3 class="font-bold text-lg mb-3">Pot anula sau reprograma un pelerinaj?</h3>
+                  <p class="text-neutral-600">Da, puteți anula sau reprograma în funcție de termenii și condițiile specifice fiecărui pelerinaj. De obicei, cu 30 de zile înainte de plecare rambursarea este integrală, iar după această perioadă se pot aplica penalizări.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                  <h3 class="font-bold text-lg mb-3">Cum pot deveni organizator de pelerinaje pe platformă?</h3>
+                  <p class="text-neutral-600">Pentru a deveni organizator, completați formularul de parteneriat din secțiunea Contact și veți fi contactat de un reprezentant pentru verificarea documentelor și detalii despre procesul de colaborare.</p>
+                </div>
+              `}
+              refreshInterval={5000}
+            />
           </div>
         </div>
       </div>

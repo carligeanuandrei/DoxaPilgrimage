@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -7,6 +7,7 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { CmsContent } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
+import { useLocation } from 'wouter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -32,9 +33,18 @@ type CmsFormValues = z.infer<typeof cmsFormSchema>;
 export default function CmsPage() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [location] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
+  const [filterPrefix, setFilterPrefix] = useState<string | null>(null);
+  
+  // Extract filter from URL query parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const filter = params.get('filter');
+    setFilterPrefix(filter);
+  }, [location]);
 
   // Setup form
   const form = useForm<CmsFormValues>({
