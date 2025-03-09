@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileTextIcon, Code2Icon, ImageIcon, PlusIcon, PencilIcon, Trash2Icon, DownloadIcon, ListIcon, AlertTriangleIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { CmsInitializers } from './cms-initializers';
 
 // Define the form validation schema
 const cmsFormSchema = z.object({
@@ -614,6 +615,9 @@ export default function CmsPage() {
                 <ListIcon className="h-4 w-4 mr-1" />
                 Exportă configurație
               </Button>
+              
+              {/* Componenta pentru inițializatorii de conținut */}
+              <CmsInitializers refetch={refetch} />
             </div>
           </div>
         </div>
