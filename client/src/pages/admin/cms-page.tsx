@@ -381,11 +381,11 @@ export default function CmsPage() {
                           <div className="flex flex-wrap gap-1">
                             <Select
                               onValueChange={(value) => {
-                                if (value) {
+                                if (value && value !== "__placeholder") {
                                   form.setValue('key', value);
                                 }
                               }}
-                              value=""
+                              value="__placeholder"
                             >
                               <FormControl>
                                 <SelectTrigger className="h-8">
@@ -393,7 +393,7 @@ export default function CmsPage() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="">Selectați o cheie predefinită</SelectItem>
+                                <SelectItem value="__placeholder">Selectați o cheie predefinită</SelectItem>
                                 <SelectItem value="homepage_banner_1">Banner 1 (homepage_banner_1)</SelectItem>
                                 <SelectItem value="homepage_banner_2">Banner 2 (homepage_banner_2)</SelectItem>
                                 <SelectItem value="homepage_banner_3">Banner 3 (homepage_banner_3)</SelectItem>
