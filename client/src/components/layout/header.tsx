@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Calendar, Church } from "lucide-react";
+import { Menu, X, User, LogOut, Calendar, Church, Settings } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -110,6 +110,16 @@ export default function Header() {
                       <span>Profil</span>
                     </Link>
                   </DropdownMenuItem>
+                  
+                  {(user.role === "operator" || user.role === "monastery" || user.role === "admin") && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/organizer/dashboard" className="cursor-pointer w-full">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Panou administrare</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Deconectare</span>
@@ -174,6 +184,14 @@ export default function Header() {
                     <User className="inline mr-2 h-4 w-4" />
                     Profilul meu
                   </Link>
+                  
+                  {(user.role === "operator" || user.role === "monastery" || user.role === "admin") && (
+                    <Link href="/organizer/dashboard" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                      <Settings className="inline mr-2 h-4 w-4" />
+                      Panou administrare
+                    </Link>
+                  )}
+                  
                   <Button variant="outline" onClick={() => { handleLogout(); closeMobileMenu(); }}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Deconectare
