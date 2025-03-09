@@ -888,11 +888,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPilgrimages(filters?: Partial<Pilgrimage>): Promise<Pilgrimage[]> {
-    if (!filters) {
-      return await db.select().from(pilgrimages);
-    }
-
     let query = db.select().from(pilgrimages);
+
+    if (!filters) {
+      // În mod implicit, arătăm doar pelerinajele publicate pentru utilizatorii standard
+      console.log("Fără filtre specificate, arătăm doar pelerinajele publicate");
+      return await query.where(eq(pilgrimages.status, "published"));
+    }
 
     // Aplicăm filtrele
     if (filters.location) {
@@ -917,7 +919,18 @@ export class DatabaseStorage implements IStorage {
     if (filters.featured !== undefined) {
       query = query.where(eq(pilgrimages.featured, filters.featured));
     }
+    // Filtrare după status
+    if (filters.status) {
+      query = query.where(eq(pilgrimages.status, filters.status));
+      console.log(`Filtrez pelerinajele după status: ${filters.status}`);
+    } else if (!filters.organizerId) {
+      // Dacă nu este specificat organizerId (adică nu suntem în dashboard-ul organizatorului)
+      // și nu este specificat un status, arătăm doar pelerinajele publicate
+      query = query.where(eq(pilgrimages.status, "published"));
+      console.log("Arăt doar pelerinajele publicate pentru utilizatorii obișnuiți");
+    }
 
+    console.log("Filtre aplicate pentru lista de pelerinaje:", filters);
     return await query;
   }
 
@@ -925,9 +938,10 @@ export class DatabaseStorage implements IStorage {
     console.log("Storage: Creez pelerinaj cu datele:", insertPilgrimage);
     
     try {
-      // status vine din ruta acum
+      // Setăm explicit statusul 'draft' pentru pelerinajele noi
       const [pilgrimage] = await db.insert(pilgrimages).values({
         ...insertPilgrimage,
+        status: "draft", // Status explicit setat la "draft"
         verified: false,
         featured: false,
         promoted: false,

@@ -341,9 +341,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         duration: Number(validData.duration),
         // Convertim date pentru a ne asigura că sunt obiecte Date
         startDate: new Date(validData.startDate),
-        endDate: new Date(validData.endDate),
-        // Setăm status la 'draft' pentru noile pelerinaje
-        status: "draft"
+        endDate: new Date(validData.endDate)
+        // NU setăm status aici - este setat în storage.createPilgrimage
       };
       
       console.log(">>> Date finale pentru creare pelerinaj:", JSON.stringify(pilgrimageData, null, 2));
