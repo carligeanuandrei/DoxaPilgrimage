@@ -239,7 +239,7 @@ export default function AboutPage() {
               <p className="text-neutral-600 italic mb-6">
                 <CmsHtml 
                   contentKey="about_testimonial1_content" 
-                  fallback="„Platforma Doxa mi-a oferit oportunitatea de a găsi pelerinaje organizate de ghizi spirituali excepționali. Experiența la Muntele Athos a fost transformatoare și organizată impecabil."" 
+                  fallback="Platforma Doxa mi-a oferit oportunitatea de a găsi pelerinaje organizate de ghizi spirituali excepționali. Experiența la Muntele Athos a fost transformatoare și organizată impecabil." 
                 />
               </p>
               <div className="flex items-center">
@@ -280,7 +280,7 @@ export default function AboutPage() {
               <p className="text-neutral-600 italic mb-6">
                 <CmsHtml 
                   contentKey="about_testimonial2_content" 
-                  fallback="„Apreciez transparența și atenția acordată detaliilor spirituale ale fiecărui pelerinaj. Prin Doxa am reușit să vizitez Țara Sfântă și să am parte de o experiență autentică, departe de turismul comercial."" 
+                  fallback="Apreciez transparența și atenția acordată detaliilor spirituale ale fiecărui pelerinaj. Prin Doxa am reușit să vizitez Țara Sfântă și să am parte de o experiență autentică, departe de turismul comercial." 
                 />
               </p>
               <div className="flex items-center">
