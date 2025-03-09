@@ -32,9 +32,9 @@ export const pilgrimages = pgTable("pilgrimages", {
   description: text("description").notNull(),
   location: text("location").notNull(),
   month: text("month").notNull(),
-  // Folosim text pentru compatibilitate cu API-ul
-  startDate: timestamp("start_date", { mode: 'string' }).notNull(),
-  endDate: timestamp("end_date", { mode: 'string' }).notNull(),
+  // Modificat pentru a accepta și procesa corect datele
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
   price: doublePrecision("price").notNull(),
   currency: text("currency").notNull().default("EUR"),
   transportation: text("transportation").notNull(),

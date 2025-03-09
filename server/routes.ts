@@ -350,16 +350,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Datele de început sau sfârșit ale pelerinajului sunt invalide");
       }
       
+      // Creăm datele pentru pelerinaj, cu valorile convertite corect
       const pilgrimageData = {
-        ...validData,
-        organizerId,
-        // Convertim datele numeric pentru a ne asigura că sunt procesate corect
+        title: validData.title,
+        description: validData.description,
+        location: validData.location,
+        month: validData.month,
+        transportation: validData.transportation,
+        guide: validData.guide,
+        saint: validData.saint,
+        // Convertim datele numerice corect
         availableSpots: Number(validData.availableSpots),
         price: Number(validData.price),
         duration: Number(validData.duration),
-        // Folosim datele convertite
-        startDate,
-        endDate
+        currency: validData.currency,
+        // Convertim datele la string ISO pentru compatibilitate cu baza de date
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        // Organizatorul
+        organizerId,
+        // Alte date opționale
+        images: validData.images || [],
+        includedServices: validData.includedServices || []
       };
       
       console.log(">>> Date finale pentru creare pelerinaj:", JSON.stringify(pilgrimageData, null, 2));

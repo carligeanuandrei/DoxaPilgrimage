@@ -52,7 +52,12 @@ const formSchema = z.object({
   guide: z.string().min(3, "Numele ghidului trebuie să aibă cel puțin 3 caractere"),
   availableSpots: z.number().min(1, "Trebuie să existe cel puțin 1 loc disponibil"),
   image: z.string().optional(),
-}).refine(data => data.endDate > data.startDate, {
+}).refine(data => {
+  // Verificăm că endDate este după startDate
+  const start = data.startDate instanceof Date ? data.startDate : new Date(data.startDate);
+  const end = data.endDate instanceof Date ? data.endDate : new Date(data.endDate);
+  return end > start;
+}, {
   message: "Data de sfârșit trebuie să fie după data de început",
   path: ["endDate"],
 });
@@ -113,9 +118,9 @@ export default function CreatePilgrimageNewPage() {
         location: data.location,
         month: data.month,
         transportation: data.transportation,
-        // Convertim datele în string ISO pentru a evita erori de tip
-        startDate: data.startDate instanceof Date ? data.startDate.toISOString() : data.startDate,
-        endDate: data.endDate instanceof Date ? data.endDate.toISOString() : data.endDate,
+        // Convertim explicit Date în string ISO pentru backend
+        startDate: data.startDate instanceof Date ? data.startDate.toISOString() : new Date(data.startDate).toISOString(),
+        endDate: data.endDate instanceof Date ? data.endDate.toISOString() : new Date(data.endDate).toISOString(),
         // Asigurăm valori numerice
         price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
         currency: data.currency,
@@ -244,8 +249,8 @@ export default function CreatePilgrimageNewPage() {
     const formattedData = {
       ...data,
       // Convertim explicit datele în format ISO string pentru a asigura compatibilitatea
-      startDate: data.startDate instanceof Date ? data.startDate.toISOString() : data.startDate,
-      endDate: data.endDate instanceof Date ? data.endDate.toISOString() : data.endDate,
+      startDate: data.startDate instanceof Date ? data.startDate.toISOString() : new Date(data.startDate).toISOString(), 
+      endDate: data.endDate instanceof Date ? data.endDate.toISOString() : new Date(data.endDate).toISOString(),
       // Convertim valorile numerice
       price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
       duration: typeof data.duration === 'string' ? parseInt(data.duration) : data.duration,
