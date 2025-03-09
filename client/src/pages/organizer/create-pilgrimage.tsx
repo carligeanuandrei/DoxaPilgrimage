@@ -34,16 +34,30 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Extindem schema Zod pentru a include validări suplimentare pentru formular
-const formSchema = insertPilgrimageSchema.extend({
+const formSchema = z.object({
+  title: z.string().min(5, "Titlul trebuie să aibă cel puțin 5 caractere"),
+  description: z.string().min(20, "Descrierea trebuie să aibă cel puțin 20 caractere"),
+  location: z.string().min(3, "Locația trebuie să aibă cel puțin 3 caractere"),
+  month: z.string(),
+  transportation: z.string(),
   startDate: z.coerce.date({
     required_error: "Data de început este obligatorie",
+  }).refine((date) => date >= new Date(new Date().setHours(0, 0, 0, 0)), {
+    message: "Data de început trebuie să fie în viitor",
   }),
   endDate: z.coerce.date({
     required_error: "Data de sfârșit este obligatorie",
   }),
+  price: z.coerce.number().min(0, "Prețul trebuie să fie pozitiv"),
+  currency: z.string(),
+  duration: z.coerce.number().min(1, "Durata trebuie să fie de cel puțin 1 zi"),
+  guide: z.string().min(3, "Numele ghidului trebuie să aibă cel puțin 3 caractere"),
+  availableSpots: z.coerce.number().min(1, "Trebuie să existe cel puțin 1 loc disponibil"),
   status: z.enum(["draft", "published", "unpublished", "cancelled"], {
     required_error: "Statusul pelerinajului este obligatoriu",
   }),
+  images: z.array(z.any()).optional().default([]),
+  includedServices: z.any().optional(),
 }).refine(data => data.endDate > data.startDate, {
   message: "Data de sfârșit trebuie să fie după data de început",
   path: ["endDate"],
@@ -145,7 +159,7 @@ export default function CreatePilgrimagePage() {
   });
 
   // Funcția de submit a formularului
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     console.log('Date originale formular:', data);
     
     if (!user?.id) {
@@ -154,6 +168,34 @@ export default function CreatePilgrimagePage() {
         description: "Trebuie să fiți autentificat pentru a crea un pelerinaj",
         variant: "destructive",
       });
+      return;
+    }
+    
+    // Validăm manual datele
+    const isValid = await form.trigger();
+    if (!isValid) {
+      console.log('Erori de validare la submit:', form.formState.errors);
+      
+      // Construim un mesaj de eroare detaliat
+      let errorMessage = "Vă rugăm să corectați următoarele erori:";
+      const errors = form.formState.errors;
+      
+      if (errors.title) errorMessage += "\n• Titlu: " + errors.title.message;
+      if (errors.description) errorMessage += "\n• Descriere: " + errors.description.message; 
+      if (errors.location) errorMessage += "\n• Locație: " + errors.location.message;
+      if (errors.guide) errorMessage += "\n• Ghid: " + errors.guide.message;
+      if (errors.startDate) errorMessage += "\n• Data început: " + errors.startDate.message;
+      if (errors.endDate) errorMessage += "\n• Data sfârșit: " + errors.endDate.message;
+      if (errors.price) errorMessage += "\n• Preț: " + errors.price.message;
+      if (errors.availableSpots) errorMessage += "\n• Locuri disponibile: " + errors.availableSpots.message;
+      if (errors.duration) errorMessage += "\n• Durată: " + errors.duration.message;
+      
+      toast({
+        title: "Formularul conține erori",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
       return;
     }
     
@@ -174,7 +216,14 @@ export default function CreatePilgrimagePage() {
       };
   
       console.log('Date formatate formular pentru trimitere:', formattedData);
-      createPilgrimageMutation.mutate(formattedData);
+      
+      // Folosim toast pentru a indica că procesul a început
+      toast({
+        title: "Se creează pelerinajul",
+        description: "Vă rugăm să așteptați...",
+      });
+      
+      await createPilgrimageMutation.mutateAsync(formattedData);
     } catch (error) {
       console.error('Eroare la formatarea datelor:', error);
       toast({
@@ -663,19 +712,6 @@ export default function CreatePilgrimagePage() {
                     className="w-full"
                     disabled={createPilgrimageMutation.isPending}
                     id="create-pilgrimage-button"
-                    onClick={(e) => {
-                      if (!form.formState.isValid) {
-                        e.preventDefault();
-                        console.log('Formular invalid:', form.formState.errors);
-                        toast({
-                          title: "Verificați formularul",
-                          description: "Vă rugăm să completați toate câmpurile obligatorii corect.",
-                          variant: "destructive",
-                        });
-                      } else {
-                        console.log('Formular valid, se trimite...');
-                      }
-                    }}
                   >
                     {createPilgrimageMutation.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
