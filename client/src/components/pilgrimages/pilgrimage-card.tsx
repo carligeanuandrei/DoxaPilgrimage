@@ -13,6 +13,8 @@ interface PilgrimageCardProps {
 }
 
 export default function PilgrimageCard({ pilgrimage, viewType = 'grid' }: PilgrimageCardProps) {
+  // Verificăm dacă pelerinajul este promovat pentru a aplica stiluri speciale
+  const isPromoted = pilgrimage.featured === true;
   const startDate = new Date(pilgrimage.startDate);
   const endDate = new Date(pilgrimage.endDate);
   const formattedDate = formatDistanceToNow(startDate, { addSuffix: true, locale: ro });
@@ -38,7 +40,7 @@ export default function PilgrimageCard({ pilgrimage, viewType = 'grid' }: Pilgri
   // Pentru formatul de listă
   if (viewType === 'list') {
     return (
-      <Card className="bg-card rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-md">
+      <Card className={`rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-md ${isPromoted ? 'bg-amber-50 border-amber-200 border-2' : 'bg-card'}`}>
         <div className="flex flex-col sm:flex-row">
           <div className="relative sm:w-1/4 max-w-[300px]">
             <img 
@@ -47,9 +49,9 @@ export default function PilgrimageCard({ pilgrimage, viewType = 'grid' }: Pilgri
               className="w-full h-full object-cover"
               style={{ maxHeight: '200px' }}
             />
-            {pilgrimage.featured && (
-              <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold py-1 px-2 rounded shadow-sm">
-                Popular
+            {isPromoted && (
+              <div className="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold py-1 px-2 rounded shadow-sm">
+                Promovat
               </div>
             )}
           </div>
@@ -122,16 +124,16 @@ export default function PilgrimageCard({ pilgrimage, viewType = 'grid' }: Pilgri
   
   // Pentru formatul de grid (implicit)
   return (
-    <Card className="bg-card rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
+    <Card className={`rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg ${isPromoted ? 'bg-amber-50 border-amber-200 border-2' : 'bg-card'}`}>
       <div className="relative h-48 md:h-56">
         <img 
           src={getPilgrimageImage()} 
           alt={pilgrimage.title} 
           className="w-full h-full object-cover" 
         />
-        {pilgrimage.featured && (
-          <div className="absolute top-4 right-4 bg-yellow-500 text-white text-sm font-bold py-1 px-3 rounded shadow-sm">
-            Popular
+        {isPromoted && (
+          <div className="absolute top-4 right-4 bg-amber-500 text-white text-sm font-bold py-1 px-3 rounded shadow-sm">
+            Promovat
           </div>
         )}
       </div>

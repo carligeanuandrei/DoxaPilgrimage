@@ -86,7 +86,12 @@ export default function PilgrimagesPage() {
   });
   
   // Filtrează local rezultatele deoarece backend-ul nu suportă toate filtrele încă
-  const filteredPilgrimages = pilgrimages.filter(pilgrimage => {
+  // Separăm pelerinajele în două categorii: promovate și normale
+  const promotedPilgrimages = pilgrimages.filter(p => p.featured === true);
+  const normalPilgrimages = pilgrimages.filter(p => p.featured !== true);
+  
+  // Filtrăm ambele categorii separat
+  const filteredPromotedPilgrimages = promotedPilgrimages.filter(pilgrimage => {
     // Filtrare după preț
     if (filters.minPrice && parseFloat(filters.minPrice) > pilgrimage.price) {
       return false;
@@ -108,6 +113,32 @@ export default function PilgrimagesPage() {
     
     return true;
   });
+  
+  const filteredNormalPilgrimages = normalPilgrimages.filter(pilgrimage => {
+    // Filtrare după preț
+    if (filters.minPrice && parseFloat(filters.minPrice) > pilgrimage.price) {
+      return false;
+    }
+    
+    if (filters.maxPrice && parseFloat(filters.maxPrice) < pilgrimage.price) {
+      return false;
+    }
+    
+    // Filtrare după dată de început
+    if (filters.startDate && new Date(pilgrimage.startDate) < filters.startDate) {
+      return false;
+    }
+    
+    // Filtrare după dată de sfârșit
+    if (filters.endDate && new Date(pilgrimage.endDate) > filters.endDate) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  // Combinăm rezultatele, cu pelerinajele promovate întotdeauna la început
+  const filteredPilgrimages = [...filteredPromotedPilgrimages, ...filteredNormalPilgrimages];
 
   const handleFilterChange = (newFilters: AdvancedFilters) => {
     setFilters(newFilters);
