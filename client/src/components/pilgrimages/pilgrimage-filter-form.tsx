@@ -96,7 +96,9 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
   
   // Când se schimbă un câmp, adăugăm/eliminăm din filtrele active
   const updateActiveFilters = (name: string, value: any) => {
-    if (value && value !== "" && value !== null) {
+    const specialValues = ['toate_locatiile', 'toate_lunile', 'toti_sfintii', 'toate_tipurile', 'toti_ghizii'];
+    
+    if (value && value !== "" && value !== null && !specialValues.includes(value)) {
       if (!activeFilters.includes(name)) {
         setActiveFilters([...activeFilters, name]);
       }
@@ -107,7 +109,23 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
   
   // Resetăm un filtru specific
   const resetFilter = (name: keyof FilterValues) => {
-    form.setValue(name, name === 'startDate' || name === 'endDate' ? undefined : "");
+    // Valorile speciale pentru fiecare câmp
+    const resetValues: Record<string, string> = {
+      location: 'toate_locatiile',
+      month: 'toate_lunile',
+      saint: 'toti_sfintii',
+      transportation: 'toate_tipurile',
+      guide: 'toti_ghizii',
+      minPrice: '',
+      maxPrice: '',
+    };
+
+    if (name === 'startDate' || name === 'endDate') {
+      form.setValue(name, undefined);
+    } else {
+      form.setValue(name, resetValues[name] || "");
+    }
+    
     updateActiveFilters(name, "");
     
     // Actualizăm filtrele
@@ -119,11 +137,11 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
   // Resetăm toate filtrele
   const resetAllFilters = () => {
     form.reset({
-      location: "",
-      month: "",
-      saint: "",
-      transportation: "",
-      guide: "",
+      location: "toate_locatiile",
+      month: "toate_lunile",
+      saint: "toti_sfintii",
+      transportation: "toate_tipurile",
+      guide: "toti_ghizii",
       minPrice: "",
       maxPrice: "",
       startDate: undefined,
@@ -135,9 +153,11 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
   
   // La submit, trimitem filtrele către componenta părinte
   const onSubmit = (values: FilterValues) => {
-    // Eliminăm câmpurile goale pentru a nu include filtre inutile
+    const specialValues = ['toate_locatiile', 'toate_lunile', 'toti_sfintii', 'toate_tipurile', 'toti_ghizii'];
+    
+    // Eliminăm câmpurile goale și valorile speciale pentru a nu include filtre inutile
     const cleanedFilters = Object.entries(values).reduce((acc, [key, value]) => {
-      if (value !== "" && value !== undefined && value !== null) {
+      if (value !== "" && value !== undefined && value !== null && !specialValues.includes(value as string)) {
         acc[key as keyof FilterValues] = value;
       }
       return acc;
@@ -207,7 +227,7 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Toate locațiile</SelectItem>
+                      <SelectItem value="toate_locatiile">Toate locațiile</SelectItem>
                       {uniqueLocations.map((location) => (
                         <SelectItem key={location} value={location}>
                           {location}
@@ -240,7 +260,7 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Toate lunile</SelectItem>
+                      <SelectItem value="toate_lunile">Toate lunile</SelectItem>
                       {months.map((month) => (
                         <SelectItem key={month.value} value={month.value}>
                           {month.label}
@@ -273,7 +293,7 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Toți sfinții</SelectItem>
+                      <SelectItem value="toti_sfintii">Toți sfinții</SelectItem>
                       {uniqueSaints.map((saint) => (
                         <SelectItem key={saint} value={saint}>
                           {saint}
@@ -306,7 +326,7 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Toate tipurile</SelectItem>
+                      <SelectItem value="toate_tipurile">Toate tipurile</SelectItem>
                       {uniqueTransportation.map((transport) => (
                         <SelectItem key={transport} value={transport}>
                           {transport}
@@ -339,7 +359,7 @@ export default function PilgrimageFilterForm({ onFilterChange, initialFilters = 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Toți ghizii</SelectItem>
+                      <SelectItem value="toti_ghizii">Toți ghizii</SelectItem>
                       {uniqueGuides.map((guide) => (
                         <SelectItem key={guide} value={guide}>
                           {guide}
