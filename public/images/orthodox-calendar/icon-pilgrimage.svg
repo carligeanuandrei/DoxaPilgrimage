@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Church Background -->
+  <rect x="30" y="40" width="40" height="40" fill="#E8D8C3" stroke="#5D4037" stroke-width="2"/>
+  
+  <!-- Church Roof -->
+  <polygon points="30,40 50,20 70,40" fill="#8D6E63" stroke="#5D4037" stroke-width="2"/>
+  
+  <!-- Church Door -->
+  <rect x="45" y="60" width="10" height="20" fill="#5D4037"/>
+  <path d="M45,60 Q50,55 55,60" fill="none" stroke="#5D4037" stroke-width="1"/>
+  
+  <!-- Church Windows -->
+  <rect x="35" y="50" width="8" height="12" fill="#B3E5FC" stroke="#5D4037" stroke-width="1"/>
+  <rect x="57" y="50" width="8" height="12" fill="#B3E5FC" stroke="#5D4037" stroke-width="1"/>
+  
+  <!-- Cross on Top -->
+  <rect x="48" y="10" width="4" height="15" fill="#5D4037"/>
+  <rect x="44" y="15" width="12" height="4" fill="#5D4037"/>
+  
+  <!-- Path to Church -->
+  <path d="M40,80 L30,100 M60,80 L70,100" fill="none" stroke="#795548" stroke-width="3"/>
+  <path d="M40,80 C40,95 60,95 60,80" fill="none" stroke="#795548" stroke-width="3"/>
+  
+  <!-- Pilgrims -->
+  <circle cx="35" cy="90" r="3" fill="#333333"/>
+  <circle cx="43" cy="95" r="3" fill="#333333"/>
+  <circle cx="65" cy="90" r="3" fill="#333333"/>
+  <circle cx="55" cy="93" r="3" fill="#333333"/>
+</svg>

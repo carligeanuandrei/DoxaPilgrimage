@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Calendar Background -->
+  <rect x="10" y="20" width="80" height="70" fill="#FFFFFF" stroke="#333333" stroke-width="2"/>
+  
+  <!-- Calendar Top -->
+  <rect x="10" y="10" width="80" height="15" fill="#8B0000" stroke="#333333" stroke-width="2"/>
+  
+  <!-- Calendar Hangers -->
+  <rect x="25" y="5" width="10" height="5" fill="#333333"/>
+  <rect x="65" y="5" width="10" height="5" fill="#333333"/>
+  
+  <!-- Days of the Week Row -->
+  <rect x="15" y="25" width="10" height="10" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="30" y="25" width="10" height="10" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="45" y="25" width="10" height="10" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="60" y="25" width="10" height="10" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="75" y="25" width="10" height="10" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="1"/>
+  
+  <!-- Calendar Days -->
+  <rect x="15" y="40" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="30" y="40" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="45" y="40" width="10" height="10" fill="#F9D5E5" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="60" y="40" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="75" y="40" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  
+  <rect x="15" y="55" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="30" y="55" width="10" height="10" fill="#DAE8FC" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="45" y="55" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="60" y="55" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="75" y="55" width="10" height="10" fill="#E1D5E7" stroke="#CCCCCC" stroke-width="1"/>
+  
+  <rect x="15" y="70" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="30" y="70" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="45" y="70" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="60" y="70" width="10" height="10" fill="#FFF2CC" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="75" y="70" width="10" height="10" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  
+  <!-- Cross Symbol -->
+  <path d="M45,15 L55,15 L55,13 L45,13 Z" fill="#FFFFFF"/>
+  <path d="M49,10 L49,20 L51,20 L51,10 Z" fill="#FFFFFF"/>
+</svg>

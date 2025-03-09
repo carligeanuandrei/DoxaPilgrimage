@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bowl -->
+  <path d="M20,60 C20,80 80,80 80,60 C80,40 75,40 75,40 L25,40 C25,40 20,40 20,60 Z" fill="#EAEAEA" stroke="#333" stroke-width="2"/>
+  
+  <!-- Plate rim -->
+  <ellipse cx="50" cy="60" rx="32" ry="8" fill="none" stroke="#333" stroke-width="2"/>
+  
+  <!-- Bread -->
+  <ellipse cx="40" cy="50" rx="12" ry="6" fill="#8B5A2B"/>
+  
+  <!-- Vegetables -->
+  <circle cx="60" cy="48" r="5" fill="#006400"/>
+  <circle cx="65" cy="54" r="4" fill="#FF6347"/>
+  <circle cx="55" cy="55" r="3" fill="#7F00FF"/>
+  
+  <!-- Steam -->
+  <path d="M40,38 C42,32 38,30 40,24" fill="none" stroke="#AAAAAA" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50,38 C52,32 48,30 50,24" fill="none" stroke="#AAAAAA" stroke-width="2" stroke-linecap="round"/>
+  <path d="M60,38 C62,32 58,30 60,24" fill="none" stroke="#AAAAAA" stroke-width="2" stroke-linecap="round"/>
+</svg>
