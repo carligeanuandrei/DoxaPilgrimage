@@ -305,6 +305,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/pilgrimages", isOrganizer, async (req, res) => {
     try {
       console.log(">>> Date primite pentru crearea pelerinajului:", JSON.stringify(req.body));
+      console.log(">>> Schema validare:", insertPilgrimageSchema);
+      console.log(">>> Schema definită în shared/schema.ts:", pilgrimages.status);
       
       // Validăm datele de intrare
       let validData;
@@ -312,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validData = insertPilgrimageSchema.parse(req.body);
         console.log(">>> Date validate cu success prin Zod:", JSON.stringify(validData));
       } catch (validationError) {
-        console.error(">>> Eroare de validare Zod:", validationError);
+        console.error(">>> Eroare detaliată de validare Zod:", JSON.stringify(validationError, null, 2));
         return res.status(400).json({ 
           message: "Date invalide pentru creare pelerinaj", 
           errors: validationError instanceof z.ZodError ? validationError.errors : String(validationError) 
