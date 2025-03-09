@@ -282,7 +282,6 @@ export const cmsContent = pgTable("cms_content", {
   key: text("key").notNull().unique(),
   value: text("value").notNull(),
   contentType: text("content_type").notNull().default('text'),
-  description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
