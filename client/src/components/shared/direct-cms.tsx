@@ -32,13 +32,21 @@ export function DirectCmsText({ contentKey, fallback = '', className = '', refre
       }
       
       const data = await response.json();
-      if (data && data.value) {
+      // Verificăm tipul specific de conținut
+      if (data && typeof data.value === 'string') {
         setContent(data.value);
         setError(false);
+      } else if (data && data.contentType === 'text' && typeof data.value === 'string') {
+        // Încercăm și acest format pentru compatibilitate
+        setContent(data.value);
+        setError(false);
+      } else {
+        console.debug(`CMS content for ${contentKey} has unexpected format:`, data);
+        setError(true);
       }
     } catch (err) {
       setError(true);
-      // Nu arătăm erorile în consolă pentru reducerea zgomotului
+      console.debug(`Failed to fetch CMS content for ${contentKey}:`, err);
     }
   }, [contentKey]);
   
@@ -99,13 +107,21 @@ export function DirectCmsHtml({ contentKey, fallback = '', className = '', refre
       }
       
       const data = await response.json();
-      if (data && data.value) {
+      // Verificăm tipul specific de conținut
+      if (data && typeof data.value === 'string') {
         setContent(data.value);
         setError(false);
+      } else if (data && data.contentType === 'html' && typeof data.value === 'string') {
+        // Încercăm și acest format pentru compatibilitate
+        setContent(data.value);
+        setError(false);
+      } else {
+        console.debug(`CMS HTML content for ${contentKey} has unexpected format:`, data);
+        setError(true);
       }
     } catch (err) {
       setError(true);
-      // Nu arătăm erorile în consolă pentru reducerea zgomotului
+      console.debug(`Failed to fetch CMS HTML content for ${contentKey}:`, err);
     }
   }, [contentKey]);
   
@@ -169,13 +185,21 @@ export function DirectCmsImage({ contentKey, fallbackSrc = '', alt = '', classNa
       }
       
       const data = await response.json();
-      if (data && data.value) {
+      // Verificăm tipul specific de conținut
+      if (data && typeof data.value === 'string') {
         setSrc(data.value);
         setError(false);
+      } else if (data && data.contentType === 'image' && typeof data.value === 'string') {
+        // Încercăm și acest format pentru compatibilitate
+        setSrc(data.value);
+        setError(false);
+      } else {
+        console.debug(`CMS Image content for ${contentKey} has unexpected format:`, data);
+        setError(true);
       }
     } catch (err) {
       setError(true);
-      // Nu arătăm erorile în consolă pentru reducerea zgomotului
+      console.debug(`Failed to fetch CMS Image content for ${contentKey}:`, err);
     }
   }, [contentKey]);
   

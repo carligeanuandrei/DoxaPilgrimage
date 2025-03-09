@@ -940,10 +940,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
       
-      const content = await storage.getCmsContent();
-      res.json(content);
+      try {
+        const content = await storage.getCmsContent();
+        res.json(content);
+      } catch (dbError) {
+        console.error("Database error fetching CMS content:", dbError);
+        // Răspundem cu un array gol în loc să returnam eroare
+        // pentru a preveni blocarea interfeței utilizatorului
+        res.json([]);
+      }
     } catch (error) {
-      console.error("Error fetching CMS content:", error);
+      console.error("General error in CMS route:", error);
       res.status(500).json({ message: "Eroare la preluarea conținutului CMS" });
     }
   });
@@ -956,15 +963,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.set('Expires', '0');
       
       const key = req.params.key;
-      const content = await storage.getCmsContent(key);
       
-      if (!content) {
-        return res.status(404).json({ message: "Conținutul CMS nu a fost găsit" });
+      try {
+        const content = await storage.getCmsContent(key);
+        
+        if (!content) {
+          return res.status(404).json({ 
+            message: "Conținutul CMS nu a fost găsit",
+            key: key,
+            // Adăugăm o valoare înștiințare pentru a ajuta la debugging
+            suggestionForUI: "Not found"
+          });
+        }
+        
+        res.json(content);
+      } catch (dbError) {
+        console.error(`Database error fetching CMS content for key=${key}:`, dbError);
+        return res.status(404).json({ 
+          message: "Eroare la accesarea conținutului CMS",
+          key: key,
+          // Adăugăm o valoare sugestie pentru UI să afișeze fallback
+          suggestionForUI: "Database error"
+        });
       }
-      
-      res.json(content);
     } catch (error) {
-      console.error("Error fetching CMS content:", error);
+      console.error("Error in CMS key route:", error);
       res.status(500).json({ message: "Eroare la preluarea conținutului CMS" });
     }
   });
