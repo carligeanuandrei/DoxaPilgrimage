@@ -107,7 +107,8 @@ export const insertPilgrimageSchema = createInsertSchema(pilgrimages).omit({
   promoted: true,
   promotionLevel: true,
   promotionExpiry: true,
-  promotionStartedAt: true
+  promotionStartedAt: true,
+  status: true // Omitem și status pentru a-l seta automat în server
 });
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
