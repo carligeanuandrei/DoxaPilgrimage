@@ -189,7 +189,7 @@ export default function OrganizerDashboard() {
               <CardTitle className="flex justify-between items-center">
                 <span>Pelerinajele mele</span>
                 <Button asChild>
-                  <Link href="/pilgrimages/new">Adaugă pelerinaj nou</Link>
+                  <Link href="/organizer/create-pilgrimage">Adaugă pelerinaj nou</Link>
                 </Button>
               </CardTitle>
               <CardDescription>
@@ -314,7 +314,7 @@ export default function OrganizerDashboard() {
                 <div className="text-center p-4 border rounded-md">
                   <p className="mb-4">Nu aveți niciun pelerinaj adăugat.</p>
                   <Button asChild>
-                    <Link href="/pilgrimages/new">Adaugă primul tău pelerinaj</Link>
+                    <Link href="/organizer/create-pilgrimage">Adaugă primul tău pelerinaj</Link>
                   </Button>
                 </div>
               )}

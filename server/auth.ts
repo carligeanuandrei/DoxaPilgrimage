@@ -139,7 +139,15 @@ export function setupAuth(app: Express) {
       } else {
         // Pentru utilizatorii normali, îi luăm din baza de date
         const user = await storage.getUser(id);
-        done(null, user);
+        
+        // VERIFICARE SUPLIMENTARĂ: Verificăm dacă contul este verificat
+        // Dacă user nu e null și nu e verificat și nu e admin, înseamnă că nu are acces
+        if (user && !user.verified && user.role !== 'admin') {
+          // Returnăm false pentru a forța utilizatorul să se autentifice din nou
+          done(null, false);
+        } else {
+          done(null, user);
+        }
       }
     } catch (error) {
       done(error);

@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
+import VerifyAccountPage from "@/pages/verify-account-page";
 import PilgrimagesPage from "@/pages/pilgrimages-page";
 import PilgrimageDetailsPage from "@/pages/pilgrimage-details-page";
 import ProfilePage from "@/pages/profile-page";
@@ -14,6 +15,7 @@ import TermsPage from "@/pages/terms-page";
 import PrivacyPolicyPage from "@/pages/privacy-policy-page";
 import CookiesPage from "@/pages/cookies-page";
 import OrganizerDashboard from "@/pages/organizer/dashboard";
+import CreatePilgrimagePage from "@/pages/organizer/create-pilgrimage";
 import CmsPage from "@/pages/admin/cms-page";
 import UsersPage from "@/pages/admin/users-page";
 import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
@@ -44,6 +46,9 @@ function Router() {
       </Route>
       <Route path="/organizer/dashboard">
         <ProtectedRoute component={OrganizerDashboard} path="/organizer/dashboard" />
+      </Route>
+      <Route path="/organizer/create-pilgrimage">
+        <ProtectedRoute component={CreatePilgrimagePage} path="/organizer/create-pilgrimage" />
       </Route>
       {/* Admin routes */}
       <Route path="/admin/cms">
