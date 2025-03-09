@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import { Loader2, Calendar, Tag, Clock, MapPin, Euro, Image, Info, FileText, Group } from 'lucide-react';
+import { Loader2, Calendar, Tag, Clock, MapPin, Euro, Image, Info, FileText, Group, X as XIcon } from 'lucide-react';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -78,7 +78,7 @@ export default function CreatePilgrimagePage() {
       guide: "",
       images: [],
       featured: false,
-      verified: false
+      verified: falsee
     }
   });
 
@@ -467,22 +467,100 @@ export default function CreatePilgrimagePage() {
                   name="images"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Imagini (URL-uri)</FormLabel>
+                      <FormLabel>Imagini</FormLabel>
                       <FormControl>
-                        <div className="flex items-center border rounded-md focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
-                          <Image className="ml-3 h-4 w-4 text-muted-foreground" />
-                          <Input 
-                            placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" 
-                            className="border-0 focus-visible:ring-0" 
-                            value={field.value.join(', ')}
-                            onChange={(e) => {
-                              const values = e.target.value.split(',').map(url => url.trim()).filter(Boolean);
-                              field.onChange(values);
-                            }}
-                          />
+                        <div className="space-y-4">
+                          {/* Afișarea imaginilor încărcate */}
+                          {field.value.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {field.value.map((url, index) => (
+                                <div key={index} className="relative group">
+                                  <img 
+                                    src={url} 
+                                    alt={`Imagine ${index + 1}`} 
+                                    className="h-20 w-20 object-cover rounded-md border" 
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newImages = [...field.value];
+                                      newImages.splice(index, 1);
+                                      field.onChange(newImages);
+                                    }}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <XIcon className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {/* Încărcarea de noi imagini */}
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0];
+                                    const formData = new FormData();
+                                    formData.append('image', file);
+                                    
+                                    try {
+                                      const response = await fetch('/api/upload-image', {
+                                        method: 'POST',
+                                        body: formData,
+                                        credentials: 'include'
+                                      });
+                                      
+                                      if (response.ok) {
+                                        const data = await response.json();
+                                        field.onChange([...field.value, data.imageUrl]);
+                                        // Reset input value
+                                        e.target.value = '';
+                                      } else {
+                                        const errorData = await response.json();
+                                        toast({
+                                          title: "Eroare",
+                                          description: errorData.message || "Eroare la încărcarea imaginii",
+                                          variant: "destructive"
+                                        });
+                                      }
+                                    } catch (error) {
+                                      console.error("Eroare la încărcarea imaginii:", error);
+                                      toast({
+                                        title: "Eroare",
+                                        description: "Nu s-a putut încărca imaginea",
+                                        variant: "destructive"
+                                      });
+                                    }
+                                  }
+                                }}
+                              />
+                              <Button 
+                                type="button" 
+                                variant="outline"
+                                onClick={() => document.querySelector('input[type="file"]')?.click()}
+                              >
+                                <Image className="h-4 w-4 mr-2" />
+                                Încarcă
+                              </Button>
+                            </div>
+                            <FormDescription>Sau adaugă URL-uri de imagini separate prin virgulă</FormDescription>
+                            <Input
+                              placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                              value={field.value.join(', ')}
+                              onChange={(e) => {
+                                const values = e.target.value.split(',').map(url => url.trim()).filter(Boolean);
+                                field.onChange(values);
+                              }}
+                            />
+                          </div>
                         </div>
                       </FormControl>
-                      <FormDescription>URL-uri de imagini separate prin virgulă</FormDescription>
+                    </FormItem>
                       <FormMessage />
                     </FormItem>
                   )}

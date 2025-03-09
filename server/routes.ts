@@ -3,6 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import { 
   insertPilgrimageSchema, 
   insertReviewSchema, 
@@ -16,7 +19,38 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder"
   apiVersion: "2023-10-16",
 });
 
+// Configurare multer pentru încărcarea imaginilor
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = 'public/images/pilgrimages';
+    if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB
+  fileFilter: function (req, file, cb) {
+    const filetypes = /jpeg|jpg|png|gif|webp/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error("Only image files are allowed!"));
+  }
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Servim fișierele statice din directorul public
+  app.use('/static', express.static('public'));
+  
   // Sets up /api/register, /api/login, /api/logout, /api/user
   setupAuth(app);
 
@@ -877,6 +911,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Image upload route
+  app.post('/api/upload-image', isAuthenticated, upload.single('image'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Nicio imagine încărcată" });
+      }
+      
+      // Constructia URL-ului imaginii
+      const imageUrl = `/static/images/pilgrimages/${req.file.filename}`;
+      
+      res.status(200).json({ 
+        success: true, 
+        imageUrl: imageUrl,
+        message: "Imaginea a fost încărcată cu succes" 
+      });
+    } catch (error) {
+      console.error("Eroare la încărcarea imaginii:", error);
+      res.status(500).json({ message: "Eroare la încărcarea imaginii" });
+    }
+  });
+  
   // CMS routes
   app.get("/api/cms", async (req, res) => {
     try {
