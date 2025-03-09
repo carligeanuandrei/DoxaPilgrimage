@@ -87,9 +87,17 @@ export default function CreatePilgrimagePage() {
   // Mutație pentru adăugarea unui pelerinaj nou
   const createPilgrimageMutation = useMutation({
     mutationFn: async (pilgrimageData: z.infer<typeof formSchema>) => {
+      console.log('Trimit date:', pilgrimageData); // debugging
+      
       const modifiedData = {
         ...pilgrimageData,
-        organizerId: user?.id
+        organizerId: user?.id,
+        // Asigurăm-ne că toate numerele sunt parsate corect
+        price: Number(pilgrimageData.price),
+        duration: Number(pilgrimageData.duration),
+        availableSpots: Number(pilgrimageData.availableSpots),
+        // Ne asigurăm că imaginile sunt procesate corect
+        images: Array.isArray(pilgrimageData.images) ? pilgrimageData.images : []
       };
 
       const res = await apiRequest('POST', '/api/pilgrimages', modifiedData);
@@ -118,14 +126,22 @@ export default function CreatePilgrimagePage() {
 
   // Funcția de submit a formularului
   const onSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log('Date originale formular:', data); // debugging
+    
     // Logică pentru convertirea datelor de formular
     const formattedData = {
       ...data,
+      // Asigurăm-ne că numerele sunt parsate corect
       price: Number(data.price),
       duration: Number(data.duration),
       availableSpots: Number(data.availableSpots),
+      // Asigurăm-ne că și imaginile sunt procesate corect
+      images: Array.isArray(data.images) ? data.images : [],
+      // Includerea organizatorului
+      organizerId: user?.id
     };
 
+    console.log('Date formatate formular:', formattedData); // debugging
     createPilgrimageMutation.mutate(formattedData);
   };
 
