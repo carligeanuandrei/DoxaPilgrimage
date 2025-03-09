@@ -925,11 +925,11 @@ export class DatabaseStorage implements IStorage {
     console.log("Storage: Creez pelerinaj cu datele:", insertPilgrimage);
     
     try {
+      // status vine din ruta acum
       const [pilgrimage] = await db.insert(pilgrimages).values({
         ...insertPilgrimage,
         verified: false,
         featured: false,
-        status: "draft", // Folosim status în loc de draft
         promoted: false,
         promotionLevel: 'none',
         createdAt: new Date()
