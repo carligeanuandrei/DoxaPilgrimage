@@ -336,12 +336,73 @@ export default function CmsPage() {
       </div>
       
       <Tabs defaultValue="all">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">Toate</TabsTrigger>
-          <TabsTrigger value="text">Text</TabsTrigger>
-          <TabsTrigger value="html">HTML</TabsTrigger>
-          <TabsTrigger value="image">Imagini</TabsTrigger>
-        </TabsList>
+        <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <TabsList>
+            <TabsTrigger value="all">Toate</TabsTrigger>
+            <TabsTrigger value="text">Text</TabsTrigger>
+            <TabsTrigger value="html">HTML</TabsTrigger>
+            <TabsTrigger value="image">Imagini</TabsTrigger>
+          </TabsList>
+        
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <div className="relative">
+              <Input 
+                placeholder="Filtrează conținut după cuvinte cheie..." 
+                value={filterPrefix || ""}
+                onChange={(e) => setFilterPrefix(e.target.value.trim() || null)}
+                className="h-9 md:w-[300px]"
+              />
+              {filterPrefix && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1 h-7 w-7"
+                  onClick={() => setFilterPrefix(null)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                  <span className="sr-only">Șterge</span>
+                </Button>
+              )}
+            </div>
+            
+            <div className="flex flex-wrap gap-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setFilterPrefix("footer_")}
+                className={filterPrefix === "footer_" ? "bg-amber-100" : ""}
+              >
+                Footer
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setFilterPrefix("contact_")}
+                className={filterPrefix === "contact_" ? "bg-blue-100" : ""}
+              >
+                Contact
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setFilterPrefix("homepage_")}
+                className={filterPrefix === "homepage_" ? "bg-green-100" : ""}
+              >
+                Homepage
+              </Button>
+            </div>
+          </div>
+        </div>
         
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
@@ -367,13 +428,27 @@ export default function CmsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {cmsContents.map((content: CmsContent) => (
-                        <TableRow key={content.id} className={content.key.startsWith('footer_') ? 'bg-amber-50/50' : ''}>
+                      {cmsContents
+                        .filter((content: CmsContent) => filterPrefix ? content.key.includes(filterPrefix) : true)
+                        .map((content: CmsContent) => (
+                        <TableRow key={content.id} className={content.key.startsWith('footer_') ? 'bg-amber-50/50' : 
+                                                              content.key.startsWith('contact_') ? 'bg-blue-50/50' : 
+                                                              content.key.startsWith('homepage_') ? 'bg-green-50/50' : ''}>
                           <TableCell className="font-medium">
                             {content.key.startsWith('footer_') ? (
                               <span className="flex items-center">
                                 {content.key}
                                 <span className="ml-2 text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">Footer</span>
+                              </span>
+                            ) : content.key.startsWith('contact_') ? (
+                              <span className="flex items-center">
+                                {content.key}
+                                <span className="ml-2 text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">Contact</span>
+                              </span>
+                            ) : content.key.startsWith('homepage_') ? (
+                              <span className="flex items-center">
+                                {content.key}
+                                <span className="ml-2 text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full">Homepage</span>
                               </span>
                             ) : content.key}
                           </TableCell>
@@ -438,6 +513,7 @@ export default function CmsPage() {
                     <TableBody>
                       {cmsContents
                         .filter((content: CmsContent) => content.contentType === "text")
+                        .filter((content: CmsContent) => filterPrefix ? content.key.includes(filterPrefix) : true)
                         .map((content: CmsContent) => (
                           <TableRow key={content.id}>
                             <TableCell className="font-medium">{content.key}</TableCell>
@@ -449,7 +525,7 @@ export default function CmsPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {new Date(content.updatedAt).toLocaleDateString()}
+                              {content.updatedAt ? new Date(content.updatedAt).toLocaleDateString() : 'N/A'}
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
@@ -488,6 +564,7 @@ export default function CmsPage() {
                     <TableBody>
                       {cmsContents
                         .filter((content: CmsContent) => content.contentType === "html")
+                        .filter((content: CmsContent) => filterPrefix ? content.key.includes(filterPrefix) : true)
                         .map((content: CmsContent) => (
                           <TableRow key={content.id}>
                             <TableCell className="font-medium">{content.key}</TableCell>
@@ -499,7 +576,7 @@ export default function CmsPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {new Date(content.updatedAt).toLocaleDateString()}
+                              {content.updatedAt ? new Date(content.updatedAt).toLocaleDateString() : 'N/A'}
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
@@ -529,6 +606,7 @@ export default function CmsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {cmsContents
                       .filter((content: CmsContent) => content.contentType === "image")
+                      .filter((content: CmsContent) => filterPrefix ? content.key.includes(filterPrefix) : true)
                       .map((content: CmsContent) => (
                         <Card key={content.id}>
                           <CardContent className="p-4">
@@ -543,7 +621,7 @@ export default function CmsPage() {
                               <div>
                                 <h3 className="font-medium">{content.key}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                  {new Date(content.updatedAt).toLocaleDateString()}
+                                  {content.updatedAt ? new Date(content.updatedAt).toLocaleDateString() : 'N/A'}
                                 </p>
                               </div>
                               <div className="flex space-x-1">
