@@ -438,6 +438,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         delete updateData.status;
       }
       
+      // Procesăm datele de început și sfârșit pentru a asigura că sunt obiecte Date valide
+      if (updateData.startDate) {
+        try {
+          // Convertim la obiect Date dacă este string
+          updateData.startDate = new Date(updateData.startDate);
+          
+          // Verificăm dacă data rezultată este validă
+          if (isNaN(updateData.startDate.getTime())) {
+            throw new Error("Data de început invalidă");
+          }
+        } catch (err) {
+          console.error("Eroare la procesarea datei de început:", err, updateData.startDate);
+          return res.status(400).json({ 
+            message: "Format invalid pentru data de început", 
+            details: String(err) 
+          });
+        }
+      }
+      
+      if (updateData.endDate) {
+        try {
+          // Convertim la obiect Date dacă este string
+          updateData.endDate = new Date(updateData.endDate);
+          
+          // Verificăm dacă data rezultată este validă
+          if (isNaN(updateData.endDate.getTime())) {
+            throw new Error("Data de sfârșit invalidă");
+          }
+        } catch (err) {
+          console.error("Eroare la procesarea datei de sfârșit:", err, updateData.endDate);
+          return res.status(400).json({ 
+            message: "Format invalid pentru data de sfârșit", 
+            details: String(err) 
+          });
+        }
+      }
+      
+      // Afișăm datele pentru debug
+      console.log("Date de actualizat:", JSON.stringify(updateData, (key, value) => {
+        // Tratăm special obiectele Date pentru a le afișa corect în log
+        if (value instanceof Date) {
+          return value.toISOString();
+        }
+        return value;
+      }, 2));
+      
       const updatedPilgrimage = await storage.updatePilgrimage(id, updateData);
       res.json(updatedPilgrimage);
     } catch (error) {
