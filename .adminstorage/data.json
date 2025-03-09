@@ -1,0 +1,20 @@
+{
+  "id": 9999,
+  "username": "avatour",
+  "password": "protected",
+  "email": "admin@doxa.ro",
+  "firstName": "Admin",
+  "lastName": "Doxa",
+  "phone": null,
+  "role": "admin",
+  "verified": true,
+  "verificationToken": null,
+  "tokenExpiry": null,
+  "resetToken": null,
+  "resetTokenExpiry": null,
+  "twoFactorCode": null,
+  "twoFactorExpiry": null,
+  "bio": null,
+  "profileImage": null,
+  "createdAt": "2025-02-08T12:00:00.000Z"
+}

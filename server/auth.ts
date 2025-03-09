@@ -108,7 +108,25 @@ export function setupAuth(app: Express) {
     try {
       // Verificăm dacă ID-ul este cel de admin special (9999)
       if (id === 9999) {
-        // Returnăm utilizatorul admin hardcodat
+        try {
+          // Citim datele salvate ale administratorului din fișier
+          const fs = require('fs');
+          const path = require('path');
+          const adminFilePath = path.join(process.cwd(), '.adminstorage', 'data.json');
+          
+          // Verificăm dacă fișierul există și încercăm să-l citim
+          if (fs.existsSync(adminFilePath)) {
+            const fileData = fs.readFileSync(adminFilePath, 'utf8');
+            const adminData = JSON.parse(fileData);
+            done(null, adminData);
+            return;
+          }
+        } catch (error) {
+          console.error('Eroare la citirea datelor salvate ale administratorului:', error);
+          // În caz de eroare, continuăm cu datele hardcodate
+        }
+      
+        // Folosim datele hardcodate ca fallback
         const adminUser: SelectUser = {
           id: 9999,
           username: 'avatour',
