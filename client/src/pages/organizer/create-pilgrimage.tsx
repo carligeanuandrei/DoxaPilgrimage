@@ -124,12 +124,22 @@ export default function CreatePilgrimagePage() {
       console.log('Date modificate pentru API:', modifiedData);
 
       try {
+        console.log('Trimit cerere POST către /api/pilgrimages cu datele:', modifiedData);
+        
         const res = await apiRequest('POST', '/api/pilgrimages', modifiedData);
+        
+        if (!res.ok) {
+          // Captăm și afișăm detaliile erorilor de la server
+          const errorResponse = await res.json();
+          console.error('Eroare de la server:', errorResponse);
+          throw new Error(errorResponse.message || 'Eroare de la server');
+        }
+        
         const responseData = await res.json();
-        console.log('Răspuns de la server:', responseData);
+        console.log('Răspuns de la server (succes):', responseData);
         return responseData;
       } catch (error) {
-        console.error('Eroare la trimiterea datelor către server:', error);
+        console.error('Eroare detaliată la trimiterea datelor către server:', error);
         throw error;
       }
     },
