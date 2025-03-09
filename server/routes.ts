@@ -33,11 +33,41 @@ const multerStorage = multer.diskStorage({
   }
 });
 
+// Configurare storage pentru CMS imagini
+const cmsStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = 'public/uploads';
+    if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, 'cms-' + uniqueSuffix + ext);
+  }
+});
+
 const upload = multer({ 
   storage: multerStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB
   fileFilter: function (req, file, cb) {
     const filetypes = /jpeg|jpg|png|gif|webp/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error("Only image files are allowed!"));
+  }
+});
+
+const cmsUpload = multer({ 
+  storage: cmsStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB
+  fileFilter: function (req, file, cb) {
+    const filetypes = /jpeg|jpg|png|gif|webp|svg/;
     const mimetype = filetypes.test(file.mimetype);
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     if (mimetype && extname) {
