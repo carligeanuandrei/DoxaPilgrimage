@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'wouter';
-import { Loader2, Calendar, Tag, Clock, MapPin, Euro, Image, Info, FileText, Group, X as XIcon, Activity } from 'lucide-react';
+import { Loader2, Calendar, Tag, Clock, MapPin, Euro, Image, Info, FileText, Group, X as XIcon, Activity, Plus, Check } from 'lucide-react';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -56,7 +56,8 @@ const formSchema = z.object({
   // Status-ul este setat automat de server la "draft" 
   // Nu includem câmpul status în schema formularului
   images: z.array(z.any()).optional().default([]),
-  includedServices: z.any().optional(),
+  includedServices: z.array(z.string()).optional().default([]),
+  excludedServices: z.array(z.string()).optional().default([]),
 }).refine(data => data.endDate > data.startDate, {
   message: "Data de sfârșit trebuie să fie după data de început",
   path: ["endDate"],
@@ -77,7 +78,11 @@ export default function CreatePilgrimagePage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
-
+  
+  // State pentru servicii incluse și excluse
+  const [newIncludedService, setNewIncludedService] = useState<string>("");
+  const [newExcludedService, setNewExcludedService] = useState<string>("");
+  
   // Inițializăm formularul
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -92,10 +97,60 @@ export default function CreatePilgrimagePage() {
       duration: 1,
       availableSpots: 20,
       guide: "",
-      images: []
+      images: [],
+      includedServices: [],
+      excludedServices: []
       // Statusul este setat pe server automat la "draft"
     }
   });
+  
+  // Funcții pentru gestionarea serviciilor incluse
+  const addIncludedService = () => {
+    if (!newIncludedService.trim()) return;
+    
+    const currentServices = form.getValues('includedServices') || [];
+    if (!currentServices.includes(newIncludedService)) {
+      form.setValue('includedServices', [...currentServices, newIncludedService]);
+      setNewIncludedService("");
+    } else {
+      toast({
+        title: "Serviciu deja adăugat",
+        description: "Acest serviciu este deja inclus în listă",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const removeIncludedService = (service: string) => {
+    const currentServices = form.getValues('includedServices') || [];
+    form.setValue('includedServices', 
+      currentServices.filter(s => s !== service)
+    );
+  };
+  
+  // Funcții pentru gestionarea serviciilor excluse
+  const addExcludedService = () => {
+    if (!newExcludedService.trim()) return;
+    
+    const currentServices = form.getValues('excludedServices') || [];
+    if (!currentServices.includes(newExcludedService)) {
+      form.setValue('excludedServices', [...currentServices, newExcludedService]);
+      setNewExcludedService("");
+    } else {
+      toast({
+        title: "Serviciu deja adăugat",
+        description: "Acest serviciu este deja inclus în listă",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const removeExcludedService = (service: string) => {
+    const currentServices = form.getValues('excludedServices') || [];
+    form.setValue('excludedServices', 
+      currentServices.filter(s => s !== service)
+    );
+  };
 
   // Mutație pentru adăugarea unui pelerinaj nou
   const createPilgrimageMutation = useMutation({
@@ -688,6 +743,134 @@ export default function CreatePilgrimagePage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Secțiune servicii incluse */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium">Servicii incluse</h3>
+                    <span className="text-sm text-muted-foreground">Adăugați serviciile incluse în prețul pelerinajului</span>
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="includedServices"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex space-x-2">
+                          <Input
+                            placeholder="Ex: Transport cu autocar"
+                            value={newIncludedService}
+                            onChange={(e) => setNewIncludedService(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button 
+                            type="button" 
+                            onClick={addIncludedService}
+                            size="sm"
+                            className="px-3"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Adaugă
+                          </Button>
+                        </div>
+                        <div className="mt-3">
+                          {field.value && field.value.length > 0 ? (
+                            <div className="border rounded-md p-3">
+                              <ul className="space-y-2">
+                                {field.value.map((service, index) => (
+                                  <li key={index} className="flex items-center justify-between bg-primary-50 p-2 rounded">
+                                    <div className="flex items-center">
+                                      <Check className="h-4 w-4 mr-2 text-green-600" />
+                                      <span>{service}</span>
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 w-8 p-0 text-destructive"
+                                      onClick={() => removeIncludedService(service)}
+                                    >
+                                      <XIcon className="h-4 w-4" />
+                                    </Button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : (
+                            <div className="text-center p-4 border border-dashed rounded-md text-muted-foreground">
+                              <p>Nu există servicii incluse adăugate</p>
+                            </div>
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Secțiune servicii neincluse */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium">Servicii neincluse</h3>
+                    <span className="text-sm text-muted-foreground">Adăugați serviciile care NU sunt incluse în preț</span>
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="excludedServices"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex space-x-2">
+                          <Input
+                            placeholder="Ex: Taxe de intrare la obiective"
+                            value={newExcludedService}
+                            onChange={(e) => setNewExcludedService(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button 
+                            type="button" 
+                            onClick={addExcludedService}
+                            size="sm"
+                            className="px-3"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Adaugă
+                          </Button>
+                        </div>
+                        <div className="mt-3">
+                          {field.value && field.value.length > 0 ? (
+                            <div className="border rounded-md p-3">
+                              <ul className="space-y-2">
+                                {field.value.map((service, index) => (
+                                  <li key={index} className="flex items-center justify-between bg-rose-50 p-2 rounded">
+                                    <div className="flex items-center">
+                                      <XIcon className="h-4 w-4 mr-2 text-rose-600" />
+                                      <span>{service}</span>
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 w-8 p-0 text-destructive"
+                                      onClick={() => removeExcludedService(service)}
+                                    >
+                                      <XIcon className="h-4 w-4" />
+                                    </Button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : (
+                            <div className="text-center p-4 border border-dashed rounded-md text-muted-foreground">
+                              <p>Nu există servicii neincluse adăugate</p>
+                            </div>
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="pt-4">
                   <Button 
