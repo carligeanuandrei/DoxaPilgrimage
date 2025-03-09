@@ -1,0 +1,139 @@
+Panou de administrare pentru gestionarea conținutului (CMS)
+
+Voi implementa un sistem de administrare care îți permite să editezi titluri, texte, imagini de pe platformă, direct dintr-un panou de control.
+
+
+---
+
+1. Crearea unei tabele pentru stocarea conținutului
+
+Adăugăm o tabelă în baza de date unde stocăm toate textele, titlurile și imaginile.
+
+CREATE TABLE cms_content (
+    id SERIAL PRIMARY KEY,
+    key VARCHAR(255) UNIQUE NOT NULL,
+    value TEXT NOT NULL
+);
+
+✅ key → identificator unic pentru fiecare element (ex: homepage_title)
+✅ value → textul sau link-ul imaginii
+
+Exemplu de date inițiale:
+
+INSERT INTO cms_content (key, value) VALUES
+('homepage_title', 'Bun venit pe platforma Doxa!'),
+('homepage_subtitle', 'Un loc unde credința și tehnologia se întâlnesc.'),
+('logo_url', '/images/logo.png');
+
+
+---
+
+2. Endpoint pentru a obține conținutul
+
+Când platforma încarcă pagina, va cere toate textele și imaginile din baza de date.
+
+@app.route('/cms-content', methods=['GET'])
+def get_cms_content():
+    cursor.execute("SELECT key, value FROM cms_content;")
+    content = {row[0]: row[1] for row in cursor.fetchall()}
+    return jsonify(content)
+
+✅ Returnează toate textele și imaginile într-un JSON
+✅ Frontend-ul folosește acest API pentru a înlocui textele dinamice
+
+
+---
+
+3. Endpoint pentru modificarea conținutului
+
+Administratorul poate schimba orice text sau imagine.
+
+@app.route('/cms-content', methods=['PUT'])
+def update_cms_content():
+    data = request.json
+    if "key" not in data or "value" not in data:
+        return {"message": "Lipsește cheia sau valoarea"}, 400
+
+    cursor.execute("UPDATE cms_content SET value = %s WHERE key = %s;", (data["value"], data["key"]))
+    conn.commit()
+
+    return {"message": "Conținut actualizat cu succes"}
+
+✅ Administratorul poate schimba titluri, texte sau imagini
+✅ Toate modificările sunt salvate instant în baza de date
+
+
+---
+
+4. Panou de administrare în frontend
+
+În React / Vue / Angular, creezi o pagină unde administratorul editează conținutul.
+
+Exemplu simplu în HTML + JavaScript:
+
+<h3>Editează conținutul</h3>
+<label for="key">Cheie:</label>
+<input id="key" type="text">
+
+<label for="value">Valoare:</label>
+<input id="value" type="text">
+
+<button onclick="updateContent()">Salvează</button>
+
+<script>
+async function updateContent() {
+    const key = document.getElementById("key").value;
+    const value = document.getElementById("value").value;
+
+    await fetch('/cms-content', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value })
+    });
+
+    alert("Conținut actualizat!");
+}
+</script>
+
+✅ Administratorul introduce cheia (homepage_title) și noua valoare
+✅ Apasă Salvează și baza de date se actualizează instant
+
+
+---
+
+5. Restricționarea accesului la administrare
+
+Doar utilizatorii cu rol de admin pot modifica conținutul.
+
+Modificăm endpoint-ul pentru a verifica rolul utilizatorului:
+
+@app.route('/cms-content', methods=['PUT'])
+def update_cms_content():
+    user_id = get_authenticated_user()  # Funcție care extrage user-ul din token
+    cursor.execute("SELECT role FROM users WHERE id = %s;", (user_id,))
+    role = cursor.fetchone()
+
+    if role != "admin":
+        return {"message": "Acces interzis"}, 403
+
+    data = request.json
+    cursor.execute("UPDATE cms_content SET value = %s WHERE key = %s;", (data["value"], data["key"]))
+    conn.commit()
+
+    return {"message": "Conținut actualizat cu succes"}
+
+✅ Verifică dacă utilizatorul e admin
+✅ Dacă nu e admin, returnează eroare 403 - Acces interzis
+
+
+---
+
+Ce poți modifica acum din panoul de administrare?
+
+✅ Titluri și subtitluri de pe pagină
+✅ Texte dinamice (ex: descrierea site-ului)
+✅ Imagini și logo-ul site-ului
+✅ Orice alt conținut text sau vizual
+
+Vrei și un editor vizual cu previzualizare?
+
