@@ -58,7 +58,6 @@ app.use((req, res, next) => {
 
   // Simplified approach to starting server on an available port
   const preferredPort = 5000;
-  let actualPort = preferredPort;
   
   // Close the server if it's already listening (which might happen during hot reload)
   if (server.listening) {
@@ -66,30 +65,21 @@ app.use((req, res, next) => {
     server.close();
   }
   
-  // First try to detect if the preferred port is available by creating a test server
-  const testServer = require('http').createServer();
-  testServer.on('error', (err: any) => {
+  // Start the server directly
+  server.listen(preferredPort, "0.0.0.0", () => {
+    log(`⚡ Server is running on preferred port ${preferredPort}`);
+  }).on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      log(`Default port ${preferredPort} is already in use`);
-      // Use alternative port
-      actualPort = preferredPort + 1;
+      const alternativePort = preferredPort + 1;
+      log(`Default port ${preferredPort} is already in use, trying ${alternativePort}`);
       
-      // Now start the real server on the alternative port
-      server.listen(actualPort, "0.0.0.0", () => {
-        log(`⚡ Server is running on port ${actualPort}`);
+      // Start on alternative port
+      server.listen(alternativePort, "0.0.0.0", () => {
+        log(`⚡ Server is running on alternative port ${alternativePort}`);
       });
     } else {
-      log(`Error checking port availability: ${err.message}`);
+      log(`Error starting server: ${err.message}`);
       process.exit(1);
     }
-  });
-  
-  testServer.listen(preferredPort, "0.0.0.0", () => {
-    // If we got here, port is available, close test server and start real server
-    testServer.close(() => {
-      server.listen(preferredPort, "0.0.0.0", () => {
-        log(`⚡ Server is running on preferred port ${preferredPort}`);
-      });
-    });
   });
 })();
