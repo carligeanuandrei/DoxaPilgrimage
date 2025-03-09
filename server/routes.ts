@@ -514,6 +514,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CMS routes
   app.get("/api/cms", async (req, res) => {
     try {
+      // Dezactivăm cache-ul pentru toate răspunsurile API CMS
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       const content = await storage.getCmsContent();
       res.json(content);
     } catch (error) {
@@ -524,6 +529,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/cms/:key", async (req, res) => {
     try {
+      // Dezactivăm cache-ul pentru toate răspunsurile API CMS
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       const key = req.params.key;
       const content = await storage.getCmsContent(key);
       
@@ -563,6 +573,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updatedContent = await storage.updateCmsContent(key, req.body);
+      
+      // Adăugăm un eveniment de log pentru a verifica actualizarea
+      console.log(`CMS content updated: ${key}`, updatedContent);
+      
+      // Dezactivăm cache-ul pentru a forța reîncărcarea datelor
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       res.json(updatedContent);
     } catch (error) {
       console.error("Error updating CMS content:", error);
