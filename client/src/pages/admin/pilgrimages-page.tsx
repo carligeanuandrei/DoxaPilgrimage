@@ -59,9 +59,11 @@ export default function AdminPilgrimagesPage() {
     data: pilgrimages,
     isLoading,
     isError,
+    refetch: refetchPilgrimages,
   } = useQuery({
     queryKey: ["/api/pilgrimages"],
     queryFn: () => apiRequest("GET", "/api/pilgrimages").then((res) => res.json()),
+    refetchInterval: 5000, // Reîmprospătează lista de pelerinaje la fiecare 5 secunde
   });
 
   // Mutație pentru a verifica un pelerinaj

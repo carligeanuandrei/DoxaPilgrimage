@@ -758,6 +758,11 @@ export class DatabaseStorage implements IStorage {
       createTableIfMissing: true
     });
   }
+  
+  // Get all users
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {

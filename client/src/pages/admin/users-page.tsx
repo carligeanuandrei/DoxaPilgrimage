@@ -50,9 +50,11 @@ export default function UsersPage() {
     data: users,
     isLoading,
     isError,
+    refetch: refetchUsers,
   } = useQuery({
     queryKey: ["/api/admin/users"],
     queryFn: () => apiRequest("GET", "/api/admin/users").then((res) => res.json()),
+    refetchInterval: 5000, // Reîmprospătează lista de utilizatori la fiecare 5 secunde
   });
 
   // Mutație pentru a verifica un utilizator
