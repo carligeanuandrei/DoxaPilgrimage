@@ -7,9 +7,14 @@ import PilgrimageRecommendations from "@/components/orthodox-calendar/pilgrimage
 export default function OrthodoxCalendarPage() {
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-heading font-bold text-primary flex items-center">
+      <div className="flex flex-col items-center justify-center mb-8">
+        <img 
+          src="/images/orthodox-calendar/header-icon.svg" 
+          alt="Calendar Ortodox" 
+          className="h-auto w-full max-w-3xl mb-4" 
+        />
+        <div className="text-center">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold text-primary flex items-center justify-center">
             <Church className="h-8 w-8 mr-3" />
             Calendar Ortodox
           </h1>

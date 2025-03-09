@@ -102,7 +102,7 @@ export default function CalendarDisplay() {
   return (
     <Card className="shadow-md">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <Button variant="ghost" size="sm" onClick={getPreviousMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -112,6 +112,13 @@ export default function CalendarDisplay() {
           <Button variant="ghost" size="sm" onClick={getNextMonth}>
             <ChevronRight className="h-4 w-4" />
           </Button>
+        </div>
+        <div className="flex justify-center">
+          <img 
+            src="/images/orthodox-calendar/calendar-display-icon.svg" 
+            alt="Orthodox Calendar Display" 
+            className="h-16 w-16" 
+          />
         </div>
       </CardHeader>
       <CardContent>

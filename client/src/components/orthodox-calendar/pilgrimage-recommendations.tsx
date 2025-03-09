@@ -45,10 +45,17 @@ export default function PilgrimageRecommendations() {
   return (
     <Card className="shadow-md">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center text-xl font-bold text-primary">
-          <MapPin className="h-5 w-5 mr-2" />
-          Pelerinaje recomandate
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center text-xl font-bold text-primary">
+            <MapPin className="h-5 w-5 mr-2" />
+            Pelerinaje recomandate
+          </CardTitle>
+          <img 
+            src="/images/orthodox-calendar/pilgrimage-icon.svg" 
+            alt="Pilgrimage Recommendation Icon" 
+            className="h-12 w-12" 
+          />
+        </div>
       </CardHeader>
       <CardContent>
         {upcomingFeasts.length > 0 && (
