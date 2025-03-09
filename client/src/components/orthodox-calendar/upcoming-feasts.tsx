@@ -50,10 +50,17 @@ export default function UpcomingFeasts({ count = 5 }: UpcomingFeastsProps) {
   return (
     <Card className="shadow-md">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center text-xl font-bold text-primary">
-          <CalendarClock className="h-5 w-5 mr-2" />
-          Sărbători apropiate
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center text-xl font-bold text-primary">
+            <CalendarClock className="h-5 w-5 mr-2" />
+            Sărbători apropiate
+          </CardTitle>
+          <img 
+            src="/images/orthodox-calendar/feast-icon.svg" 
+            alt="Orthodox Feast Icon" 
+            className="h-12 w-12" 
+          />
+        </div>
       </CardHeader>
       <CardContent>
         {upcomingFeasts.length > 0 ? (

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="50" cy="50" r="45" fill="#FFECB3" opacity="0.7"/>
+  
+  <!-- Plate -->
+  <ellipse cx="50" cy="55" rx="30" ry="10" fill="#F5F5F5" stroke="#757575" stroke-width="1"/>
+  <ellipse cx="50" cy="55" rx="25" ry="8" fill="#FAFAFA" stroke="#757575" stroke-width="0.5"/>
+  
+  <!-- Cross Shadow on Plate -->
+  <rect x="45" y="47" width="10" height="2" fill="#E0E0E0"/>
+  <rect x="49" y="43" width="2" height="10" fill="#E0E0E0"/>
+  
+  <!-- Food Items (Simple Greens) -->
+  <path d="M40,50 C42,48 45,47 48,49 C50,51 53,50 55,47" fill="none" stroke="#388E3C" stroke-width="2"/>
+  <path d="M38,52 C40,50 43,49 46,51 C48,53 51,52 53,49" fill="none" stroke="#388E3C" stroke-width="1.5"/>
+  <path d="M42,53 C44,52 47,51 50,52 C53,54 56,53 58,50" fill="none" stroke="#388E3C" stroke-width="1.5"/>
+  
+  <!-- Bread -->
+  <ellipse cx="60" cy="54" rx="8" ry="3" fill="#D7CCC8" stroke="#8D6E63" stroke-width="0.5"/>
+  <path d="M56,53 Q60,50 64,53" fill="none" stroke="#8D6E63" stroke-width="0.5"/>
+  
+  <!-- Calendar Element -->
+  <rect x="25" y="20" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#757575" stroke-width="1"/>
+  <rect x="25" y="20" width="20" height="5" rx="2" fill="#FF5252" stroke="#757575" stroke-width="1"/>
+  <text x="33" y="35" font-family="Arial" font-size="10" text-anchor="middle" fill="#212121">W</text>
+  
+  <!-- Fish Symbol -->
+  <g transform="translate(65, 28)">
+    <path d="M-12,0 C-8,-6 -4,-8 0,-8 C4,-8 8,-6 12,0 C8,6 4,8 0,8 C-4,8 -8,6 -12,0 Z" fill="#B3E5FC" stroke="#0277BD" stroke-width="1"/>
+    <circle cx="4" cy="-2" r="1" fill="#0277BD"/>
+    <path d="M-5,0 C-3,-2 0,-2 0,0 C0,2 -3,2 -5,0 Z" fill="none" stroke="#0277BD" stroke-width="0.5"/>
+  </g>
+  
+  <!-- Connecting Line - Calendar to Plate -->
+  <path d="M35,40 Q40,45 45,48" fill="none" stroke="#BDBDBD" stroke-width="1" stroke-dasharray="2,1"/>
+  
+  <!-- Connecting Line - Fish to Plate -->
+  <path d="M65,36 Q60,45 55,48" fill="none" stroke="#BDBDBD" stroke-width="1" stroke-dasharray="2,1"/>
+</svg>
