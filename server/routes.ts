@@ -47,6 +47,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Eroare la obținerea listei de utilizatori" });
     }
   });
+  
+  // Actualizare profil utilizator
+  app.put("/api/users/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Verificăm dacă utilizatorul încearcă să actualizeze propriul profil sau este admin
+      if (req.user.id !== id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu aveți permisiunea de a actualiza acest profil" });
+      }
+      
+      const updateData = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        phone: req.body.phone || null,
+        profileImage: req.body.profileImage || null,
+        bio: req.body.bio || null
+      };
+      
+      const updatedUser = await storage.updateUser(id, updateData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Utilizatorul nu a fost găsit" });
+      }
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Eroare la actualizarea profilului utilizatorului" });
+    }
+  });
 
   // Check organizer role middleware
   const isOrganizer = (req: any, res: any, next: any) => {
