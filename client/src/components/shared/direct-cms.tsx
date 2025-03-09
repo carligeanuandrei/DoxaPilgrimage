@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 /**
  * Component for direct CMS content fetch without caching
@@ -12,39 +13,55 @@ interface DirectCmsTextProps {
   refreshInterval?: number; // in ms, default is 1000ms (1s)
 }
 
-export function DirectCmsText({ contentKey, fallback = '', className = '', refreshInterval = 1000 }: DirectCmsTextProps) {
+export function DirectCmsText({ contentKey, fallback = '', className = '', refreshInterval = 2000 }: DirectCmsTextProps) {
   const [content, setContent] = useState<string>(fallback);
+  const [error, setError] = useState<boolean>(false);
   const { toast } = useToast();
   
   const fetchContent = useCallback(async () => {
+    if (!contentKey) return;
+    
     try {
-      // Utilizăm fetch direct pentru a evita aruncarea de erori din apiRequest
-      const response = await fetch(`/api/cms/${contentKey}`, {
-        credentials: "include",
-        headers: {
-          "Accept": "application/json"
-        }
-      });
+      // Folosim apiRequest pentru o gestionare mai bună a erorilor
+      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
       
-      if (response.ok) {
-        const data = await response.json();
-        setContent(data.value);
+      if (!response.ok) {
+        // Silently fail and use fallback
+        setError(true);
+        return;
       }
-    } catch (error) {
-      console.log(`Error fetching CMS content for ${contentKey}:`, error);
-      // Silently fail and use fallback
+      
+      const data = await response.json();
+      if (data && data.value) {
+        setContent(data.value);
+        setError(false);
+      }
+    } catch (err) {
+      setError(true);
+      // Nu arătăm erorile în consolă pentru reducerea zgomotului
     }
-  }, [contentKey, fallback]);
+  }, [contentKey]);
   
   useEffect(() => {
     // Initial fetch
-    fetchContent();
+    let isMounted = true;
+    
+    const doFetch = async () => {
+      if (isMounted) {
+        await fetchContent();
+      }
+    };
+    
+    doFetch();
     
     // Set up interval for periodic refresh
-    const intervalId = setInterval(fetchContent, refreshInterval);
+    const intervalId = setInterval(doFetch, refreshInterval);
     
     // Clean up on unmount
-    return () => clearInterval(intervalId);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [fetchContent, refreshInterval]);
   
   return (
@@ -64,33 +81,54 @@ interface DirectCmsHtmlProps {
   refreshInterval?: number;
 }
 
-export function DirectCmsHtml({ contentKey, fallback = '', className = '', refreshInterval = 1000 }: DirectCmsHtmlProps) {
+export function DirectCmsHtml({ contentKey, fallback = '', className = '', refreshInterval = 2000 }: DirectCmsHtmlProps) {
   const [content, setContent] = useState<string>(fallback);
+  const [error, setError] = useState<boolean>(false);
   
   const fetchContent = useCallback(async () => {
+    if (!contentKey) return;
+    
     try {
-      // Utilizăm fetch direct pentru a evita aruncarea de erori 
-      const response = await fetch(`/api/cms/${contentKey}`, {
-        credentials: "include",
-        headers: {
-          "Accept": "application/json"
-        }
-      });
+      // Folosim apiRequest pentru o gestionare mai bună a erorilor
+      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
       
-      if (response.ok) {
-        const data = await response.json();
-        setContent(data.value);
+      if (!response.ok) {
+        // Silently fail and use fallback
+        setError(true);
+        return;
       }
-    } catch (error) {
-      console.log(`Error fetching CMS content for ${contentKey}:`, error);
-      // Silently fail and use fallback
+      
+      const data = await response.json();
+      if (data && data.value) {
+        setContent(data.value);
+        setError(false);
+      }
+    } catch (err) {
+      setError(true);
+      // Nu arătăm erorile în consolă pentru reducerea zgomotului
     }
-  }, [contentKey, fallback]);
+  }, [contentKey]);
   
   useEffect(() => {
-    fetchContent();
-    const intervalId = setInterval(fetchContent, refreshInterval);
-    return () => clearInterval(intervalId);
+    // Initial fetch
+    let isMounted = true;
+    
+    const doFetch = async () => {
+      if (isMounted) {
+        await fetchContent();
+      }
+    };
+    
+    doFetch();
+    
+    // Set up interval for periodic refresh
+    const intervalId = setInterval(doFetch, refreshInterval);
+    
+    // Clean up on unmount
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [fetchContent, refreshInterval]);
   
   return (
@@ -113,33 +151,54 @@ interface DirectCmsImageProps {
   refreshInterval?: number;
 }
 
-export function DirectCmsImage({ contentKey, fallbackSrc = '', alt = '', className = '', refreshInterval = 1000 }: DirectCmsImageProps) {
+export function DirectCmsImage({ contentKey, fallbackSrc = '', alt = '', className = '', refreshInterval = 2000 }: DirectCmsImageProps) {
   const [src, setSrc] = useState<string>(fallbackSrc);
+  const [error, setError] = useState<boolean>(false);
   
   const fetchContent = useCallback(async () => {
+    if (!contentKey) return;
+    
     try {
-      // Utilizăm fetch direct pentru a evita aruncarea de erori
-      const response = await fetch(`/api/cms/${contentKey}`, {
-        credentials: "include",
-        headers: {
-          "Accept": "application/json"
-        }
-      });
+      // Folosim apiRequest pentru o gestionare mai bună a erorilor
+      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
       
-      if (response.ok) {
-        const data = await response.json();
-        setSrc(data.value);
+      if (!response.ok) {
+        // Silently fail and use fallback
+        setError(true);
+        return;
       }
-    } catch (error) {
-      console.log(`Error fetching CMS content for ${contentKey}:`, error);
-      // Silently fail and use fallback
+      
+      const data = await response.json();
+      if (data && data.value) {
+        setSrc(data.value);
+        setError(false);
+      }
+    } catch (err) {
+      setError(true);
+      // Nu arătăm erorile în consolă pentru reducerea zgomotului
     }
-  }, [contentKey, fallbackSrc]);
+  }, [contentKey]);
   
   useEffect(() => {
-    fetchContent();
-    const intervalId = setInterval(fetchContent, refreshInterval);
-    return () => clearInterval(intervalId);
+    // Initial fetch
+    let isMounted = true;
+    
+    const doFetch = async () => {
+      if (isMounted) {
+        await fetchContent();
+      }
+    };
+    
+    doFetch();
+    
+    // Set up interval for periodic refresh
+    const intervalId = setInterval(doFetch, refreshInterval);
+    
+    // Clean up on unmount
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [fetchContent, refreshInterval]);
   
   if (!src && !fallbackSrc) {
