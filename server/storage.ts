@@ -1163,81 +1163,108 @@ export class DatabaseStorage implements IStorage {
     // Scriem în log-uri datele primite pentru debugging
     console.log('Trying to create CMS content with data:', JSON.stringify(content));
     
-    // Pregătim datele pentru inserare, excluzând câmpul description care nu există în BD
+    // Adaptăm datele pentru ambele formate posibile - camelCase și snake_case
+    // În cazul în care primim content_type în loc de contentType, sau invers
+    const contentTypeValue = content.contentType || (content as any).content_type;
+    
+    // Pregătim datele pentru inserare, folosind corect content_type (snake_case) pentru baza de date
     const insertData = {
       key: content.key,
       value: content.value,
-      contentType: content.contentType,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      content_type: contentTypeValue, // Folosim formatul corect pentru baza de date (snake_case)
+      description: content.description || null,
+      created_at: new Date(), // Folosim snake_case pentru timestamp-uri
+      updated_at: new Date()
     };
     
-    console.log('Inserting data:', JSON.stringify(insertData));
+    console.log('Inserting data with adapted field names:', JSON.stringify(insertData));
     
     try {
-      // Încercăm metoda standard de inserare cu Drizzle ORM
-      const [cmsItem] = await db.insert(cmsContent).values(insertData).returning({
-        id: cmsContent.id,
-        key: cmsContent.key,
-        value: cmsContent.value,
-        contentType: cmsContent.contentType,
-        createdAt: cmsContent.createdAt,
-        updatedAt: cmsContent.updatedAt
-      });
+      // Executăm SQL direct pentru a evita probleme de mapare a numelor de câmpuri
+      const result = await db.execute(`
+        INSERT INTO cms_content (key, value, content_type, description, created_at, updated_at) 
+        VALUES ($1, $2, $3, $4, $5, $6) 
+        RETURNING id, key, value, content_type as "contentType", description, created_at as "createdAt", updated_at as "updatedAt"
+      `, [
+        insertData.key, 
+        insertData.value, 
+        insertData.content_type, 
+        insertData.description,
+        insertData.created_at,
+        insertData.updated_at
+      ]);
       
-      console.log('CMS item created successfully:', cmsItem);
-      return { ...cmsItem, description: null };
-    } catch (error) {
-      console.error('Error creating CMS content with ORM method:', error);
-      
-      try {
-        // Abordare alternativă: executăm SQL direct
-        const result = await db.execute(`
-          INSERT INTO cms_content (key, value, content_type, created_at, updated_at) 
-          VALUES ('${content.key}', '${content.value}', '${content.contentType}', NOW(), NOW()) 
-          RETURNING id, key, value, content_type as "contentType", created_at as "createdAt", updated_at as "updatedAt"
-        `);
-        
-        if (result && result.rows && result.rows.length > 0) {
-          const createdItem = result.rows[0];
-          console.log('CMS item created with direct SQL:', createdItem);
-          return { ...createdItem, description: null };
-        }
-        
-        throw new Error('Failed to create CMS content with both approaches');
-      } catch (fallbackError) {
-        console.error('Both attempts to create CMS content failed:', fallbackError);
-        throw fallbackError;
+      if (result && result.rows && result.rows.length > 0) {
+        const createdItem = result.rows[0];
+        console.log('CMS item created successfully:', createdItem);
+        return createdItem;
       }
+      
+      throw new Error('Failed to create CMS content, no rows returned');
+    } catch (error) {
+      console.error('Error creating CMS content:', error);
+      throw error;
     }
   }
 
   async updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined> {
     try {
-      // Extragem doar câmpurile care există în baza de date
-      const updateData: any = {};
+      console.log('Updating CMS content for key:', key, 'with data:', JSON.stringify(content));
       
-      if (content.value !== undefined) updateData.value = content.value;
-      if (content.contentType !== undefined) updateData.contentType = content.contentType;
+      // Extragem doar câmpurile care există în baza de date și le adaptăm la snake_case
+      const contentTypeValue = content.contentType || (content as any).content_type;
       
-      // Actualizăm data
-      updateData.updatedAt = new Date();
+      // Pregătim datele pentru SQL direct
+      const updateFields = [];
+      const updateValues = [];
+      let paramCounter = 1;
       
-      // Facem update doar cu câmpurile care există în BD
-      const [updatedContent] = await db.update(cmsContent)
-        .set(updateData)
-        .where(eq(cmsContent.key, key))
-        .returning({
-          id: cmsContent.id,
-          key: cmsContent.key,
-          value: cmsContent.value,
-          contentType: cmsContent.contentType,
-          createdAt: cmsContent.createdAt,
-          updatedAt: cmsContent.updatedAt
-        });
+      if (content.value !== undefined) {
+        updateFields.push(`value = $${paramCounter}`);
+        updateValues.push(content.value);
+        paramCounter++;
+      }
       
-      // Adăugăm câmpul description manual pentru compatibilitate
-      return updatedContent ? { ...updatedContent, description: null } : undefined;
+      if (contentTypeValue !== undefined) {
+        updateFields.push(`content_type = $${paramCounter}`);
+        updateValues.push(contentTypeValue);
+        paramCounter++;
+      }
+      
+      // Mereu actualizăm data
+      updateFields.push(`updated_at = $${paramCounter}`);
+      updateValues.push(new Date());
+      paramCounter++;
+      
+      // Dacă nu avem câmpuri de actualizat, returnăm conținutul existent
+      if (updateFields.length === 1 && updateFields[0].startsWith('updated_at')) {
+        const existingContent = await this.getCmsContent(key);
+        return Array.isArray(existingContent) ? existingContent[0] : existingContent;
+      }
+      
+      // Adăugăm condiția WHERE și executăm SQL
+      const updateQuery = `
+        UPDATE cms_content 
+        SET ${updateFields.join(', ')}
+        WHERE key = $${paramCounter}
+        RETURNING id, key, value, content_type as "contentType", description, created_at as "createdAt", updated_at as "updatedAt"
+      `;
+      
+      // Adăugăm cheia ca ultimul parametru pentru WHERE
+      updateValues.push(key);
+      
+      console.log('Executing update query:', updateQuery, 'with values:', updateValues);
+      
+      const result = await db.execute(updateQuery, updateValues);
+      
+      if (result && result.rows && result.rows.length > 0) {
+        const updatedItem = result.rows[0];
+        console.log('CMS item updated successfully:', updatedItem);
+        return updatedItem;
+      }
+      
+      console.log('No CMS item found with key:', key);
+      return undefined;
     } catch (error) {
       console.error('Error updating CMS content:', error);
       throw error;
@@ -1245,9 +1272,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCmsContent(key: string): Promise<boolean> {
-    const result = await db.delete(cmsContent)
-      .where(eq(cmsContent.key, key));
-    return result.count > 0;
+    try {
+      console.log('Deleting CMS content with key:', key);
+      
+      const result = await db.execute(`
+        DELETE FROM cms_content 
+        WHERE key = $1
+        RETURNING id
+      `, [key]);
+      
+      const deleted = result && result.rows && result.rows.length > 0;
+      console.log('CMS item deleted:', deleted ? 'yes' : 'no');
+      
+      return deleted;
+    } catch (error) {
+      console.error('Error deleting CMS content:', error);
+      throw error;
+    }
   }
 }
 
