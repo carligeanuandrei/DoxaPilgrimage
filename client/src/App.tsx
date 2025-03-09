@@ -14,7 +14,7 @@ import ContactPage from "@/pages/contact-page";
 import TermsPage from "@/pages/terms-page";
 import PrivacyPolicyPage from "@/pages/privacy-policy-page";
 import CookiesPage from "@/pages/cookies-page";
-import OrganizerDashboard from "@/pages/organizer/dashboard";
+import OrganizerDashboard from "@/pages/organizer/new-dashboard";
 import CreatePilgrimagePage from "@/pages/organizer/create-pilgrimage";
 import CmsPage from "@/pages/admin/cms-page";
 import UsersPage from "@/pages/admin/users-page";
