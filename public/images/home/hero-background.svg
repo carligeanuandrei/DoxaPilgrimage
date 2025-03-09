@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="600" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sky Gradient -->
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8CBED6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Sky -->
+  <rect x="0" y="0" width="1200" height="600" fill="url(#skyGradient)"/>
+  
+  <!-- Mountains in Background -->
+  <polygon points="0,350 200,250 350,300 500,200 700,300 900,220 1050,280 1200,230 1200,600 0,600" fill="#8DA399" opacity="0.8"/>
+  <polygon points="0,400 150,330 280,380 450,300 580,350 750,280 900,330 1050,300 1200,350 1200,600 0,600" fill="#6D8475" opacity="0.9"/>
+  
+  <!-- Green Hills -->
+  <path d="M0,450 Q600,350 1200,450 L1200,600 L0,600 Z" fill="#4A6741" opacity="0.8"/>
+  <path d="M0,500 Q300,450 600,500 Q900,550 1200,500 L1200,600 L0,600 Z" fill="#2E5A32" opacity="0.9"/>
+  
+  <!-- Main Monastery in Center -->
+  <g transform="translate(600, 380) scale(1.5)">
+    <!-- Main Church Building -->
+    <rect x="-40" y="-50" width="80" height="60" fill="#F5DEB3" stroke="#5D4037" stroke-width="2"/>
+    
+    <!-- Church Roof -->
+    <polygon points="-40,-50 0,-80 40,-50" fill="#8D6E63" stroke="#5D4037" stroke-width="2"/>
+    
+    <!-- Church Door -->
+    <rect x="-10" y="-10" width="20" height="20" fill="#5D4037"/>
+    <path d="M-10,-10 Q0,-20 10,-10" fill="none" stroke="#5D4037" stroke-width="1"/>
+    
+    <!-- Church Windows -->
+    <rect x="-25" y="-35" width="12" height="18" fill="#B3E5FC" stroke="#5D4037" stroke-width="1"/>
+    <rect x="13" y="-35" width="12" height="18" fill="#B3E5FC" stroke="#5D4037" stroke-width="1"/>
+    
+    <!-- Cross on Top -->
+    <rect x="-2" y="-95" width="4" height="15" fill="#5D4037"/>
+    <rect x="-7" y="-88" width="14" height="4" fill="#5D4037"/>
+    
+    <!-- Bell Tower -->
+    <rect x="25" y="-65" width="20" height="25" fill="#F5DEB3" stroke="#5D4037" stroke-width="1"/>
+    <polygon points="25,-65 35,-75 45,-65" fill="#8D6E63" stroke="#5D4037" stroke-width="1"/>
+    
+    <!-- Bell Tower Cross -->
+    <rect x="33" y="-85" width="4" height="10" fill="#5D4037"/>
+    <rect x="28" y="-82" width="14" height="4" fill="#5D4037"/>
+  </g>
+  
+  <!-- Small Churches/Chapels -->
+  <g transform="translate(300, 450) scale(0.8)">
+    <rect x="-30" y="-40" width="60" height="50" fill="#F5DEB3" stroke="#5D4037" stroke-width="2"/>
+    <polygon points="-30,-40 0,-60 30,-40" fill="#8D6E63" stroke="#5D4037" stroke-width="2"/>
+    <rect x="-2" y="-70" width="4" height="10" fill="#5D4037"/>
+    <rect x="-5" y="-65" width="10" height="4" fill="#5D4037"/>
+  </g>
+  
+  <g transform="translate(900, 430) scale(0.8)">
+    <rect x="-30" y="-40" width="60" height="50" fill="#F5DEB3" stroke="#5D4037" stroke-width="2"/>
+    <polygon points="-30,-40 0,-60 30,-40" fill="#8D6E63" stroke="#5D4037" stroke-width="2"/>
+    <rect x="-2" y="-70" width="4" height="10" fill="#5D4037"/>
+    <rect x="-5" y="-65" width="10" height="4" fill="#5D4037"/>
+  </g>
+  
+  <!-- Path to Churches -->
+  <path d="M600,440 L600,550 M300,490 C300,520 450,550 600,550 C750,550 900,520 900,490" fill="none" stroke="#A87D5F" stroke-width="5"/>
+  
+  <!-- Trees -->
+  <g transform="translate(400, 480)">
+    <circle cx="0" cy="-15" r="15" fill="#2E7D32"/>
+    <rect x="-3" y="0" width="6" height="10" fill="#795548"/>
+  </g>
+  
+  <g transform="translate(800, 470)">
+    <circle cx="0" cy="-15" r="15" fill="#2E7D32"/>
+    <rect x="-3" y="0" width="6" height="10" fill="#795548"/>
+  </g>
+  
+  <g transform="translate(150, 520)">
+    <circle cx="0" cy="-15" r="15" fill="#2E7D32"/>
+    <rect x="-3" y="0" width="6" height="10" fill="#795548"/>
+  </g>
+  
+  <g transform="translate(1050, 510)">
+    <circle cx="0" cy="-15" r="15" fill="#2E7D32"/>
+    <rect x="-3" y="0" width="6" height="10" fill="#795548"/>
+  </g>
+  
+  <!-- Sun with Cross Shadow -->
+  <circle cx="950" cy="120" r="40" fill="#FFF9C4" stroke="#FFB300" stroke-width="4"/>
+  <rect x="945" y="80" width="10" height="80" fill="#FFF9C4" opacity="0.3"/>
+  <rect x="910" y="115" width="80" height="10" fill="#FFF9C4" opacity="0.3"/>
+</svg>

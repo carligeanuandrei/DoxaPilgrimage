@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="40" cy="40" r="40" fill="#FFECB3" opacity="0.7"/>
+  
+  <!-- Priest/Guide Figure -->
+  <g transform="translate(40, 40)">
+    <!-- Head -->
+    <circle cx="0" cy="-20" r="8" fill="#5D4037"/>
+    
+    <!-- Body/Robe -->
+    <path d="M-10,0 L-5,-20 L5,-20 L10,0" fill="#212121"/>
+    <path d="M-10,0 L-12,20 M10,0 L12,20" fill="none" stroke="#212121" stroke-width="3"/>
+    
+    <!-- Arms as if blessing or guiding -->
+    <path d="M-5,-15 L-15,-10 M5,-15 L15,-5" fill="none" stroke="#5D4037" stroke-width="2"/>
+    
+    <!-- Cross/Pendant -->
+    <rect x="-1" y="-10" width="2" height="5" fill="#FFCA28"/>
+    <rect x="-2.5" y="-8" width="5" height="1.5" fill="#FFCA28"/>
+  </g>
+  
+  <!-- Book (Bible or Guide Book) -->
+  <g transform="translate(40, 50)">
+    <rect x="-10" y="-2" width="20" height="15" fill="#8D6E63"/>
+    <rect x="-8" y="0" width="16" height="11" fill="#FFFDE7"/>
+    <path d="M-6,3 L6,3 M-6,6 L6,6 M-6,9 L6,9" fill="none" stroke="#8D6E63" stroke-width="0.5"/>
+  </g>
+  
+  <!-- Direction/Path Symbol -->
+  <g transform="translate(40, 70)">
+    <path d="M-15,0 L15,0" fill="none" stroke="#5D4037" stroke-width="2"/>
+    <polygon points="10,-3 15,0 10,3" fill="#5D4037"/>
+  </g>
+</svg>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="40" cy="40" r="40" fill="#B3E5FC" opacity="0.7"/>
+  
+  <!-- Path/Road -->
+  <path d="M15,65 C25,55 35,60 40,50 C45,40 55,35 65,25" fill="none" stroke="#8D6E63" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Church/Monastery at Destination -->
+  <g transform="translate(65, 25)">
+    <!-- Main Building -->
+    <rect x="-6" y="-3" width="12" height="8" fill="#FFFDE7" stroke="#5D4037" stroke-width="1"/>
+    
+    <!-- Roof & Cross -->
+    <polygon points="-6,-3 0,-8 6,-3" fill="#8D6E63" stroke="#5D4037" stroke-width="1"/>
+    <rect x="-0.5" y="-11" width="1" height="3" fill="#5D4037"/>
+    <rect x="-1.5" y="-10" width="3" height="1" fill="#5D4037"/>
+  </g>
+  
+  <!-- Pilgrim Figure -->
+  <g transform="translate(15, 65)">
+    <!-- Head -->
+    <circle cx="0" cy="-12" r="4" fill="#5D4037"/>
+    
+    <!-- Body -->
+    <line x1="0" y1="-8" x2="0" y2="0" stroke="#5D4037" stroke-width="2"/>
+    
+    <!-- Arms -->
+    <line x1="-5" y1="-5" x2="5" y2="-5" stroke="#5D4037" stroke-width="2"/>
+    
+    <!-- Legs -->
+    <line x1="0" y1="0" x2="-3" y2="5" stroke="#5D4037" stroke-width="2"/>
+    <line x1="0" y1="0" x2="3" y2="5" stroke="#5D4037" stroke-width="2"/>
+    
+    <!-- Walking Stick -->
+    <line x1="4" y1="-6" x2="6" y2="7" stroke="#8D6E63" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Milestone Markers Along Path -->
+  <circle cx="40" cy="50" r="2" fill="#5D4037"/>
+  <circle cx="28" cy="58" r="2" fill="#5D4037"/>
+  <circle cx="52" cy="38" r="2" fill="#5D4037"/>
+  
+  <!-- Sun -->
+  <circle cx="20" cy="20" r="6" fill="#FFEB3B" opacity="0.8"/>
+  <g transform="translate(20, 20)">
+    <line x1="-9" y1="0" x2="-7" y2="0" stroke="#FFEB3B" stroke-width="1"/>
+    <line x1="7" y1="0" x2="9" y2="0" stroke="#FFEB3B" stroke-width="1"/>
+    <line x1="0" y1="-9" x2="0" y2="-7" stroke="#FFEB3B" stroke-width="1"/>
+    <line x1="0" y1="7" x2="0" y2="9" stroke="#FFEB3B" stroke-width="1"/>
+    <line x1="-6" y1="-6" x2="-4" y2="-4" stroke="#FFEB3B" stroke-width="1"/>
+    <line x1="4" y1="-4" x2="6" y2="-6" stroke="#FFEB3B" stroke-width="1"/>
+    <line x1="-6" y1="6" x2="-4" y2="4" stroke="#FFEB3B" stroke-width="1"/>
+    <line x1="4" y1="4" x2="6" y2="6" stroke="#FFEB3B" stroke-width="1"/>
+  </g>
+</svg>

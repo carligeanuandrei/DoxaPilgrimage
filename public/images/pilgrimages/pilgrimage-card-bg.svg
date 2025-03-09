@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Sky -->
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#90CAF9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E3F2FD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="300" height="200" fill="url(#skyGradient)"/>
+  
+  <!-- Mountains in Background -->
+  <polygon points="0,100 50,70 100,85 150,60 200,80 250,65 300,75 300,200 0,200" fill="#78909C" opacity="0.7"/>
+  
+  <!-- Green Hills -->
+  <path d="M0,120 Q150,100 300,120 L300,200 L0,200 Z" fill="#4CAF50" opacity="0.6"/>
+  <path d="M0,140 Q75,130 150,140 Q225,150 300,140 L300,200 L0,200 Z" fill="#388E3C" opacity="0.8"/>
+  
+  <!-- Church/Monastery -->
+  <g transform="translate(150, 120)">
+    <!-- Main Building -->
+    <rect x="-20" y="-30" width="40" height="30" fill="#F5DEB3" stroke="#5D4037" stroke-width="1"/>
+    <!-- Roof -->
+    <polygon points="-20,-30 0,-45 20,-30" fill="#8D6E63" stroke="#5D4037" stroke-width="1"/>
+    <!-- Door -->
+    <rect x="-5" y="-10" width="10" height="10" fill="#5D4037"/>
+    <!-- Windows -->
+    <rect x="-12" y="-22" width="6" height="8" fill="#B3E5FC" stroke="#5D4037" stroke-width="0.5"/>
+    <rect x="6" y="-22" width="6" height="8" fill="#B3E5FC" stroke="#5D4037" stroke-width="0.5"/>
+    <!-- Cross -->
+    <rect x="-1" y="-52" width="2" height="7" fill="#5D4037"/>
+    <rect x="-3" y="-50" width="6" height="2" fill="#5D4037"/>
+  </g>
+  
+  <!-- Trees -->
+  <g transform="translate(100, 130)">
+    <circle cx="0" cy="-8" r="8" fill="#1B5E20"/>
+    <rect x="-1.5" y="0" width="3" height="5" fill="#795548"/>
+  </g>
+  
+  <g transform="translate(200, 125)">
+    <circle cx="0" cy="-8" r="8" fill="#1B5E20"/>
+    <rect x="-1.5" y="0" width="3" height="5" fill="#795548"/>
+  </g>
+  
+  <!-- Path -->
+  <path d="M150,150 L150,170 Q120,180 100,170 M150,170 Q180,180 200,170" fill="none" stroke="#A87D5F" stroke-width="2"/>
+  
+  <!-- Sun -->
+  <circle cx="50" cy="40" r="15" fill="#FFEB3B" opacity="0.7"/>
+  
+  <!-- Transparent Overlay -->
+  <rect x="0" y="0" width="300" height="200" fill="white" opacity="0.2"/>
+</svg>

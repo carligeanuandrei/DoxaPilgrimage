@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="40" cy="40" r="40" fill="#FFE0B2" opacity="0.7"/>
+  
+  <!-- Priest Figure -->
+  <g transform="translate(40, 35)">
+    <!-- Head -->
+    <circle cx="0" cy="-15" r="8" fill="#5D4037"/>
+    
+    <!-- Traditional Priest Hat -->
+    <rect x="-7" y="-30" width="14" height="7" fill="#212121"/>
+    <rect x="-5" y="-23" width="10" height="3" fill="#212121"/>
+    
+    <!-- Robe/Vestments -->
+    <rect x="-12" y="-7" width="24" height="25" rx="3" fill="#212121"/>
+    
+    <!-- Collar -->
+    <rect x="-6" y="-7" width="12" height="3" fill="#FFFDE7"/>
+    
+    <!-- Cross/Pendant -->
+    <rect x="-1" y="-1" width="2" height="7" fill="#FFCA28"/>
+    <rect x="-3" y="1" width="6" height="2" fill="#FFCA28"/>
+    
+    <!-- Hands (simplified) -->
+    <circle cx="-15" cy="8" r="3" fill="#8D6E63"/>
+    <circle cx="15" cy="8" r="3" fill="#8D6E63"/>
+  </g>
+  
+  <!-- Bible/Book -->
+  <g transform="translate(40, 60)">
+    <rect x="-10" y="-5" width="20" height="15" rx="1" fill="#795548"/>
+    <rect x="-8" y="-3" width="16" height="11" rx="1" fill="#FFFDE7"/>
+    <path d="M-5,0 L5,0 M-5,3 L5,3 M-5,6 L5,6" stroke="#795548" stroke-width="0.5"/>
+  </g>
+  
+  <!-- Speech Bubble -->
+  <g transform="translate(55, 22)">
+    <path d="M-10,0 Q-15,-8 -10,-15 L10,-15 Q15,-8 10,0 L5,0 L0,5 L-5,0 Z" fill="#FFFFFF" stroke="#5D4037" stroke-width="1.5"/>
+    
+    <!-- Question Mark -->
+    <path d="M-2,-5 Q-2,-8 0,-8 Q2,-8 2,-5 Q2,-3 0,-3 L0,0" fill="none" stroke="#5D4037" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="0" cy="2" r="1" fill="#5D4037"/>
+  </g>
+</svg>
