@@ -7,7 +7,8 @@ import {
   insertPilgrimageSchema, 
   insertReviewSchema, 
   insertBookingSchema,
-  insertMessageSchema
+  insertMessageSchema,
+  insertCmsContentSchema
 } from "@shared/schema";
 import Stripe from "stripe";
 
