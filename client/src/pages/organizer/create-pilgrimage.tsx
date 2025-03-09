@@ -76,9 +76,7 @@ export default function CreatePilgrimagePage() {
       duration: 1,
       availableSpots: 20,
       guide: "",
-      images: [],
-      featured: false,
-      verified: false
+      images: []
     }
   });
 
