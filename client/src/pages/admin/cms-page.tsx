@@ -75,8 +75,11 @@ export default function CmsPage() {
       const data = await response.json();
       setUploadProgress(100);
       
+      // Actualizează formularul cu URL-ul imaginii
+      form.setValue('value', data.url);
+      
       // Returnează URL-ul imaginii încărcate
-      return `${window.location.origin}${data.url}`;
+      return data.url;
     } catch (error) {
       console.error('Eroare la încărcarea imaginii:', error);
       toast({
@@ -248,7 +251,27 @@ export default function CmsPage() {
   });
 
   // Handle form submission
-  const onSubmit = (values: CmsFormValues) => {
+  const onSubmit = async (values: CmsFormValues) => {
+    // Dacă avem o imagine încărcată, o procesăm întâi și actualizăm câmpul value
+    if (values.contentType === 'image' && uploadImage) {
+      try {
+        form.setValue('value', 'Se încarcă imaginea...');
+        // Încărcăm imaginea și obținem URL-ul
+        const imageUrl = await handleImageUpload(uploadImage);
+        // Actualizăm valoarea formularului cu URL-ul imaginii
+        values.value = imageUrl;
+      } catch (error) {
+        console.error('Eroare la încărcarea imaginii:', error);
+        toast({
+          title: 'Eroare la încărcarea imaginii',
+          description: 'A apărut o eroare la încărcarea imaginii. Încercați din nou.',
+          variant: 'destructive',
+        });
+        return; // Nu continuăm cu trimiterea formularului
+      }
+    }
+
+    // Acum trimitem formularul cu imaginea deja procesată
     if (isEditing && currentKey) {
       updateMutation.mutate(values);
     } else {
