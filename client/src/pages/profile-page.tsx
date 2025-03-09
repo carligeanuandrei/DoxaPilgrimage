@@ -70,7 +70,7 @@ export default function ProfilePage() {
             <Card>
               <CardHeader className="text-center">
                 <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src={user.profileImage} />
+                  <AvatarImage src={user.profileImage || `/images/demo/avatar-${(user.id % 3) + 1}.svg`} />
                   <AvatarFallback className="bg-primary text-white text-xl">
                     {getInitials(user.firstName, user.lastName)}
                   </AvatarFallback>

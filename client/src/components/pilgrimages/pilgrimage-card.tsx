@@ -21,14 +21,15 @@ export default function PilgrimageCard({ pilgrimage }: PilgrimageCardProps) {
     }
     
     if (pilgrimage.location.toLowerCase().includes('putna')) {
-      return '/images/locations/putna-monastery.svg';
+      return '/images/demo/card-1.svg';
     }
     
     if (pilgrimage.location.toLowerCase().includes('athos')) {
-      return '/images/locations/mount-athos.svg';
+      return '/images/demo/card-2.svg';
     }
     
-    return '/images/pilgrimages/pilgrimage-card-bg.svg';
+    // Use one of the 5 demo card images based on pilgrimage ID
+    return `/images/demo/card-${(pilgrimage.id % 5) + 1}.svg`;
   };
   
   return (

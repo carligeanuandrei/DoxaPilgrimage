@@ -79,7 +79,8 @@ export default function PilgrimageRecommendations() {
                 <div className="flex items-start">
                   <div className="h-16 w-16 mr-3 rounded overflow-hidden flex-shrink-0">
                     <img 
-                      src={pilgrimage.images && pilgrimage.images.length > 0 ? pilgrimage.images[0] : undefined}
+                      src={pilgrimage.images && pilgrimage.images.length > 0 ? 
+                           pilgrimage.images[0] : `/images/demo/card-${(pilgrimage.id % 5) + 1}.svg`}
                       alt={pilgrimage.title}
                       className="h-full w-full object-cover"
                     />

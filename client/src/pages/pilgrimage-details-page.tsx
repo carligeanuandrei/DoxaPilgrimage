@@ -62,9 +62,11 @@ export default function PilgrimageDetailsPage() {
                 className="w-full h-[400px] object-cover"
               />
             ) : (
-              <div className="w-full h-[400px] bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500">No image available</span>
-              </div>
+              <img
+                src={`/images/demo/placeholder-${(pilgrimage.id % 5) + 1}.svg`}
+                alt={pilgrimage.title}
+                className="w-full h-[400px] object-cover"
+              />
             )}
           </div>
           
