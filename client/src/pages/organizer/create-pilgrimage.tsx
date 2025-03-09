@@ -170,7 +170,7 @@ export default function CreatePilgrimagePage() {
                         </div>
                       </FormControl>
                       <FormDescription>Titlul pelerinajului care va fi afișat</FormDescription>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -193,7 +193,7 @@ export default function CreatePilgrimagePage() {
                         </div>
                       </FormControl>
                       <FormDescription>Destinația principală a pelerinajului</FormDescription>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -216,7 +216,7 @@ export default function CreatePilgrimagePage() {
                         </div>
                       </FormControl>
                       <FormDescription>O descriere completă a pelerinajului</FormDescription>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -240,7 +240,7 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </FormControl>
                         <FormDescription>Data începerii pelerinajului</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -262,7 +262,7 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </FormControl>
                         <FormDescription>Data încheierii pelerinajului</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -293,7 +293,7 @@ export default function CreatePilgrimagePage() {
                           </SelectContent>
                         </Select>
                         <FormDescription>Luna în care are loc pelerinajul</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -321,7 +321,7 @@ export default function CreatePilgrimagePage() {
                           </SelectContent>
                         </Select>
                         <FormDescription>Transportul utilizat în pelerinaj</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -350,7 +350,7 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </FormControl>
                         <FormDescription>Numărul de zile</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -377,7 +377,7 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </FormControl>
                         <FormDescription>Prețul per persoană</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -403,7 +403,7 @@ export default function CreatePilgrimagePage() {
                           </SelectContent>
                         </Select>
                         <FormDescription>Moneda de plată</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -432,7 +432,7 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </FormControl>
                         <FormDescription>Numărul de locuri disponibile</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -455,7 +455,7 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </FormControl>
                         <FormDescription>Numele ghidului sau însoțitorului grupului</FormDescription>
-                        <FormMessage></FormMessage>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -560,7 +560,7 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </div>
                       </FormControl>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
