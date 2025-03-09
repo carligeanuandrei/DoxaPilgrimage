@@ -1222,6 +1222,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Endpoint pentru listarea bannerelor promoționale
+  app.get("/api/cms/promo-banners", async (req, res) => {
+    try {
+      // Dezactivăm cache-ul pentru a asigura actualizarea corectă a bannerelor
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
+      const allContent = await storage.getCmsContent() as any[];
+      if (!Array.isArray(allContent)) {
+        return res.json({ banners: [], sectionTitle: "Oferte și Evenimente Speciale" });
+      }
+      
+      // Filtrăm conținutul pentru a obține bannerele promoționale și titlul secțiunii
+      const promoBanners = allContent.filter(item => 
+        item.key.startsWith('promo_banner_') && 
+        item.contentType === 'image' &&
+        !item.key.includes('section_title')
+      );
+      
+      // Găsim titlul secțiunii
+      const sectionTitleItem = allContent.find(item => 
+        item.key === 'promo_banner_section_title' && 
+        item.contentType === 'text'
+      );
+      
+      const sectionTitle = sectionTitleItem ? sectionTitleItem.value : "Oferte și Evenimente Speciale";
+      
+      const sortedPromoBanners = promoBanners.sort((a, b) => {
+        // Extrage numărul din cheia banner-ului (ex: promo_banner_1 -> 1)
+        const aNumber = parseInt(a.key.split('_').pop() || '0');
+        const bNumber = parseInt(b.key.split('_').pop() || '0');
+        return aNumber - bNumber;
+      });
+      
+      // Adăugăm informații mai detaliate despre bannere promoționale
+      const enhancedPromoBanners = sortedPromoBanners.map(banner => {
+        return {
+          ...banner,
+          title: banner.description || undefined,
+          linkUrl: "/pilgrimages"
+        };
+      });
+      
+      res.json({
+        banners: enhancedPromoBanners,
+        sectionTitle
+      });
+    } catch (error) {
+      console.error("Eroare la obținerea listei de bannere promoționale:", error);
+      res.status(500).json({ message: "Eroare la obținerea listei de bannere promoționale" });
+    }
+  });
+  
   app.get("/api/cms/:key", async (req, res) => {
     try {
       // Dezactivăm cache-ul pentru toate răspunsurile API CMS

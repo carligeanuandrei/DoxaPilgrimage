@@ -53,28 +53,15 @@ export default function PromoBannersSection() {
   useEffect(() => {
     const fetchPromoBanners = async () => {
       try {
-        // Obținem bannerele promoționale
-        const response = await apiRequest("GET", "/api/cms");
+        // Obținem bannerele promoționale utilizând endpoint-ul dedicat
+        const response = await apiRequest("GET", "/api/cms/promo-banners");
         const data = await response.json();
         
-        // Filtrăm bannerele promoționale (cele cu cheia promo_banner_X)
-        const banners = data.filter((item: PromoBanner) => 
-          item.contentType === 'image' && 
-          item.key.startsWith('promo_banner_') && 
-          !item.key.includes('section_title')
-        );
-        
-        // Căutăm titlul secțiunii
-        const titleItem = data.find((item: PromoBanner) => 
-          item.key === 'promo_banner_section_title' && 
-          item.contentType === 'text'
-        );
-        
-        if (titleItem) {
-          setSectionTitle(titleItem.value);
+        if (data) {
+          // Actualizăm bannerele și titlul secțiunii
+          setPromoBanners(data.banners || []);
+          setSectionTitle(data.sectionTitle || "Oferte și Evenimente Speciale");
         }
-        
-        setPromoBanners(banners);
       } catch (error) {
         console.error("Eroare la încărcarea bannerelor promoționale:", error);
       } finally {
