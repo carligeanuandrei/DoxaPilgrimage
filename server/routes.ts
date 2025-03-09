@@ -679,6 +679,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rută specială pentru inițializarea conținutului CMS (batch)
+  app.post("/api/cms/initialize", isAuthenticated, async (req, res) => {
+    try {
+      // Verificăm dacă utilizatorul este admin sau operator
+      if (req.user?.role !== "admin" && req.user?.role !== "operator") {
+        return res.status(403).json({ message: "Acces interzis" });
+      }
+      
+      const results = [];
+      let createdCount = 0;
+      let skippedCount = 0;
+      let errorCount = 0;
+      
+      // Procesăm fiecare element din array
+      for (const item of req.body) {
+        try {
+          // Verificăm dacă elementul există deja
+          const existing = await storage.getCmsContent(item.key);
+          if (!existing) {
+            const cmsItem = await storage.createCmsContent(item);
+            results.push({ key: item.key, status: 'created' });
+            createdCount++;
+          } else {
+            results.push({ key: item.key, status: 'exists' });
+            skippedCount++;
+          }
+        } catch (error) {
+          console.error(`Error processing ${item.key}:`, error);
+          results.push({ key: item.key, status: 'error', message: String(error) });
+          errorCount++;
+        }
+      }
+      
+      res.status(201).json({
+        message: "Conținut CMS inițializat",
+        stats: {
+          total: req.body.length,
+          created: createdCount,
+          skipped: skippedCount,
+          errors: errorCount
+        },
+        results
+      });
+    } catch (error) {
+      console.error("Error initializing CMS content:", error);
+      res.status(500).json({ message: "Eroare la inițializarea conținutului CMS", error: String(error) });
+    }
+  });
+
   app.post("/api/cms", isAdmin, async (req, res) => {
     try {
       const validData = insertCmsContentSchema.parse(req.body);

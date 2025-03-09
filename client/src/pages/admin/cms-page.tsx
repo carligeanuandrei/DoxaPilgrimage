@@ -533,23 +533,47 @@ export default function CmsPage() {
                     description: "Procesare în curs... Vă rugăm așteptați.",
                   });
                   
-                  for (const item of footerItems) {
-                    await createCmsItem(item);
+                  try {
+                    // Utilizăm noua rută pentru inițializare în masă
+                    const response = await apiRequest('POST', '/api/cms/initialize', footerItems, { 
+                      credentials: 'include' // Asigurăm transmiterea cookie-urilor
+                    });
+                    
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      console.error("Eroare la inițializare:", errorData);
+                      toast({
+                        title: "Eroare la inițializare",
+                        description: errorData.message || "A apărut o eroare la inițializarea conținutului CMS.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    const result = await response.json();
+                    console.log("Rezultat inițializare CMS:", result);
+                    
+                    // Invalidăm cache-ul pentru a reîncărca datele
+                    queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+                    queryClient.invalidateQueries();
+                    
+                    // Facem un refetch imediat
+                    await refetch();
+                    
+                    // Afișăm rezultatul final
+                    toast({
+                      title: "Inițializare completă",
+                      description: `S-au creat ${result.stats?.created || 0} elemente noi, ${result.stats?.skipped || 0} elemente existente, ${result.stats?.errors || 0} erori.`,
+                      variant: (result.stats?.errors || 0) > 0 ? "destructive" : "default",
+                    });
+                  } catch (error) {
+                    console.error("Excepție la inițializarea CMS:", error);
+                    toast({
+                      title: "Eroare la inițializare",
+                      description: "A apărut o excepție la inițializarea conținutului CMS.",
+                      variant: "destructive",
+                    });
                   }
-                  
-                  // Invalidăm cache-ul pentru a reîncărca datele
-                  queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
-                  queryClient.invalidateQueries();
-                  
-                  // Facem un refetch imediat
-                  await refetch();
-                  
-                  // Afișăm rezultatul final
-                  toast({
-                    title: "Inițializare completă",
-                    description: `S-au creat ${createdCount} elemente noi, ${skippedCount} elemente existente, ${errorCount} erori.`,
-                    variant: errorCount > 0 ? "destructive" : "default",
-                  });
                 }}
               >
                 <DownloadIcon className="h-4 w-4 mr-1" />
