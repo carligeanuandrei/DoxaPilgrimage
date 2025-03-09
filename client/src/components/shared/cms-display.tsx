@@ -86,11 +86,22 @@ interface CmsTextProps {
 export function CmsText({ contentKey, fallback = '', className = '', refreshInterval }: CmsTextProps) {
   const [value, setValue] = useState<string>(fallback);
   const [isLoading, setIsLoading] = useState(true);
+  const hasInitialFetchRef = useRef(false);
+
+  // Adăugăm un efect pentru shimmer/skeleton
+  useEffect(() => {
+    if (!hasInitialFetchRef.current) {
+      setIsLoading(true);
+    }
+  }, [contentKey]);
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        setIsLoading(true);
+        if (!hasInitialFetchRef.current) {
+          setIsLoading(true);
+        }
+
         const response = await fetch(`/api/cms/${contentKey}`, {
           method: 'GET',
           headers: {
@@ -103,6 +114,9 @@ export function CmsText({ contentKey, fallback = '', className = '', refreshInte
         if (response.ok) {
           const data = await response.json();
           setValue(data.value || fallback);
+          
+          // Marcăm că am făcut prima încărcare
+          hasInitialFetchRef.current = true;
         } else {
           setValue(fallback);
         }

@@ -371,10 +371,64 @@ export const FooterLinksInitializer: React.FC<{refetch: () => Promise<any>}> = (
   );
 };
 
+// Componenta pentru inițializarea paginii Home
+export const HomeInitializer: React.FC<{refetch: () => Promise<any>}> = ({ refetch }) => {
+  const { toast } = useToast();
+  
+  const homeItems: CmsItem[] = [
+    { key: 'homepage_title', contentType: 'text', value: 'Descoperă pelerinaje ortodoxe autentice' },
+    { key: 'homepage_subtitle', contentType: 'text', value: 'Călătorii spirituale organizate cu grijă pentru sufletul tău' },
+    
+    { key: 'hero_search_placeholder', contentType: 'text', value: 'Caută locații de pelerinaj...' },
+    { key: 'hero_search_button', contentType: 'text', value: 'Caută' },
+    { key: 'hero_cta_primary', contentType: 'text', value: 'Explorează pelerinaje' },
+    { key: 'hero_cta_secondary', contentType: 'text', value: 'Contactează-ne' },
+    
+    { key: 'featured_title', contentType: 'text', value: 'Pelerinaje populare' },
+    { key: 'featured_subtitle', contentType: 'text', value: 'Cele mai căutate destinații spirituale' },
+    { key: 'featured_view_all', contentType: 'text', value: 'Vezi toate pelerinajele' },
+    
+    { key: 'how_it_works_title', contentType: 'text', value: 'Cum funcționează' },
+    { key: 'how_it_works_subtitle', contentType: 'text', value: 'Planificarea pelerinajului tău în 3 pași simpli' },
+    
+    { key: 'how_it_works_step1_title', contentType: 'text', value: 'Alege destinația' },
+    { key: 'how_it_works_step1_desc', contentType: 'text', value: 'Explorează destinațiile noastre și alege pelerinajul care rezonează cu nevoile tale spirituale.' },
+    
+    { key: 'how_it_works_step2_title', contentType: 'text', value: 'Rezervă locul' },
+    { key: 'how_it_works_step2_desc', contentType: 'text', value: 'Completează datele necesare și asigură-ți locul în grupul de pelerini.' },
+    
+    { key: 'how_it_works_step3_title', contentType: 'text', value: 'Pregătește-te pentru călătorie' },
+    { key: 'how_it_works_step3_desc', contentType: 'text', value: 'Primești toate informațiile necesare și te pregătești pentru experiența spirituală.' },
+    
+    { key: 'destinations_title', contentType: 'text', value: 'Destinații populare' },
+    { key: 'destinations_subtitle', contentType: 'text', value: 'Locuri sfinte renumite în întreaga lume ortodoxă' },
+    
+    { key: 'testimonials_title', contentType: 'text', value: 'Ce spun pelerinii noștri' },
+    { key: 'testimonials_subtitle', contentType: 'text', value: 'Experiențe autentice împărtășite de comunitatea noastră' },
+    
+    { key: 'cta_title', contentType: 'text', value: 'Pregătit pentru următoarea ta călătorie spirituală?' },
+    { key: 'cta_subtitle', contentType: 'text', value: 'Alătură-te miilor de pelerini care și-au transformat viața prin experiențe spirituale autentice' },
+    { key: 'cta_button', contentType: 'text', value: 'Explorează acum' },
+  ];
+  
+  return (
+    <Button 
+      variant="outline" 
+      size="sm"
+      className="bg-orange-50 hover:bg-orange-100"
+      onClick={() => initializeCmsContent(homeItems, 'Pagină principală', toast, refetch)}
+    >
+      <DownloadIcon className="h-4 w-4 mr-1" />
+      Inițializează CMS Homepage
+    </Button>
+  );
+};
+
 // Export componenta principală care include toți inițializatorii
 export const CmsInitializers: React.FC<{refetch: () => Promise<any>}> = ({ refetch }) => {
   return (
     <div className="flex flex-wrap gap-2 mt-4">
+      <HomeInitializer refetch={refetch} />
       <ContactInitializer refetch={refetch} />
       <AboutInitializer refetch={refetch} />
       <TermsInitializer refetch={refetch} />
