@@ -20,7 +20,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder"
 });
 
 // Configurare multer pentru încărcarea imaginilor
-const storage = multer.diskStorage({
+const multerStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dir = 'public/images/pilgrimages';
     if (!fs.existsSync(dir)){
@@ -34,7 +34,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ 
-  storage: storage,
+  storage: multerStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB
   fileFilter: function (req, file, cb) {
     const filetypes = /jpeg|jpg|png|gif|webp/;
