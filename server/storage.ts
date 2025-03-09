@@ -1016,8 +1016,11 @@ export class DatabaseStorage implements IStorage {
     try {
       if (key) {
         // Returnează un singur element după cheie
-        const [content] = await db.select().from(cmsContent).where(eq(cmsContent.key, key));
-        return content;
+        const content = await db.select().from(cmsContent).where(eq(cmsContent.key, key));
+        if (content.length > 0) {
+          return content[0]; // Returnăm primul element găsit
+        }
+        return undefined; // Returnăm undefined dacă nu găsim nimic
       } else {
         // Returnează toate elementele
         return await db.select().from(cmsContent);
