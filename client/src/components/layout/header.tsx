@@ -32,6 +32,16 @@ export default function Header() {
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
+
+  const getRoleName = (role: string) => {
+    const roleMap: Record<string, string> = {
+      'admin': 'Administrator',
+      'pilgrim': 'Pelerin',
+      'operator': 'Operator de Turism',
+      'monastery': 'Administrator Mănăstire'
+    };
+    return roleMap[role] || role;
+  };
   
   const isActiveLink = (path: string) => {
     if (path === '/' && location === '/') return true;
@@ -89,6 +99,9 @@ export default function Header() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem className="font-medium">
                     {user.firstName} {user.lastName}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-muted-foreground">
+                    {getRoleName(user.role)}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
@@ -153,6 +166,10 @@ export default function Header() {
             <div className="mt-4 flex flex-col space-y-2 px-4">
               {user ? (
                 <>
+                  <div className="mb-2 pb-2 border-b border-neutral-200">
+                    <div className="font-medium">{user.firstName} {user.lastName}</div>
+                    <div className="text-sm text-neutral-500">{getRoleName(user.role)}</div>
+                  </div>
                   <Link href="/profile" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
                     <User className="inline mr-2 h-4 w-4" />
                     Profilul meu
