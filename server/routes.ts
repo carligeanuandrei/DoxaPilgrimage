@@ -140,6 +140,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const filters: any = {};
       
+      // Adăugăm implicit filtrul pentru a afișa doar pelerinajele verificate/publicate
+      // Acest lucru asigură că doar pelerinajele publicate apar în pagina publică
+      filters.verified = true;
+      
       // Extract filters from query params
       if (req.query.location) filters.location = req.query.location as string;
       if (req.query.month) filters.month = req.query.month as string;

@@ -45,7 +45,29 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, FileText, User, DollarSign, Calendar, Edit, Eye, MapPin, Clock, Users } from "lucide-react";
+import { 
+  CalendarIcon, 
+  FileText, 
+  User, 
+  DollarSign, 
+  Calendar, 
+  Edit, 
+  Eye, 
+  MapPin, 
+  Clock, 
+  Users, 
+  ChevronDown, 
+  CheckCircle, 
+  XCircle 
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 
 export default function OrganizerDashboard() {
   const { user } = useAuth();
@@ -130,6 +152,29 @@ export default function OrganizerDashboard() {
       toast({
         title: "Eroare",
         description: "Nu s-a putut depublica pelerinajul. Încercați din nou.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Funcție pentru marcarea unui pelerinaj ca draft
+  const markAsDraft = async (pilgrimageId: number) => {
+    try {
+      await apiRequest("POST", `/api/organizer/pilgrimages/${pilgrimageId}/draft`);
+      
+      // Actualizăm lista de pelerinaje
+      queryClient.invalidateQueries({ queryKey: ["/api/organizer/pilgrimages"] });
+      
+      toast({
+        title: "Pelerinaj salvat ca draft",
+        description: "Pelerinajul a fost marcat ca draft cu succes",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error marking pilgrimage as draft:", error);
+      toast({
+        title: "Eroare",
+        description: "Nu s-a putut marca pelerinajul ca draft. Încercați din nou.",
         variant: "destructive",
       });
     }
