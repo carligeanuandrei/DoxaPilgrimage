@@ -491,7 +491,7 @@ export default function OrganizerDashboard() {
                 </div>
               ) : pilgrimagesError ? (
                 <div className="bg-destructive/10 p-4 rounded-md text-destructive">
-                  Nu s-au putut încărca pelerinajele. Încercați să reîmprospătați pagina.
+                  Eroare la încărcarea pelerinajelor. Încercați să reîmprospătați pagina.
                 </div>
               ) : pilgrimages && pilgrimages.length > 0 ? (
                 <div className="overflow-x-auto">
@@ -655,7 +655,7 @@ export default function OrganizerDashboard() {
                 </div>
               ) : bookingsError ? (
                 <div className="bg-destructive/10 p-4 rounded-md text-destructive">
-                  Nu s-au putut încărca rezervările. Încercați să reîmprospătați pagina.
+                  Eroare la încărcarea rezervărilor. Încercați să reîmprospătați pagina.
                 </div>
               ) : bookings && bookings.length > 0 ? (
                 <div className="overflow-x-auto">
@@ -775,7 +775,7 @@ export default function OrganizerDashboard() {
                 </div>
               ) : financialReportError ? (
                 <div className="bg-destructive/10 p-4 rounded-md text-destructive">
-                  Nu s-a putut încărca raportul financiar. Încercați să reîmprospătați pagina.
+                  Eroare la încărcarea raportului financiar. Încercați să reîmprospătați pagina.
                 </div>
               ) : financialReport ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
