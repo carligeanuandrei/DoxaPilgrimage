@@ -1160,18 +1160,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCmsContent(content: InsertCmsContent): Promise<CmsContent> {
+    // Scriem în log-uri datele primite pentru debugging
+    console.log('Trying to create CMS content with data:', JSON.stringify(content));
+    
+    // Pregătim datele pentru inserare, excluzând câmpul description care nu există în BD
+    const insertData = {
+      key: content.key,
+      value: content.value,
+      contentType: content.contentType,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    console.log('Inserting data:', JSON.stringify(insertData));
+    
     try {
-      // Extragem doar câmpurile care există în baza de date
-      const { key, value, contentType } = content;
-      
-      // Inserăm doar câmpurile care există în baza de date
-      const [cmsItem] = await db.insert(cmsContent).values({
-        key,
-        value,
-        contentType,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }).returning({
+      // Încercăm metoda standard de inserare cu Drizzle ORM
+      const [cmsItem] = await db.insert(cmsContent).values(insertData).returning({
         id: cmsContent.id,
         key: cmsContent.key,
         value: cmsContent.value,
@@ -1180,11 +1185,30 @@ export class DatabaseStorage implements IStorage {
         updatedAt: cmsContent.updatedAt
       });
       
-      // Adăugăm câmpul description manual pentru compatibilitate
-      return { ...cmsItem, description: undefined };
+      console.log('CMS item created successfully:', cmsItem);
+      return { ...cmsItem, description: null };
     } catch (error) {
-      console.error('Error creating CMS content:', error);
-      throw error;
+      console.error('Error creating CMS content with ORM method:', error);
+      
+      try {
+        // Abordare alternativă: executăm SQL direct
+        const result = await db.execute(`
+          INSERT INTO cms_content (key, value, content_type, created_at, updated_at) 
+          VALUES ('${content.key}', '${content.value}', '${content.contentType}', NOW(), NOW()) 
+          RETURNING id, key, value, content_type as "contentType", created_at as "createdAt", updated_at as "updatedAt"
+        `);
+        
+        if (result && result.rows && result.rows.length > 0) {
+          const createdItem = result.rows[0];
+          console.log('CMS item created with direct SQL:', createdItem);
+          return { ...createdItem, description: null };
+        }
+        
+        throw new Error('Failed to create CMS content with both approaches');
+      } catch (fallbackError) {
+        console.error('Both attempts to create CMS content failed:', fallbackError);
+        throw fallbackError;
+      }
     }
   }
 
@@ -1213,7 +1237,7 @@ export class DatabaseStorage implements IStorage {
         });
       
       // Adăugăm câmpul description manual pentru compatibilitate
-      return updatedContent ? { ...updatedContent, description: undefined } : undefined;
+      return updatedContent ? { ...updatedContent, description: null } : undefined;
     } catch (error) {
       console.error('Error updating CMS content:', error);
       throw error;

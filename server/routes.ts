@@ -1415,16 +1415,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/cms", isAdmin, async (req, res) => {
     try {
-      const validData = insertCmsContentSchema.parse(req.body);
-      const content = await storage.createCmsContent(validData);
+      console.log("Trying to create CMS content with request body:", JSON.stringify(req.body));
       
-      res.status(201).json(content);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Date invalide", errors: error.errors });
+      // Verificăm manual dacă avem toate câmpurile necesare pentru a proteja contra erorilor
+      if (!req.body.key || !req.body.value || !req.body.contentType) {
+        return res.status(400).json({ 
+          message: "Date invalide", 
+          errors: "Câmpurile key, value și contentType sunt obligatorii"
+        });
       }
+      
+      try {
+        const validData = insertCmsContentSchema.parse(req.body);
+        console.log("Validation passed, creating CMS content with:", JSON.stringify(validData));
+        
+        const content = await storage.createCmsContent(validData);
+        console.log("CMS content created:", JSON.stringify(content));
+        
+        res.status(201).json(content);
+      } catch (zodError) {
+        console.error("Validation error:", zodError);
+        if (zodError instanceof z.ZodError) {
+          return res.status(400).json({ message: "Date invalide", errors: zodError.errors });
+        }
+        
+        // Încercăm o abordare mai simplă dacă validarea eșuează
+        console.log("Trying simplified approach...");
+        const simpleContent = await storage.createCmsContent({
+          key: req.body.key,
+          value: req.body.value,
+          contentType: req.body.contentType
+        });
+        
+        res.status(201).json(simpleContent);
+      }
+    } catch (error) {
       console.error("Error creating CMS content:", error);
-      res.status(500).json({ message: "Eroare la crearea conținutului CMS" });
+      res.status(500).json({ 
+        message: "Eroare la crearea conținutului CMS", 
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 
