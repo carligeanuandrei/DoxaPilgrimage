@@ -1,0 +1,68 @@
+Exact, dacă CMS-ul nu are încă date pentru footer, un script de inițializare este o soluție bună. Câteva sugestii pentru implementare:
+
+1. Crearea unui script de inițializare a footer-ului în CMS
+
+Dacă folosești un API REST sau GraphQL pentru a comunica cu CMS-ul, poți crea un script care verifică dacă datele există și le adaugă doar dacă lipsesc.
+
+Exemplu (într-un script Node.js sau direct în Next.js/React, dacă folosești fetch):
+
+async function initializeFooterContent() {
+    const response = await fetch('/api/cms/footer'); // Endpoint pentru a verifica existența conținutului
+
+    if (response.status === 404) { // Dacă datele lipsesc
+        await fetch('/api/cms/footer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: "Despre noi",
+                description: "Contactează-ne pentru mai multe detalii",
+                socialLinks: [
+                    { name: "Facebook", url: "https://facebook.com/pagina" },
+                    { name: "Instagram", url: "https://instagram.com/pagina" }
+                ]
+            })
+        });
+        console.log("Footer CMS initialized.");
+    } else {
+        console.log("Footer CMS already exists.");
+    }
+}
+
+initializeFooterContent();
+
+
+---
+
+2. Adăugarea unui buton în panoul de administrare CMS
+
+Poți adăuga un buton „Inițializează Footer” care să ruleze scriptul la cerere.
+
+Exemplu React (într-o pagină de admin CMS):
+
+<button onClick={initializeFooterContent}>Inițializează Footer</button>
+
+
+---
+
+3. Prevenirea afișării erorilor în UI
+
+Până când datele sunt încărcate, afișează un loader sau un fallback:
+
+{footerData ? (
+    <FooterComponent data={footerData} />
+) : (
+    <p>Se încarcă footer-ul...</p>
+)}
+
+
+---
+
+4. Opțional: Adăugare automată la deploy
+
+Dacă vrei să te asiguri că datele există întotdeauna după un update al aplicației, rulează scriptul de inițializare în procesul de build/deploy (de exemplu, într-un hook onDeploy).
+
+
+---
+
+Cu această soluție, eviți problemele 404 și te asiguri că footer-ul CMS e configurat corect, fie automat, fie manual din admin.
+

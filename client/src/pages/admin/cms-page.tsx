@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileTextIcon, Code2Icon, ImageIcon, PlusIcon, PencilIcon, Trash2Icon } from 'lucide-react';
+import { FileTextIcon, Code2Icon, ImageIcon, PlusIcon, PencilIcon, Trash2Icon, DownloadIcon, ListIcon, AlertTriangleIcon } from 'lucide-react';
 import { format } from 'date-fns';
 
 // Define the form validation schema
@@ -399,6 +399,167 @@ export default function CmsPage() {
                 className={filterPrefix === "homepage_" ? "bg-green-100" : ""}
               >
                 Homepage
+              </Button>
+            </div>
+            
+            {/* Butoane pentru operațiuni avansate */}
+            <div className="flex flex-wrap gap-1 mt-2">
+              <Button 
+                variant="secondary" 
+                size="sm"
+                className="bg-blue-50 hover:bg-blue-100"
+                onClick={async () => {
+                  if(!window.confirm("Doriți să inițializați toate elementele CMS pentru footer? Această operațiune va crea toate cheile necesare.")) {
+                    return;
+                  }
+                  
+                  // Array cu toate cheile și valorile pentru footer
+                  const footerItems = [
+                    { key: "footer_brand_name", contentType: "text", value: "Doxa", description: "Numele brandului din footer" },
+                    { key: "footer_brand_icon", contentType: "image", value: "/images/icons/icon-cross.svg", description: "Iconița brandului din footer" },
+                    { key: "footer_description", contentType: "text", value: "Platformă de pelerinaje care conectează pelerini cu organizatori de încredere pentru experiențe spirituale autentice.", description: "Descriere scurtă despre platformă" },
+                    
+                    // Social media
+                    { key: "footer_social_facebook_url", contentType: "text", value: "https://facebook.com", description: "Link către Facebook" },
+                    { key: "footer_social_facebook", contentType: "image", value: "/images/icons/facebook.svg", description: "Iconița Facebook" },
+                    { key: "footer_social_instagram_url", contentType: "text", value: "https://instagram.com", description: "Link către Instagram" },
+                    { key: "footer_social_instagram", contentType: "image", value: "/images/icons/instagram.svg", description: "Iconița Instagram" },
+                    { key: "footer_social_youtube_url", contentType: "text", value: "https://youtube.com", description: "Link către YouTube" },
+                    { key: "footer_social_youtube", contentType: "image", value: "/images/icons/youtube.svg", description: "Iconița YouTube" },
+                    
+                    // Quicklinks
+                    { key: "footer_quicklinks_title", contentType: "text", value: "Linkuri Rapide", description: "Titlul secțiunii de linkuri rapide" },
+                    { key: "footer_link_home", contentType: "text", value: "Acasă", description: "Text pentru link-ul Acasă" },
+                    { key: "footer_link_home_url", contentType: "text", value: "/", description: "URL pentru link-ul Acasă" },
+                    { key: "footer_link_pilgrimages", contentType: "text", value: "Pelerinaje", description: "Text pentru link-ul Pelerinaje" },
+                    { key: "footer_link_pilgrimages_url", contentType: "text", value: "/pilgrimages", description: "URL pentru link-ul Pelerinaje" },
+                    { key: "footer_link_about", contentType: "text", value: "Despre Noi", description: "Text pentru link-ul Despre Noi" },
+                    { key: "footer_link_about_url", contentType: "text", value: "/about", description: "URL pentru link-ul Despre Noi" },
+                    { key: "footer_link_contact", contentType: "text", value: "Contact", description: "Text pentru link-ul Contact" },
+                    { key: "footer_link_contact_url", contentType: "text", value: "/contact", description: "URL pentru link-ul Contact" },
+                    { key: "footer_link_auth", contentType: "text", value: "Autentificare", description: "Text pentru link-ul Autentificare" },
+                    { key: "footer_link_auth_url", contentType: "text", value: "/auth", description: "URL pentru link-ul Autentificare" },
+                    
+                    // Destinations
+                    { key: "footer_destinations_title", contentType: "text", value: "Destinații Populare", description: "Titlul secțiunii de destinații populare" },
+                    { key: "footer_destination_israel", contentType: "text", value: "Israel și Palestina", description: "Text pentru link-ul Israel și Palestina" },
+                    { key: "footer_destination_israel_url", contentType: "text", value: "/pilgrimages?location=Israel", description: "URL pentru link-ul Israel și Palestina" },
+                    { key: "footer_destination_athos", contentType: "text", value: "Muntele Athos", description: "Text pentru link-ul Muntele Athos" },
+                    { key: "footer_destination_athos_url", contentType: "text", value: "/pilgrimages?location=Grecia", description: "URL pentru link-ul Muntele Athos" },
+                    { key: "footer_destination_moldova", contentType: "text", value: "Mănăstirile din Moldova", description: "Text pentru link-ul Mănăstirile din Moldova" },
+                    { key: "footer_destination_moldova_url", contentType: "text", value: "/pilgrimages?location=România", description: "URL pentru link-ul Mănăstirile din Moldova" },
+                    { key: "footer_destination_vatican", contentType: "text", value: "Vatican", description: "Text pentru link-ul Vatican" },
+                    { key: "footer_destination_vatican_url", contentType: "text", value: "/pilgrimages?location=Vatican", description: "URL pentru link-ul Vatican" },
+                    { key: "footer_destination_lourdes", contentType: "text", value: "Lourdes", description: "Text pentru link-ul Lourdes" },
+                    { key: "footer_destination_lourdes_url", contentType: "text", value: "/pilgrimages?location=Franța", description: "URL pentru link-ul Lourdes" },
+                    
+                    // Contact info
+                    { key: "footer_contact_title", contentType: "text", value: "Contact", description: "Titlul secțiunii de contact" },
+                    { key: "footer_contact_address_icon", contentType: "image", value: "/images/icons/map-pin.svg", description: "Iconița pentru adresă" },
+                    { key: "footer_contact_address", contentType: "text", value: "Str. Biserica Amzei 19, București, România", description: "Adresa de contact" },
+                    { key: "footer_contact_phone_icon", contentType: "image", value: "/images/icons/phone.svg", description: "Iconița pentru telefon" },
+                    { key: "footer_contact_phone", contentType: "text", value: "+40 721 234 567", description: "Număr de telefon contact" },
+                    { key: "footer_contact_email_icon", contentType: "image", value: "/images/icons/mail.svg", description: "Iconița pentru email" },
+                    { key: "footer_contact_email", contentType: "text", value: "contact@doxa-pelerinaje.ro", description: "Email de contact" },
+                    
+                    // Copyright și linkuri juridice
+                    { key: "footer_copyright", contentType: "text", value: "Doxa Pelerinaje. Toate drepturile rezervate.", description: "Text copyright" },
+                    { key: "footer_terms", contentType: "text", value: "Termeni și Condiții", description: "Text pentru link-ul Termeni și Condiții" },
+                    { key: "footer_terms_url", contentType: "text", value: "/termeni-si-conditii", description: "URL pentru link-ul Termeni și Condiții" },
+                    { key: "footer_privacy", contentType: "text", value: "Politica de Confidențialitate", description: "Text pentru link-ul Politica de Confidențialitate" },
+                    { key: "footer_privacy_url", contentType: "text", value: "/politica-de-confidentialitate", description: "URL pentru link-ul Politica de Confidențialitate" },
+                    { key: "footer_cookies", contentType: "text", value: "Cookies", description: "Text pentru link-ul Cookies" },
+                    { key: "footer_cookies_url", contentType: "text", value: "/cookies", description: "URL pentru link-ul Cookies" },
+                  ];
+                  
+                  // Indicator de progres
+                  let createdCount = 0;
+                  let skippedCount = 0;
+                  let errorCount = 0;
+                  
+                  // Funcție pentru a crea un element CMS
+                  const createCmsItem = async (item: any) => {
+                    try {
+                      // Verificăm dacă elementul există deja pentru a evita duplicatele
+                      const checkResp = await apiRequest('GET', `/api/cms/${item.key}`);
+                      
+                      // Dacă există, sărim peste
+                      if (checkResp.status === 200) {
+                        console.log(`Elementul ${item.key} există deja.`);
+                        skippedCount++;
+                        return;
+                      }
+                      
+                      // Dacă avem 404, înseamnă că elementul nu există și trebuie creat
+                      if (checkResp.status === 404) {
+                        const resp = await apiRequest('POST', '/api/cms', item);
+                        
+                        if (resp.status === 201 || resp.status === 200) {
+                          console.log(`Creat element CMS: ${item.key}`);
+                          createdCount++;
+                        } else {
+                          console.error(`Eroare la crearea elementului ${item.key}:`, resp.statusText);
+                          errorCount++;
+                        }
+                      }
+                    } catch (error) {
+                      console.error(`Eroare la procesarea elementului ${item.key}:`, error);
+                      errorCount++;
+                    }
+                  };
+                  
+                  // Procesăm fiecare element secvențial
+                  toast({
+                    title: "Inițializare CMS Footer",
+                    description: "Procesare în curs... Vă rugăm așteptați.",
+                  });
+                  
+                  for (const item of footerItems) {
+                    await createCmsItem(item);
+                  }
+                  
+                  // Invalidăm cache-ul pentru a reîncărca datele
+                  queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+                  queryClient.invalidateQueries();
+                  
+                  // Facem un refetch imediat
+                  await refetch();
+                  
+                  // Afișăm rezultatul final
+                  toast({
+                    title: "Inițializare completă",
+                    description: `S-au creat ${createdCount} elemente noi, ${skippedCount} elemente existente, ${errorCount} erori.`,
+                    variant: errorCount > 0 ? "destructive" : "default",
+                  });
+                }}
+              >
+                <DownloadIcon className="h-4 w-4 mr-1" />
+                Inițializează CMS Footer
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-red-50 hover:bg-red-100"
+                onClick={() => {
+                  alert("Funcționalitate în curând disponibilă");
+                }}
+              >
+                <AlertTriangleIcon className="h-4 w-4 mr-1" />
+                Verifică elemente lipsă
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-emerald-50 hover:bg-emerald-100"
+                onClick={() => {
+                  // Implementăm ulterior, dacă e nevoie
+                  alert("Funcționalitate în curând disponibilă");
+                }}
+              >
+                <ListIcon className="h-4 w-4 mr-1" />
+                Exportă configurație
               </Button>
             </div>
           </div>
