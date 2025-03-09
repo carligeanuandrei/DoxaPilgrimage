@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Pilgrimage, Booking } from "@shared/schema";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import PromotionStats from "@/components/organizer/promotion-stats";
@@ -61,7 +61,8 @@ import {
   CheckCircle, 
   XCircle,
   Star,
-  Award
+  Award,
+  Pencil
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -76,6 +77,7 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContai
 export default function OrganizerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const [selectedPilgrimageId, setSelectedPilgrimageId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("pilgrimages");
   const [showPromoteDialog, setShowPromoteDialog] = useState(false);
@@ -572,21 +574,21 @@ export default function OrganizerDashboard() {
                                   <DropdownMenuLabel>Schimbă starea</DropdownMenuLabel>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem 
-                                    disabled={pilgrimage.draft}
+                                    disabled={pilgrimage.hasOwnProperty('draft') && pilgrimage.draft}
                                     onClick={() => markAsDraft(pilgrimage.id)}
                                   >
                                     <FileText className="h-4 w-4 mr-2" />
                                     <span>Draft</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    disabled={pilgrimage.verified}
+                                    disabled={pilgrimage.hasOwnProperty('verified') && pilgrimage.verified}
                                     onClick={() => publishPilgrimage(pilgrimage.id)}
                                   >
                                     <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
                                     <span>Publică</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    disabled={!pilgrimage.verified}
+                                    disabled={!pilgrimage.hasOwnProperty('verified') || !pilgrimage.verified}
                                     onClick={() => unpublishPilgrimage(pilgrimage.id)}
                                   >
                                     <XCircle className="h-4 w-4 mr-2 text-red-500" />
