@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { CmsText, CmsHtml, CmsImage } from "@/components/shared/cms-content";
+import { CmsText, CmsHtml, CmsImage } from "@/components/shared/cms-display";
 
 export default function Footer() {
   return (
