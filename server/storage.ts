@@ -36,6 +36,16 @@ export interface IStorage {
   verifyUserEmail(token: string): Promise<boolean>;
   getUserByVerificationToken(token: string): Promise<User | undefined>;
   
+  // Password reset operations
+  createPasswordResetToken(userId: number, email: string): Promise<string>;
+  resetPasswordWithToken(token: string, newPassword: string): Promise<boolean>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
+  
+  // Two-factor authentication operations
+  createTwoFactorCode(userId: number): Promise<string>;
+  verifyTwoFactorCode(userId: number, code: string): Promise<boolean>;
+  resetTwoFactorCode(userId: number): Promise<void>;
+  
   // Pilgrimage operations
   getPilgrimage(id: number): Promise<Pilgrimage | undefined>;
   getPilgrimages(filters?: Partial<Pilgrimage>): Promise<Pilgrimage[]>;
@@ -214,6 +224,94 @@ export class MemStorage implements IStorage {
     });
     
     return true;
+  }
+  
+  // Password reset operations
+  async createPasswordResetToken(userId: number, email: string): Promise<string> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+    
+    // Create a random token
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // Set expiry for 1 hour
+    const resetTokenExpiry = new Date();
+    resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1);
+    
+    // Update user with token and expiry
+    await this.updateUser(userId, {
+      resetToken: token,
+      resetTokenExpiry
+    });
+    
+    return token;
+  }
+  
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.resetToken === token
+    );
+  }
+  
+  async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+    const user = await this.getUserByResetToken(token);
+    if (!user) return false;
+    
+    // Check if token expired
+    const now = new Date();
+    if (user.resetTokenExpiry && user.resetTokenExpiry < now) {
+      return false;
+    }
+    
+    // Update password and clear token
+    await this.updateUser(user.id, {
+      password: newPassword,
+      resetToken: null,
+      resetTokenExpiry: null
+    });
+    
+    return true;
+  }
+  
+  // Two-factor authentication operations
+  async createTwoFactorCode(userId: number): Promise<string> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+    
+    // Generate a 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Set expiry for 5 minutes
+    const twoFactorExpiry = new Date();
+    twoFactorExpiry.setMinutes(twoFactorExpiry.getMinutes() + 5);
+    
+    // Update user with code and expiry
+    await this.updateUser(userId, {
+      twoFactorCode: code,
+      twoFactorExpiry
+    });
+    
+    return code;
+  }
+  
+  async verifyTwoFactorCode(userId: number, code: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user || !user.twoFactorCode) return false;
+    
+    // Check if code matches and not expired
+    const now = new Date();
+    if (user.twoFactorCode !== code || (user.twoFactorExpiry && user.twoFactorExpiry < now)) {
+      return false;
+    }
+    
+    return true;
+  }
+  
+  async resetTwoFactorCode(userId: number): Promise<void> {
+    await this.updateUser(userId, {
+      twoFactorCode: null,
+      twoFactorExpiry: null
+    });
   }
   
   // Pilgrimage operations

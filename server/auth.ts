@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { sendVerificationEmail, sendWelcomeEmail } from "./email";
 
 declare global {
   namespace Express {
@@ -52,7 +53,9 @@ export function setupAuth(app: Express) {
       try {
         const user = await storage.getUserByUsername(username);
         if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false);
+          return done(null, false, { message: "Credențiale incorecte" });
+        } else if (!user.verified && user.role !== "admin") {
+          return done(null, false, { message: "Contul nu a fost verificat. Verificați-vă emailul pentru a activa contul." });
         } else {
           return done(null, user);
         }
@@ -89,9 +92,23 @@ export function setupAuth(app: Express) {
         password: await hashPassword(req.body.password),
       });
 
+      // Generează token pentru verificarea emailului
+      const verificationToken = await storage.createVerificationToken(user.id, user.email);
+      
+      // Trimite email de verificare
+      const emailPreviewUrl = await sendVerificationEmail(user, verificationToken);
+      
+      // Pentru development, logăm URL-ul de preview al email-ului
+      if (process.env.NODE_ENV !== "production" && emailPreviewUrl) {
+        console.log("Email verification preview URL:", emailPreviewUrl);
+      }
+
       req.login(user, (err) => {
         if (err) return next(err);
-        res.status(201).json(user);
+        res.status(201).json({
+          ...user,
+          message: "Un email de verificare a fost trimis la adresa ta de email."
+        });
       });
     } catch (error) {
       next(error);
@@ -99,9 +116,9 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: Error, user: any, info: { message: string }) => {
       if (err) return next(err);
-      if (!user) return res.status(401).json({ message: "Credențiale incorecte" });
+      if (!user) return res.status(401).json({ message: info?.message || "Credențiale incorecte" });
       
       req.login(user, (err) => {
         if (err) return next(err);
@@ -120,5 +137,98 @@ export function setupAuth(app: Express) {
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(req.user);
+  });
+
+  // Rută pentru verificarea emailului
+  app.get("/api/verify-email", async (req, res) => {
+    try {
+      const token = req.query.token as string;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token lipsă" });
+      }
+      
+      const verified = await storage.verifyUserEmail(token);
+      
+      if (verified) {
+        // Găsim utilizatorul cu acest token
+        const user = await storage.getUserByVerificationToken(token);
+        
+        if (user) {
+          // Trimitem email de confirmare (bun venit)
+          await sendWelcomeEmail(user);
+          
+          // Logăm utilizatorul automat
+          req.login(user, (err) => {
+            if (err) throw err;
+            return res.redirect('/#verified=success');
+          });
+        } else {
+          return res.redirect('/#verified=already');
+        }
+      } else {
+        return res.redirect('/#verified=failed');
+      }
+    } catch (error) {
+      console.error("Eroare la verificarea emailului:", error);
+      res.status(500).json({ message: "Eroare la verificarea emailului" });
+    }
+  });
+
+  // Rută pentru a solicita resetarea parolei
+  app.post("/api/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email obligatoriu" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      
+      if (user) {
+        // Generăm token pentru resetarea parolei
+        const token = await storage.createPasswordResetToken(user.id, email);
+        
+        // Trimitem emailul de resetare
+        const emailPreviewUrl = await sendPasswordResetEmail(user, token);
+        
+        // Pentru development, logăm URL-ul de preview al email-ului
+        if (process.env.NODE_ENV !== "production" && emailPreviewUrl) {
+          console.log("Password reset email preview URL:", emailPreviewUrl);
+        }
+      }
+      
+      // Pentru securitate, întotdeauna confirmăm că am trimis mailul
+      // chiar dacă utilizatorul nu există
+      res.json({ 
+        message: "Dacă adresa de email există în baza noastră de date, vei primi instrucțiuni pentru resetarea parolei." 
+      });
+    } catch (error) {
+      console.error("Eroare la solicitarea resetării parolei:", error);
+      res.status(500).json({ message: "Eroare la solicitarea resetării parolei" });
+    }
+  });
+
+  // Rută pentru resetarea parolei
+  app.post("/api/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token și parolă obligatorii" });
+      }
+      
+      const success = await storage.resetPasswordWithToken(token, await hashPassword(password));
+      
+      if (success) {
+        res.json({ message: "Parola a fost schimbată cu succes." });
+      } else {
+        res.status(400).json({ message: "Token invalid sau expirat." });
+      }
+    } catch (error) {
+      console.error("Eroare la resetarea parolei:", error);
+      res.status(500).json({ message: "Eroare la resetarea parolei" });
+    }
   });
 }
