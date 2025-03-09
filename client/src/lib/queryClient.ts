@@ -46,8 +46,8 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      refetchOnWindowFocus: true, // Modificat pentru a permite reîmprospătarea la focus pe fereastră
+      staleTime: 10000, // Modificat pentru a marca datele ca fiind vechi după 10 secunde
       retry: false,
     },
     mutations: {
