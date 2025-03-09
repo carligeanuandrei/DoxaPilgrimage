@@ -552,6 +552,16 @@ export default function OrganizerDashboard() {
                                 <DollarSign className="h-4 w-4 mr-1" /> Financiar
                               </Button>
 
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  navigate(`/organizer/edit-pilgrimage/${pilgrimage.id}`);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4 mr-1" /> Editează
+                              </Button>
+
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="outline" size="sm">
