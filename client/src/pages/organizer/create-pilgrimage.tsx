@@ -412,7 +412,34 @@ export default function CreatePilgrimagePage() {
                 </div>
 
                 {/* Rând cu locuri disponibile și ghid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Status */}
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status pelerinaj</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <Activity className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <SelectValue placeholder="Selectează statusul" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="draft">Ciornă (doar pentru tine)</SelectItem>
+                            <SelectItem value="published">Publicat (vizibil public)</SelectItem>
+                            <SelectItem value="unpublished">Nepublicat (în așteptare)</SelectItem>
+                            <SelectItem value="cancelled">Anulat</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>Statusul determină vizibilitatea</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
                   {/* Locuri disponibile */}
                   <FormField
                     control={form.control}
@@ -457,36 +484,6 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </FormControl>
                         <FormDescription>Numele ghidului sau însoțitorului grupului</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Rând cu status */}
-                <div className="grid grid-cols-1 gap-6">
-                  {/* Status */}
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status pelerinaj</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <Activity className="mr-2 h-4 w-4 text-muted-foreground" />
-                              <SelectValue placeholder="Selectează statusul" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="draft">Ciornă (vizibil doar pentru tine)</SelectItem>
-                            <SelectItem value="published">Publicat (vizibil pentru toți)</SelectItem>
-                            <SelectItem value="unpublished">Nepublicat (în așteptare)</SelectItem>
-                            <SelectItem value="cancelled">Anulat</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>Statusul curent al pelerinajului</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
