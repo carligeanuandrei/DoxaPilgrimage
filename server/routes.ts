@@ -336,40 +336,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(">>> OrganizerId folosit:", organizerId);
       
-      // Verificăm și ajustăm datele
-      const startDate = validData.startDate instanceof Date ? 
-          validData.startDate : 
-          new Date(validData.startDate);
+      // Trimitem datele direct, sunt deja procesate de schema Zod
+      // Vom folosi valorile așa cum sunt deoarece în schema insertPilgrimageSchema
+      // am definit deja transformarea datelor în string-uri ISO pentru a fi compatibile cu baza de date
       
-      const endDate = validData.endDate instanceof Date ? 
-          validData.endDate : 
-          new Date(validData.endDate);
-        
-      // Verificăm dacă datele sunt valide
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        throw new Error("Datele de început sau sfârșit ale pelerinajului sunt invalide");
-      }
-      
-      // Creăm datele pentru pelerinaj, cu valorile convertite corect
+      // Folosim direct validData care are deja toate câmpurile necesare și procesate corect
       const pilgrimageData = {
-        title: validData.title,
-        description: validData.description,
-        location: validData.location,
-        month: validData.month,
-        transportation: validData.transportation,
-        guide: validData.guide,
-        saint: validData.saint,
-        // Convertim datele numerice corect
-        availableSpots: Number(validData.availableSpots),
-        price: Number(validData.price),
-        duration: Number(validData.duration),
-        currency: validData.currency,
-        // Convertim datele la string ISO pentru compatibilitate cu baza de date
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        // Organizatorul
+        ...validData,
+        // Asigurăm că valorile numerice sunt corecte
+        availableSpots: Number(validData.availableSpots || 0),
+        price: Number(validData.price || 0),
+        duration: Number(validData.duration || 0),
+        // Adăugăm organizatorul
         organizerId,
-        // Alte date opționale
+        // Asigurăm că avem structuri de date valide pentru câmpurile opționale
         images: validData.images || [],
         includedServices: validData.includedServices || []
       };

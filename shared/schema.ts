@@ -100,7 +100,15 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true
 });
 
-export const insertPilgrimageSchema = createInsertSchema(pilgrimages).omit({
+// Schema pentru inserarea pelerinajelor cu transformări de date
+export const insertPilgrimageSchema = createInsertSchema(pilgrimages, {
+  startDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? val : val.toISOString()
+  ),
+  endDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? val : val.toISOString()
+  )
+}).omit({
   id: true,
   createdAt: true,
   verified: true,
