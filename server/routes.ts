@@ -348,12 +348,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let endDateValue = validData.endDate;
       
       // Asigurăm că avem date în format string pentru baza de date
-      if (startDateValue instanceof Date) {
-        startDateValue = startDateValue.toISOString();
-      }
-      
-      if (endDateValue instanceof Date) {
-        endDateValue = endDateValue.toISOString();
+      try {
+        // Verificăm dacă avem un obiect Date valid
+        if (startDateValue instanceof Date && !isNaN(startDateValue.getTime())) {
+          startDateValue = startDateValue.toISOString();
+        } else if (typeof startDateValue === 'string') {
+          // Dacă e string, încercăm să-l păstrăm dacă e un format ISO valid
+          // sau convertim la ISO dacă e posibil
+          try {
+            const testDate = new Date(startDateValue);
+            if (!isNaN(testDate.getTime())) {
+              startDateValue = testDate.toISOString();
+            }
+          } catch (e) {
+            console.error(">>> Eroare la conversia startDate din string:", e);
+          }
+        }
+        
+        // Aceeași logică pentru endDate
+        if (endDateValue instanceof Date && !isNaN(endDateValue.getTime())) {
+          endDateValue = endDateValue.toISOString();
+        } else if (typeof endDateValue === 'string') {
+          try {
+            const testDate = new Date(endDateValue);
+            if (!isNaN(testDate.getTime())) {
+              endDateValue = testDate.toISOString();
+            }
+          } catch (e) {
+            console.error(">>> Eroare la conversia endDate din string:", e);
+          }
+        }
+      } catch (dateError) {
+        console.error(">>> Eroare la procesarea datelor:", dateError);
       }
       
       // Creem obiectul final

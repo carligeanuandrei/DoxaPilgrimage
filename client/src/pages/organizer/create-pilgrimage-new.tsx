@@ -118,9 +118,18 @@ export default function CreatePilgrimageNewPage() {
         location: data.location,
         month: data.month,
         transportation: data.transportation,
-        // Convertim explicit Date în string ISO pentru backend
-        startDate: data.startDate instanceof Date ? data.startDate.toISOString() : new Date(data.startDate).toISOString(),
-        endDate: data.endDate instanceof Date ? data.endDate.toISOString() : new Date(data.endDate).toISOString(),
+        // Convertim explicit Date în string ISO pentru backend, cu verificări suplimentare pentru a preveni erorile
+        startDate: data.startDate instanceof Date && !isNaN(data.startDate.getTime())
+          ? data.startDate.toISOString()
+          : typeof data.startDate === 'string'
+            ? data.startDate // lăsăm string-ul așa cum e
+            : new Date().toISOString(), // dacă ajungem aici, ceva e greșit, folosim data curentă
+        
+        endDate: data.endDate instanceof Date && !isNaN(data.endDate.getTime())
+          ? data.endDate.toISOString()
+          : typeof data.endDate === 'string'
+            ? data.endDate // lăsăm string-ul așa cum e
+            : new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(), // data curentă + 7 zile
         // Asigurăm valori numerice
         price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
         currency: data.currency,
