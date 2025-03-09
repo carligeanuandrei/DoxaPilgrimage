@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 /**
@@ -19,8 +18,13 @@ export function DirectCmsText({ contentKey, fallback = '', className = '', refre
   
   const fetchContent = useCallback(async () => {
     try {
-      // Folosim apiRequest pentru a gestiona mai bine erorile și headerele
-      const response = await apiRequest("GET", `/api/cms/${contentKey}`);
+      // Utilizăm fetch direct pentru a evita aruncarea de erori din apiRequest
+      const response = await fetch(`/api/cms/${contentKey}`, {
+        credentials: "include",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -65,8 +69,13 @@ export function DirectCmsHtml({ contentKey, fallback = '', className = '', refre
   
   const fetchContent = useCallback(async () => {
     try {
-      // Folosim apiRequest pentru a gestiona mai bine erorile și headerele
-      const response = await apiRequest("GET", `/api/cms/${contentKey}`);
+      // Utilizăm fetch direct pentru a evita aruncarea de erori 
+      const response = await fetch(`/api/cms/${contentKey}`, {
+        credentials: "include",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -109,8 +118,13 @@ export function DirectCmsImage({ contentKey, fallbackSrc = '', alt = '', classNa
   
   const fetchContent = useCallback(async () => {
     try {
-      // Folosim apiRequest pentru a gestiona mai bine erorile și headerele
-      const response = await apiRequest("GET", `/api/cms/${contentKey}`);
+      // Utilizăm fetch direct pentru a evita aruncarea de erori
+      const response = await fetch(`/api/cms/${contentKey}`, {
+        credentials: "include",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
       
       if (response.ok) {
         const data = await response.json();
