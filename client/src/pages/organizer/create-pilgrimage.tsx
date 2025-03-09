@@ -53,9 +53,8 @@ const formSchema = z.object({
   duration: z.coerce.number().min(1, "Durata trebuie să fie de cel puțin 1 zi"),
   guide: z.string().min(3, "Numele ghidului trebuie să aibă cel puțin 3 caractere"),
   availableSpots: z.coerce.number().min(1, "Trebuie să existe cel puțin 1 loc disponibil"),
-  status: z.enum(["draft", "published", "unpublished", "cancelled"], {
-    required_error: "Statusul pelerinajului este obligatoriu",
-  }),
+  // Status-ul este setat automat de server la "draft" 
+  // Nu includem câmpul status în schema formularului
   images: z.array(z.any()).optional().default([]),
   includedServices: z.any().optional(),
 }).refine(data => data.endDate > data.startDate, {
@@ -93,8 +92,8 @@ export default function CreatePilgrimagePage() {
       duration: 1,
       availableSpots: 20,
       guide: "",
-      images: [],
-      status: "draft"
+      images: []
+      // Statusul este setat pe server automat la "draft"
     }
   });
 
