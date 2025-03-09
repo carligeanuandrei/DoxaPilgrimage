@@ -8,6 +8,9 @@ import PilgrimageDetailsPage from "@/pages/pilgrimage-details-page";
 import ProfilePage from "@/pages/profile-page";
 import OrthodoxCalendarPage from "@/pages/orthodox-calendar-page";
 import OrganizerDashboard from "@/pages/organizer/dashboard";
+import CmsPage from "@/pages/admin/cms-page";
+import UsersPage from "@/pages/admin/users-page";
+import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -25,6 +28,16 @@ function Router() {
       </Route>
       <Route path="/organizer/dashboard">
         <ProtectedRoute component={OrganizerDashboard} path="/organizer/dashboard" />
+      </Route>
+      {/* Admin routes */}
+      <Route path="/admin/cms">
+        <ProtectedRoute component={CmsPage} path="/admin/cms" />
+      </Route>
+      <Route path="/admin/users">
+        <ProtectedRoute component={UsersPage} path="/admin/users" />
+      </Route>
+      <Route path="/admin/pilgrimages">
+        <ProtectedRoute component={AdminPilgrimagesPage} path="/admin/pilgrimages" />
       </Route>
       <Route component={NotFound} />
     </Switch>

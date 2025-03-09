@@ -511,6 +511,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CMS routes
+  app.get("/api/cms", async (req, res) => {
+    try {
+      const content = await storage.getCmsContent();
+      res.json(content);
+    } catch (error) {
+      console.error("Error fetching CMS content:", error);
+      res.status(500).json({ message: "Eroare la preluarea conținutului CMS" });
+    }
+  });
+
+  app.get("/api/cms/:key", async (req, res) => {
+    try {
+      const key = req.params.key;
+      const content = await storage.getCmsContent(key);
+      
+      if (!content) {
+        return res.status(404).json({ message: "Conținutul CMS nu a fost găsit" });
+      }
+      
+      res.json(content);
+    } catch (error) {
+      console.error("Error fetching CMS content:", error);
+      res.status(500).json({ message: "Eroare la preluarea conținutului CMS" });
+    }
+  });
+
+  app.post("/api/cms", isAdmin, async (req, res) => {
+    try {
+      const validData = insertCmsContentSchema.parse(req.body);
+      const content = await storage.createCmsContent(validData);
+      
+      res.status(201).json(content);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Date invalide", errors: error.errors });
+      }
+      console.error("Error creating CMS content:", error);
+      res.status(500).json({ message: "Eroare la crearea conținutului CMS" });
+    }
+  });
+
+  app.put("/api/cms/:key", isAdmin, async (req, res) => {
+    try {
+      const key = req.params.key;
+      const content = await storage.getCmsContent(key);
+      
+      if (!content) {
+        return res.status(404).json({ message: "Conținutul CMS nu a fost găsit" });
+      }
+      
+      const updatedContent = await storage.updateCmsContent(key, req.body);
+      res.json(updatedContent);
+    } catch (error) {
+      console.error("Error updating CMS content:", error);
+      res.status(500).json({ message: "Eroare la actualizarea conținutului CMS" });
+    }
+  });
+
+  app.delete("/api/cms/:key", isAdmin, async (req, res) => {
+    try {
+      const key = req.params.key;
+      const content = await storage.getCmsContent(key);
+      
+      if (!content) {
+        return res.status(404).json({ message: "Conținutul CMS nu a fost găsit" });
+      }
+      
+      const result = await storage.deleteCmsContent(key);
+      
+      if (result) {
+        res.json({ success: true, message: "Conținutul CMS a fost șters cu succes" });
+      } else {
+        res.status(500).json({ message: "Eroare la ștergerea conținutului CMS" });
+      }
+    } catch (error) {
+      console.error("Error deleting CMS content:", error);
+      res.status(500).json({ message: "Eroare la ștergerea conținutului CMS" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
