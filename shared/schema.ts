@@ -46,7 +46,7 @@ export const pilgrimages = pgTable("pilgrimages", {
   organizerId: integer("organizer_id").notNull(),
   featured: boolean("featured").default(false),
   verified: boolean("verified").default(false),
-  draft: boolean("draft").default(true), // Sistem cu trei stări: draft, publicat, depublicat
+  status: text("status", { enum: ["draft", "published", "unpublished", "cancelled"] }).notNull().default("draft"),
   // Opțiuni de promovare - acum sunt active
   promoted: boolean("promoted").default(false),
   promotionLevel: text("promotion_level", { enum: ["none", "basic", "premium", "exclusive"] }).notNull().default("none"),
@@ -104,7 +104,7 @@ export const insertPilgrimageSchema = createInsertSchema(pilgrimages).omit({
   createdAt: true,
   verified: true,
   featured: true,
-  draft: true,
+  status: true,
   promoted: true,
   promotionLevel: true,
   promotionExpiry: true,

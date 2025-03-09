@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import { Loader2, Calendar, Tag, Clock, MapPin, Euro, Image, Info, FileText, Group, X as XIcon } from 'lucide-react';
+import { Loader2, Calendar, Tag, Clock, MapPin, Euro, Image, Info, FileText, Group, X as XIcon, Activity } from 'lucide-react';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
