@@ -374,7 +374,10 @@ export class MemStorage implements IStorage {
       id, 
       createdAt: now,
       verified: false,
-      featured: false
+      featured: false,
+      // Asigurăm-ne că includedServices și excludedServices sunt întotdeauna arrays
+      includedServices: insertPilgrimage.includedServices || [],
+      excludedServices: insertPilgrimage.excludedServices || []
     };
     this.pilgrimages.set(id, pilgrimage);
     return pilgrimage;
@@ -383,6 +386,15 @@ export class MemStorage implements IStorage {
   async updatePilgrimage(id: number, pilgrimageData: Partial<Pilgrimage>): Promise<Pilgrimage | undefined> {
     const pilgrimage = this.pilgrimages.get(id);
     if (!pilgrimage) return undefined;
+    
+    // Asigurăm-ne că includedServices și excludedServices sunt întotdeauna arrays
+    if (pilgrimageData.includedServices === undefined && pilgrimage.includedServices === undefined) {
+      pilgrimageData.includedServices = [];
+    }
+    
+    if (pilgrimageData.excludedServices === undefined && pilgrimage.excludedServices === undefined) {
+      pilgrimageData.excludedServices = [];
+    }
     
     const updatedPilgrimage = { ...pilgrimage, ...pilgrimageData };
     this.pilgrimages.set(id, updatedPilgrimage);
