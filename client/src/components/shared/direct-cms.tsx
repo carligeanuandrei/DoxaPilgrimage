@@ -119,6 +119,10 @@ export function DirectCmsHtml({ contentKey, fallback = '', className = '', refre
         // Încercăm și acest format pentru compatibilitate
         setContent(data.value);
         setError(false);
+      } else if (data && data.content_type === 'html' && typeof data.value === 'string') {
+        // Încercăm și formatul snake_case din baza de date
+        setContent(data.value);
+        setError(false);
       } else {
         console.debug(`CMS HTML content for ${contentKey} has unexpected format:`, data);
         setError(true);
@@ -195,6 +199,10 @@ export function DirectCmsImage({ contentKey, fallbackSrc = '', alt = '', classNa
         setError(false);
       } else if (data && data.contentType === 'image' && typeof data.value === 'string') {
         // Încercăm și acest format pentru compatibilitate
+        setSrc(data.value);
+        setError(false);
+      } else if (data && data.content_type === 'image' && typeof data.value === 'string') {
+        // Încercăm și formatul snake_case din baza de date
         setSrc(data.value);
         setError(false);
       } else {
