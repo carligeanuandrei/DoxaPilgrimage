@@ -230,8 +230,10 @@ export default function OrganizerDashboard() {
                           <TableCell>
                             {pilgrimage.verified ? (
                               <Badge className="bg-green-500">Publicat</Badge>
+                            ) : pilgrimage.hasOwnProperty('draft') && pilgrimage.draft ? (
+                              <Badge variant="secondary">Draft</Badge>
                             ) : (
-                              <Badge variant="outline">Nepublicat</Badge>
+                              <Badge variant="outline">Depublicat</Badge>
                             )}
                           </TableCell>
                           <TableCell>
@@ -261,36 +263,38 @@ export default function OrganizerDashboard() {
                                 <DollarSign className="h-4 w-4 mr-1" /> Financiar
                               </Button>
 
-                              {pilgrimage.verified ? (
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="destructive" size="sm">Depublică</Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Depublică pelerinajul</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Sunteți sigur că doriți să depublicați acest pelerinaj? 
-                                        Nu va mai fi vizibil pentru utilizatori.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Anulare</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => unpublishPilgrimage(pilgrimage.id)}>
-                                        Depublică
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              ) : (
-                                <Button 
-                                  variant="default" 
-                                  size="sm"
-                                  onClick={() => publishPilgrimage(pilgrimage.id)}
-                                >
-                                  Publică
-                                </Button>
-                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    Stare <ChevronDown className="h-4 w-4 ml-1" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                  <DropdownMenuLabel>Schimbă starea</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    disabled={pilgrimage.draft}
+                                    onClick={() => markAsDraft(pilgrimage.id)}
+                                  >
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    <span>Draft</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    disabled={pilgrimage.verified}
+                                    onClick={() => publishPilgrimage(pilgrimage.id)}
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                                    <span>Publică</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    disabled={!pilgrimage.verified}
+                                    onClick={() => unpublishPilgrimage(pilgrimage.id)}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2 text-red-500" />
+                                    <span>Depublică</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                               
                               <Button variant="outline" size="sm" asChild>
                                 <Link href={`/pilgrimages/${pilgrimage.id}/edit`}>
