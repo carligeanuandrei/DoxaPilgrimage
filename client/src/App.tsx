@@ -10,6 +10,9 @@ import EditProfilePage from "@/pages/edit-profile-page";
 import OrthodoxCalendarPage from "@/pages/orthodox-calendar-page";
 import AboutPage from "@/pages/about-page";
 import ContactPage from "@/pages/contact-page";
+import TermsPage from "@/pages/terms-page";
+import PrivacyPolicyPage from "@/pages/privacy-policy-page";
+import CookiesPage from "@/pages/cookies-page";
 import OrganizerDashboard from "@/pages/organizer/dashboard";
 import CmsPage from "@/pages/admin/cms-page";
 import UsersPage from "@/pages/admin/users-page";
@@ -26,6 +29,9 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/contact" component={ContactPage} />
+      <Route path="/termeni-si-conditii" component={TermsPage} />
+      <Route path="/politica-de-confidentialitate" component={PrivacyPolicyPage} />
+      <Route path="/cookies" component={CookiesPage} />
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/pilgrimages" component={PilgrimagesPage} />
       <Route path="/pilgrimages/:id" component={PilgrimageDetailsPage} />
