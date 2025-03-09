@@ -304,18 +304,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/pilgrimages", isOrganizer, async (req, res) => {
     try {
-      console.log("Date primite pentru crearea pelerinajului:", req.body);
+      console.log(">>> Date primite pentru crearea pelerinajului:", JSON.stringify(req.body));
       
       // Validăm datele de intrare
       let validData;
       try {
         validData = insertPilgrimageSchema.parse(req.body);
-        console.log("Date validate cu success prin Zod:", validData);
+        console.log(">>> Date validate cu success prin Zod:", JSON.stringify(validData));
       } catch (validationError) {
-        console.error("Eroare de validare Zod:", validationError);
+        console.error(">>> Eroare de validare Zod:", validationError);
         return res.status(400).json({ 
           message: "Date invalide pentru creare pelerinaj", 
-          errors: validationError instanceof z.ZodError ? validationError.errors : validationError.message 
+          errors: validationError instanceof z.ZodError ? validationError.errors : String(validationError) 
         });
       }
       
@@ -323,29 +323,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const organizerId = req.user?.id || req.body.organizerId;
       
       if (!organizerId) {
+        console.error(">>> Error: ID organizator lipsă");
         return res.status(400).json({ message: "ID organizator lipsă" });
       }
       
-      console.log("OrganizerId folosit:", organizerId);
+      console.log(">>> OrganizerId folosit:", organizerId);
       
-      // Creăm pelerinajul
+      // Verificăm și ajustăm datele
       const pilgrimageData = {
         ...validData,
-        organizerId: organizerId
+        organizerId,
+        // Convertim datele numeric pentru a ne asigura că sunt procesate corect
+        availableSpots: Number(validData.availableSpots),
+        price: Number(validData.price),
+        duration: Number(validData.duration),
+        // Convertim date pentru a ne asigura că sunt obiecte Date
+        startDate: new Date(validData.startDate),
+        endDate: new Date(validData.endDate)
       };
       
-      console.log("Date finale pentru creare pelerinaj:", pilgrimageData);
+      console.log(">>> Date finale pentru creare pelerinaj:", JSON.stringify(pilgrimageData, null, 2));
       
-      const pilgrimage = await storage.createPilgrimage(pilgrimageData);
-      
-      console.log("Pelerinaj creat cu succes:", pilgrimage.id);
-      res.status(201).json(pilgrimage);
-    } catch (error) {
-      console.error("Eroare la crearea pelerinajului:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Date invalide", errors: error.errors });
+      try {
+        const pilgrimage = await storage.createPilgrimage(pilgrimageData);
+        console.log(">>> Pelerinaj creat cu succes:", pilgrimage.id);
+        res.status(201).json(pilgrimage);
+      } catch (dbError) {
+        console.error(">>> Eroare la inserarea în baza de date:", dbError);
+        throw new Error(`Eroare la stocarea pelerinajului: ${dbError.message}`);
       }
-      res.status(500).json({ message: "Eroare la crearea pelerinajului", error: error.message });
+    } catch (error) {
+      console.error(">>> Eroare la crearea pelerinajului:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Date invalide pentru schema",
+          details: error.message || "Eroare de validare"
+        });
+      }
+      res.status(500).json({ 
+        message: "Eroare la crearea pelerinajului", 
+        details: error.message || "Eroare neașteptată" 
+      });
     }
   });
 
@@ -700,10 +718,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Nu aveți permisiunea de a publica acest pelerinaj" });
       }
       
-      // Actualizăm statusul pelerinajului la verificat (publicat) și scoatem din draft
+      // Actualizăm statusul pelerinajului la verificat (publicat)
       const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
         verified: true,
-        draft: false 
+        status: "published" 
       });
       
       res.json(updatedPilgrimage);
@@ -731,7 +749,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Actualizăm statusul pelerinajului la neverificat (nepublicat)
       const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
         verified: false,
-        draft: false
+        status: "unpublished"
       });
       
       res.json(updatedPilgrimage);
@@ -759,7 +777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Actualizăm statusul pelerinajului la draft (neverificat și marcat ca draft)
       const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
         verified: false,
-        draft: true 
+        status: "draft" 
       });
       
       res.json(updatedPilgrimage);
@@ -853,7 +871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verificăm dacă pelerinajul este publicat
-      if (pilgrimage.draft || !pilgrimage.verified) {
+      if (pilgrimage.status !== "published" || !pilgrimage.verified) {
         return res.status(400).json({ message: "Doar pelerinajele publicate pot fi promovate" });
       }
       

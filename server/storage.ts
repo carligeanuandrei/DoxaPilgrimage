@@ -922,16 +922,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPilgrimage(insertPilgrimage: InsertPilgrimage): Promise<Pilgrimage> {
-    const [pilgrimage] = await db.insert(pilgrimages).values({
-      ...insertPilgrimage,
-      verified: false,
-      featured: false,
-      draft: true,
-      promoted: false,
-      promotionLevel: 'none',
-      createdAt: new Date()
-    }).returning();
-    return pilgrimage;
+    console.log("Storage: Creez pelerinaj cu datele:", insertPilgrimage);
+    
+    try {
+      const [pilgrimage] = await db.insert(pilgrimages).values({
+        ...insertPilgrimage,
+        verified: false,
+        featured: false,
+        status: "draft", // Folosim status în loc de draft
+        promoted: false,
+        promotionLevel: 'none',
+        createdAt: new Date()
+      }).returning();
+      
+      console.log("Storage: Pelerinaj creat cu succes:", pilgrimage.id);
+      return pilgrimage;
+    } catch (error) {
+      console.error("Eroare în storage la crearea pelerinajului:", error);
+      throw error;
+    }
   }
 
   async updatePilgrimage(id: number, pilgrimageData: Partial<Pilgrimage>): Promise<Pilgrimage | undefined> {
