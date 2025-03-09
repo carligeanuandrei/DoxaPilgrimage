@@ -11,9 +11,10 @@ import { Badge } from "@/components/ui/badge";
 export default function ProfilePage() {
   const { user, logoutMutation } = useAuth();
   
+  // Încarcă rezervările doar dacă utilizatorul nu este admin
   const { data: bookings = [], isLoading: bookingsLoading } = useQuery<Booking[]>({
     queryKey: ['/api/bookings'],
-    enabled: !!user,
+    enabled: !!user && user.role !== "admin",
   });
   
   const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
@@ -101,8 +102,10 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <div className="pt-4 space-y-2">
-                  <Button variant="outline" className="w-full" size="sm">
-                    <Edit className="h-4 w-4 mr-2" /> Editează profilul
+                  <Button variant="outline" className="w-full" size="sm" asChild>
+                    <a href="/edit-profile">
+                      <Edit className="h-4 w-4 mr-2" /> Editează profilul
+                    </a>
                   </Button>
                   <Button variant="destructive" className="w-full" size="sm" onClick={handleLogout} disabled={logoutMutation.isPending}>
                     {logoutMutation.isPending ? (
@@ -120,119 +123,172 @@ export default function ProfilePage() {
           
           {/* Main content */}
           <div className="w-full md:w-2/3">
-            <Tabs defaultValue="bookings">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="bookings">Rezervările mele</TabsTrigger>
-                <TabsTrigger value="messages">Mesaje</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="bookings" className="mt-6">
-                <h2 className="text-xl font-bold mb-4">Rezervările mele</h2>
+            {user.role === "admin" ? (
+              // Pentru administratori - doar secțiunea Mesaje
+              <Tabs defaultValue="messages">
+                <TabsList className="w-full">
+                  <TabsTrigger value="messages" className="w-full">Mesaje</TabsTrigger>
+                </TabsList>
                 
-                {bookingsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                ) : bookings.length === 0 ? (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg">
-                    <p className="text-gray-500">Nu ai nicio rezervare încă.</p>
-                    <Button variant="outline" className="mt-4" asChild>
-                      <a href="/pilgrimages">Descoperă pelerinaje</a>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {bookings.map((booking) => (
-                      <Card key={booking.id}>
-                        <CardContent className="p-6">
-                          <div className="flex justify-between">
-                            <div>
-                              <h3 className="font-bold">Pelerinaj #{booking.pilgrimageId}</h3>
+                <TabsContent value="messages" className="mt-6">
+                  <h2 className="text-xl font-bold mb-4">Mesaje</h2>
+                  
+                  {messagesLoading ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <div className="text-center py-8 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500">Nu ai niciun mesaj.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((message) => (
+                        <Card key={message.id} className={!message.read ? 'border-l-4 border-l-primary' : ''}>
+                          <CardContent className="p-6">
+                            <div className="flex justify-between">
+                              <h3 className="font-bold">
+                                {message.fromUserId === user.id ? 'Către: User #' + message.toUserId : 'De la: User #' + message.fromUserId}
+                              </h3>
                               <p className="text-sm text-gray-500">
-                                Rezervare efectuată la {new Date(booking.createdAt).toLocaleDateString('ro-RO')}
+                                {new Date(message.createdAt).toLocaleDateString('ro-RO', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
                               </p>
                             </div>
-                            <div>
-                              <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                                {getStatusLabel(booking.status)}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-4 space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Persoane:</span>
-                              <span>{booking.persons}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Preț total:</span>
-                              <span className="font-bold">{booking.totalPrice} EUR</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Status plată:</span>
-                              <span className={booking.paymentStatus === 'paid' ? 'text-green-600' : 'text-yellow-600'}>
-                                {booking.paymentStatus === 'paid' ? 'Plătit' : 'În așteptare'}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {booking.paymentStatus === 'pending' && (
-                            <div className="mt-4">
-                              <Button className="w-full" size="sm">
-                                <CreditCard className="h-4 w-4 mr-2" /> Plătește acum
-                              </Button>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="messages" className="mt-6">
-                <h2 className="text-xl font-bold mb-4">Mesaje</h2>
+                            <p className="mt-2">{message.content}</p>
+                            
+                            {message.fromUserId !== user.id && (
+                              <div className="mt-4">
+                                <Button variant="outline" size="sm">
+                                  Răspunde
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            ) : (
+              // Pentru utilizatori non-admin - Secțiunile Rezervări și Mesaje
+              <Tabs defaultValue="bookings">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="bookings">Rezervările mele</TabsTrigger>
+                  <TabsTrigger value="messages">Mesaje</TabsTrigger>
+                </TabsList>
                 
-                {messagesLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                ) : messages.length === 0 ? (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg">
-                    <p className="text-gray-500">Nu ai niciun mesaj.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {messages.map((message) => (
-                      <Card key={message.id} className={!message.read ? 'border-l-4 border-l-primary' : ''}>
-                        <CardContent className="p-6">
-                          <div className="flex justify-between">
-                            <h3 className="font-bold">
-                              {message.fromUserId === user.id ? 'Către: User #' + message.toUserId : 'De la: User #' + message.fromUserId}
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                              {new Date(message.createdAt).toLocaleDateString('ro-RO', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}
-                            </p>
-                          </div>
-                          <p className="mt-2">{message.content}</p>
-                          
-                          {message.fromUserId !== user.id && (
-                            <div className="mt-4">
-                              <Button variant="outline" size="sm">
-                                Răspunde
-                              </Button>
+                <TabsContent value="bookings" className="mt-6">
+                  <h2 className="text-xl font-bold mb-4">Rezervările mele</h2>
+                  
+                  {bookingsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : bookings.length === 0 ? (
+                    <div className="text-center py-8 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500">Nu ai nicio rezervare încă.</p>
+                      <Button variant="outline" className="mt-4" asChild>
+                        <a href="/pilgrimages">Descoperă pelerinaje</a>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {bookings.map((booking) => (
+                        <Card key={booking.id}>
+                          <CardContent className="p-6">
+                            <div className="flex justify-between">
+                              <div>
+                                <h3 className="font-bold">Pelerinaj #{booking.pilgrimageId}</h3>
+                                <p className="text-sm text-gray-500">
+                                  Rezervare efectuată la {new Date(booking.createdAt).toLocaleDateString('ro-RO')}
+                                </p>
+                              </div>
+                              <div>
+                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
+                                  {getStatusLabel(booking.status)}
+                                </span>
+                              </div>
                             </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                            
+                            <div className="mt-4 space-y-2">
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">Persoane:</span>
+                                <span>{booking.persons}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">Preț total:</span>
+                                <span className="font-bold">{booking.totalPrice} EUR</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">Status plată:</span>
+                                <span className={booking.paymentStatus === 'paid' ? 'text-green-600' : 'text-yellow-600'}>
+                                  {booking.paymentStatus === 'paid' ? 'Plătit' : 'În așteptare'}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {booking.paymentStatus === 'pending' && (
+                              <div className="mt-4">
+                                <Button className="w-full" size="sm">
+                                  <CreditCard className="h-4 w-4 mr-2" /> Plătește acum
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="messages" className="mt-6">
+                  <h2 className="text-xl font-bold mb-4">Mesaje</h2>
+                  
+                  {messagesLoading ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <div className="text-center py-8 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500">Nu ai niciun mesaj.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((message) => (
+                        <Card key={message.id} className={!message.read ? 'border-l-4 border-l-primary' : ''}>
+                          <CardContent className="p-6">
+                            <div className="flex justify-between">
+                              <h3 className="font-bold">
+                                {message.fromUserId === user.id ? 'Către: User #' + message.toUserId : 'De la: User #' + message.fromUserId}
+                              </h3>
+                              <p className="text-sm text-gray-500">
+                                {new Date(message.createdAt).toLocaleDateString('ro-RO', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </p>
+                            </div>
+                            <p className="mt-2">{message.content}</p>
+                            
+                            {message.fromUserId !== user.id && (
+                              <div className="mt-4">
+                                <Button variant="outline" size="sm">
+                                  Răspunde
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            )}
           </div>
         </div>
       </div>
