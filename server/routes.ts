@@ -1236,16 +1236,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Filtrăm conținutul pentru a obține bannerele promoționale și titlul secțiunii
-      const promoBanners = allContent.filter(item => 
-        item.key.startsWith('promo_banner_') && 
-        item.contentType === 'image' &&
-        !item.key.includes('section_title')
-      );
+      const promoBanners = allContent.filter(item => {
+        // Debug pentru a vedea ce proprietăți sunt disponibile
+        if (item.key.startsWith('promo_banner_')) {
+          console.log('Proprietăți pentru banner:', Object.keys(item));
+          console.log('Content type pentru banner:', item.content_type || item.contentType);
+        }
+        
+        return (
+          item.key.startsWith('promo_banner_') && 
+          (item.content_type === 'image' || item.contentType === 'image') &&
+          !item.key.includes('section_title')
+        );
+      });
       
       // Găsim titlul secțiunii
       const sectionTitleItem = allContent.find(item => 
         item.key === 'promo_banner_section_title' && 
-        item.contentType === 'text'
+        (item.contentType === 'text' || item.content_type === 'text')
       );
       
       const sectionTitle = sectionTitleItem ? sectionTitleItem.value : "Oferte și Evenimente Speciale";
@@ -1262,7 +1270,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enhancedPromoBanners = await Promise.all(sortedPromoBanners.map(async (banner) => {
         // Încercăm să obținem descrierea pentru acest banner (dacă există)
         const descriptionKey = banner.key.replace('_banner_', '_banner_description_');
-        const descriptionItem = allContent.find(item => item.key === descriptionKey);
+        const descriptionItem = allContent.find(item => 
+          item.key === descriptionKey && 
+          (item.contentType === 'text' || item.content_type === 'text')
+        );
         
         return {
           ...banner,
