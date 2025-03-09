@@ -111,7 +111,32 @@ export default function Header() {
                     </Link>
                   </DropdownMenuItem>
                   
-                  {(user.role === "operator" || user.role === "monastery" || user.role === "admin") && (
+                  {/* Link-uri specifice pentru admin */}
+                  {user.role === "admin" && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/cms" className="cursor-pointer w-full">
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Gestiune CMS</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/users" className="cursor-pointer w-full">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Gestiune Utilizatori</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/pilgrimages" className="cursor-pointer w-full">
+                          <Church className="mr-2 h-4 w-4" />
+                          <span>Gestiune Pelerinaje</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  {/* Link pentru organizatori */}
+                  {(user.role === "operator" || user.role === "monastery") && (
                     <DropdownMenuItem asChild>
                       <Link href="/organizer/dashboard" className="cursor-pointer w-full">
                         <Settings className="mr-2 h-4 w-4" />
@@ -185,7 +210,26 @@ export default function Header() {
                     Profilul meu
                   </Link>
                   
-                  {(user.role === "operator" || user.role === "monastery" || user.role === "admin") && (
+                  {/* Linkuri pentru admin în meniul mobil */}
+                  {user.role === "admin" && (
+                    <>
+                      <Link href="/admin/cms" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <Settings className="inline mr-2 h-4 w-4" />
+                        Gestiune CMS
+                      </Link>
+                      <Link href="/admin/users" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <User className="inline mr-2 h-4 w-4" />
+                        Gestiune Utilizatori
+                      </Link>
+                      <Link href="/admin/pilgrimages" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <Church className="inline mr-2 h-4 w-4" />
+                        Gestiune Pelerinaje
+                      </Link>
+                    </>
+                  )}
+                  
+                  {/* Link pentru organizatori în meniul mobil */}
+                  {(user.role === "operator" || user.role === "monastery") && (
                     <Link href="/organizer/dashboard" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
                       <Settings className="inline mr-2 h-4 w-4" />
                       Panou administrare
