@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams } from 'wouter';
-import { Loader2, Calendar, MapPin, Euro, FileText, Upload, X, Info } from 'lucide-react';
+import { Loader2, Calendar, MapPin, Euro, FileText, Upload, X, Info, Plus, Check } from 'lucide-react';
 import { z } from 'zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -53,6 +53,8 @@ const formSchema = z.object({
   guide: z.string().min(3, "Numele ghidului trebuie să aibă cel puțin 3 caractere"),
   availableSpots: z.number().min(1, "Trebuie să existe cel puțin 1 loc disponibil"),
   image: z.string().optional(),
+  includedServices: z.array(z.string()).optional(),
+  excludedServices: z.array(z.string()).optional(),
 }).refine(data => {
   // Verificăm că endDate este după startDate
   const start = data.startDate instanceof Date ? data.startDate : new Date(data.startDate);
@@ -88,6 +90,58 @@ export default function EditPilgrimagePage() {
   const [, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  // State pentru servicii incluse și excluse
+  const [newIncludedService, setNewIncludedService] = useState<string>("");
+  const [newExcludedService, setNewExcludedService] = useState<string>("");
+  
+  // Funcții pentru gestionarea serviciilor incluse
+  const addIncludedService = () => {
+    if (!newIncludedService.trim()) return;
+    
+    const currentServices = form.getValues('includedServices') || [];
+    if (!currentServices.includes(newIncludedService)) {
+      form.setValue('includedServices', [...currentServices, newIncludedService]);
+      setNewIncludedService("");
+    } else {
+      toast({
+        title: "Serviciu deja adăugat",
+        description: "Acest serviciu este deja inclus în listă",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const removeIncludedService = (service: string) => {
+    const currentServices = form.getValues('includedServices') || [];
+    form.setValue('includedServices', 
+      currentServices.filter(s => s !== service)
+    );
+  };
+  
+  // Funcții pentru gestionarea serviciilor excluse
+  const addExcludedService = () => {
+    if (!newExcludedService.trim()) return;
+    
+    const currentServices = form.getValues('excludedServices') || [];
+    if (!currentServices.includes(newExcludedService)) {
+      form.setValue('excludedServices', [...currentServices, newExcludedService]);
+      setNewExcludedService("");
+    } else {
+      toast({
+        title: "Serviciu deja adăugat",
+        description: "Acest serviciu este deja inclus în listă",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const removeExcludedService = (service: string) => {
+    const currentServices = form.getValues('excludedServices') || [];
+    form.setValue('excludedServices', 
+      currentServices.filter(s => s !== service)
+    );
+  };
 
   // Inițializăm formularul cu valori implicite sigure
   const form = useForm<FormValues>({
@@ -106,6 +160,8 @@ export default function EditPilgrimagePage() {
       availableSpots: 20,
       guide: "",
       image: "",
+      includedServices: [],
+      excludedServices: [],
     }
   });
 
@@ -144,6 +200,8 @@ export default function EditPilgrimagePage() {
         guide: pilgrimage.guide,
         availableSpots: pilgrimage.availableSpots,
         image: pilgrimage.images && pilgrimage.images.length > 0 ? pilgrimage.images[0] : "",
+        includedServices: pilgrimage.includedServices || [],
+        excludedServices: pilgrimage.excludedServices || [],
       });
 
       // Setăm previzualizarea imaginii
@@ -220,6 +278,9 @@ export default function EditPilgrimagePage() {
         duration: typeof data.duration === 'string' ? parseInt(data.duration) || 1 : (data.duration || 1),
         guide: data.guide,
         availableSpots: typeof data.availableSpots === 'string' ? parseInt(data.availableSpots) || 1 : (data.availableSpots || 1),
+        // Pentru servicii incluse/excluse
+        includedServices: data.includedServices || [],
+        excludedServices: data.excludedServices || [],
         // Pentru simplificare, folosim doar o singură imagine pentru început
         images: data.image ? [data.image] : [],
       };
@@ -681,6 +742,91 @@ export default function EditPilgrimagePage() {
                   />
                 </div>
 
+                {/* Servicii incluse și excluse */}
+                <div className="space-y-4 pt-4 border-t">
+                  <h3 className="text-lg font-semibold">Servicii</h3>
+                  
+                  {/* Servicii incluse */}
+                  <div>
+                    <h4 className="text-base font-medium mb-2">Servicii incluse</h4>
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      {form.watch('includedServices')?.map((service, index) => (
+                        <div key={index} className="bg-primary/10 text-primary rounded-full px-3 py-1 text-sm flex items-center">
+                          <Check className="h-3 w-3 mr-1" />
+                          {service}
+                          <button
+                            type="button"
+                            onClick={() => removeIncludedService(service)}
+                            className="ml-2 text-primary/70 hover:text-primary"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={newIncludedService}
+                        onChange={e => setNewIncludedService(e.target.value)}
+                        placeholder="Ex: Transport cu autocar"
+                        className="max-w-sm"
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={addIncludedService}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Adaugă
+                      </Button>
+                    </div>
+                    <FormDescription>
+                      Adăugați serviciile care sunt incluse în prețul pelerinajului
+                    </FormDescription>
+                  </div>
+                  
+                  {/* Servicii excluse */}
+                  <div className="mt-4">
+                    <h4 className="text-base font-medium mb-2">Servicii neincluse</h4>
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      {form.watch('excludedServices')?.map((service, index) => (
+                        <div key={index} className="bg-destructive/10 text-destructive rounded-full px-3 py-1 text-sm flex items-center">
+                          <X className="h-3 w-3 mr-1" />
+                          {service}
+                          <button
+                            type="button"
+                            onClick={() => removeExcludedService(service)}
+                            className="ml-2 text-destructive/70 hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={newExcludedService}
+                        onChange={e => setNewExcludedService(e.target.value)}
+                        placeholder="Ex: Masa de prânz"
+                        className="max-w-sm"
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={addExcludedService}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Adaugă
+                      </Button>
+                    </div>
+                    <FormDescription>
+                      Specificați serviciile care NU sunt incluse în preț și se plătesc separat
+                    </FormDescription>
+                  </div>
+                </div>
+                
                 {/* Imagine */}
                 <div className="space-y-4 pt-4 border-t">
                   <h3 className="text-lg font-semibold">Imagine</h3>
