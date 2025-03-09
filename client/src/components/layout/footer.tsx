@@ -213,24 +213,62 @@ export default function Footer() {
               <DirectCmsText contentKey="footer_cookies" fallback="Cookies" />
             </a>
             
-            {/* Link-uri personalizate - legal links */}
+            {/* Link-uri personalizate - legal links - afișate doar când există conținut */}
             {[1, 2, 3, 4, 5].map((index) => (
-              <a 
-                key={`legal-link-${index}`}
-                href="#" 
-                onClick={(e) => { 
-                  e.preventDefault();
-                  const href = document.querySelector(`[data-cms-key="footer_legal_link${index}_url"]`)?.textContent;
-                  if (href) window.location.href = href;
-                }} 
-                className="text-neutral-400 hover:text-white text-sm transition duration-300"
-                style={{ display: 'contents' }}
-              >
-                <DirectCmsText contentKey={`footer_legal_link${index}_url`} fallback="" className="hidden" />
-                <span className="text-neutral-400 hover:text-white text-sm transition duration-300">
-                  <DirectCmsText contentKey={`footer_legal_link${index}_text`} fallback="" />
-                </span>
-              </a>
+              <span key={`legal-link-wrapper-${index}`} style={{ display: 'contents' }}>
+                <DirectCmsText 
+                  contentKey={`footer_legal_link${index}_text`} 
+                  fallback="" 
+                  refreshInterval={1000}
+                  className="hidden cms-detection"
+                  id={`footer-legal-link-text-${index}`}
+                />
+                <a 
+                  key={`legal-link-${index}`}
+                  id={`footer-legal-link-${index}`}
+                  href="#" 
+                  onClick={(e) => { 
+                    e.preventDefault();
+                    const href = document.querySelector(`[data-cms-key="footer_legal_link${index}_url"]`)?.textContent;
+                    if (href) window.location.href = href;
+                  }} 
+                  className="text-neutral-400 hover:text-white text-sm transition duration-300"
+                  style={{ 
+                    display: 'none', 
+                    visibility: 'hidden' 
+                  }}
+                >
+                  <DirectCmsText 
+                    contentKey={`footer_legal_link${index}_url`} 
+                    fallback="" 
+                    className="hidden" 
+                    refreshInterval={1000}
+                  />
+                  <span className="custom-link-text">
+                    <DirectCmsText 
+                      contentKey={`footer_legal_link${index}_text`} 
+                      fallback="" 
+                      refreshInterval={1000}
+                    />
+                  </span>
+                </a>
+                <script
+                  dangerouslySetInnerHTML={{
+                    __html: `
+                      (function() {
+                        const linkText = document.querySelector('[data-cms-key="footer_legal_link${index}_text"]')?.textContent;
+                        const linkUrl = document.querySelector('[data-cms-key="footer_legal_link${index}_url"]')?.textContent;
+                        const linkElement = document.getElementById('footer-legal-link-${index}');
+
+                        if (linkText && linkUrl && linkElement) {
+                          linkElement.style.display = 'inline';
+                          linkElement.style.visibility = 'visible';
+                        }
+                      })();
+                    `
+                  }}
+                />
+              </span>
             ))}
           </div>
         </div>

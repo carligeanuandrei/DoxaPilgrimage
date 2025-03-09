@@ -719,13 +719,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Verificăm dacă elementul există deja
           const existing = await storage.getCmsContent(item.key);
           if (!existing) {
+            // Creăm un element nou
             const cmsItem = await storage.createCmsContent(item);
             results.push({ key: item.key, status: 'created' });
             createdCount++;
             console.log(`Created CMS item: ${item.key}`);
           } else {
-            results.push({ key: item.key, status: 'exists' });
-            skippedCount++;
+            // Actualizăm elementul existent
+            const updatedCmsItem = await storage.updateCmsContent(item.key, {
+              value: item.value,
+              contentType: item.contentType || existing.contentType
+            });
+            
+            if (updatedCmsItem) {
+              results.push({ key: item.key, status: 'updated' });
+              createdCount++; // Considerăm și actualizarea ca o creare pentru statistici
+              console.log(`Updated CMS item: ${item.key}`);
+            } else {
+              results.push({ key: item.key, status: 'update_failed' });
+              errorCount++;
+              console.error(`Failed to update CMS item: ${item.key}`);
+            }
           }
         } catch (error) {
           console.error(`Error processing ${item.key}:`, error);
