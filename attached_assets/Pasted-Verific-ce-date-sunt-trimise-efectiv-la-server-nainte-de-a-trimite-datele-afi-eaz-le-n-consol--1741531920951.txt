@@ -1,0 +1,57 @@
+Verifică ce date sunt trimise efectiv la server
+Înainte de a trimite datele, afișează-le în consolă:
+În create-pilgrimage-new.tsx, înainte de fetch() sau axios.post():
+
+javascript
+Copiază
+Editează
+console.log("Datele trimise la server:", JSON.stringify(data, null, 2));
+Verifică în consola browserului (F12 -> Console).
+
+Dacă startDate și endDate apar ca null, undefined sau un string ciudat, problema este în frontend.
+
+2️⃣ Verifică dacă serverul primește datele corect
+În routes.ts, adaugă un console.log(req.body) înainte de validare:
+
+typescript
+Copiază
+Editează
+console.log("Date primite de la client:", req.body);
+Apoi verifică în terminal ce apare la cererea POST.
+
+Dacă startDate și endDate sunt încă string-uri în loc de obiecte Date, atunci problema este la cum sunt interpretate în backend.
+
+3️⃣ Forțează conversia în server, chiar dacă clientul le trimite corect
+Înainte de validare, forțează conversia manual:
+
+typescript
+Copiază
+Editează
+const startDate = new Date(req.body.startDate);
+const endDate = new Date(req.body.endDate);
+
+console.log("startDate convertit:", startDate);
+console.log("endDate convertit:", endDate);
+
+if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return res.status(400).json({ message: "Format dată invalid după conversie" });
+}
+Dacă aceste console.log() arată Invalid Date, problema este că serverul primește string-uri într-un format pe care new Date() nu îl înțelege.
+
+4️⃣ Verifică ce format folosește baza de date
+În baza de date (SQLite / MySQL), rulează:
+
+sql
+Copiază
+Editează
+PRAGMA table_info(pilgrimages);
+Verifică dacă startDate și endDate sunt TEXT, DATETIME sau TIMESTAMP.
+
+Dacă sunt TEXT, trebuie salvate ca stringuri ISO (toISOString()).
+Dacă sunt DATETIME, trebuie salvate ca obiecte Date în ORM.
+🔄 După depanare, testează din nou
+1️⃣ Deschide consola browserului și verifică ce se trimite
+2️⃣ Verifică logurile din server pentru datele primite
+3️⃣ Asigură-te că serverul convertește corect înainte de validare
+
+Dacă încă ai probleme, spune-mi exact ce apare în console.log() la fiecare pas. 

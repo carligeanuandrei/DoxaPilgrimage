@@ -304,7 +304,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/pilgrimages", isOrganizer, async (req, res) => {
     try {
-      console.log(">>> Date primite pentru crearea pelerinajului:", JSON.stringify(req.body));
+      console.log(">>> Date primite pentru crearea pelerinajului:", JSON.stringify(req.body, null, 2));
+      
+      // Logăm tipurile de date primite pentru debug
+      console.log(">>> Tipuri de date primite:");
+      console.log(">>> startDate type:", typeof req.body.startDate, "value:", req.body.startDate);
+      console.log(">>> endDate type:", typeof req.body.endDate, "value:", req.body.endDate);
+      
       console.log(">>> Schema validare:", insertPilgrimageSchema);
       
       // Validăm datele de intrare
