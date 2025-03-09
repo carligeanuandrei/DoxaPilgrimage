@@ -48,13 +48,16 @@ export default function CmsPage() {
   });
 
   // Fetch CMS content
-  const { data: cmsContents, isLoading, isError } = useQuery({
+  const { data: cmsContents, isLoading, isError, refetch } = useQuery({
     queryKey: ['/api/cms'],
     queryFn: async () => {
       const res = await apiRequest('GET', '/api/cms');
       const data = await res.json();
       return data;
     },
+    // Configurare pentru actualizare frecventă
+    refetchOnWindowFocus: true,
+    staleTime: 1000, // 1 secundă
   });
 
   // Create mutation
@@ -62,6 +65,8 @@ export default function CmsPage() {
     mutationFn: (data: CmsFormValues) => apiRequest('POST', '/api/cms', data),
     onSuccess: () => {
       // Invalidează toate interogările pentru a re-încărca datele în toate componentele
+      queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+      // Forțează reîmprospătarea pentru alte componente care utilizează date CMS
       queryClient.invalidateQueries();
       toast({
         title: 'Succes!',
@@ -83,7 +88,9 @@ export default function CmsPage() {
   const updateMutation = useMutation({
     mutationFn: (data: CmsFormValues) => apiRequest('PATCH', `/api/cms/${data.key}`, data),
     onSuccess: () => {
-      // Invalidează toate interogările pentru a re-încărca datele în toate componentele
+      // Invalidează specific interogările CMS pentru a re-încărca datele
+      queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+      // Forțează reîmprospătarea pentru alte componente care utilizează date CMS
       queryClient.invalidateQueries();
       toast({
         title: 'Succes!',
@@ -107,8 +114,11 @@ export default function CmsPage() {
   const deleteMutation = useMutation({
     mutationFn: (key: string) => apiRequest('DELETE', `/api/cms/${key}`),
     onSuccess: () => {
-      // Invalidează toate interogările pentru a re-încărca datele în toate componentele
+      // Invalidează specific interogările CMS pentru a re-încărca datele
+      queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+      // Forțează reîmprospătarea pentru alte componente care utilizează date CMS
       queryClient.invalidateQueries();
+      
       toast({
         title: 'Succes!',
         description: 'Conținutul a fost șters cu succes.',
