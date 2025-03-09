@@ -11,6 +11,7 @@ import OrganizerDashboard from "@/pages/organizer/dashboard";
 import CmsPage from "@/pages/admin/cms-page";
 import UsersPage from "@/pages/admin/users-page";
 import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
+import AdminLoginPage from "@/pages/admin/admin-login";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -20,6 +21,7 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/pilgrimages" component={PilgrimagesPage} />
       <Route path="/pilgrimages/:id" component={PilgrimageDetailsPage} />
       <Route path="/orthodox-calendar" component={OrthodoxCalendarPage} />
@@ -31,13 +33,13 @@ function Router() {
       </Route>
       {/* Admin routes */}
       <Route path="/admin/cms">
-        <ProtectedRoute component={CmsPage} path="/admin/cms" />
+        <ProtectedRoute component={CmsPage} path="/admin/cms" adminOnly={true} />
       </Route>
       <Route path="/admin/users">
-        <ProtectedRoute component={UsersPage} path="/admin/users" />
+        <ProtectedRoute component={UsersPage} path="/admin/users" adminOnly={true} />
       </Route>
       <Route path="/admin/pilgrimages">
-        <ProtectedRoute component={AdminPilgrimagesPage} path="/admin/pilgrimages" />
+        <ProtectedRoute component={AdminPilgrimagesPage} path="/admin/pilgrimages" adminOnly={true} />
       </Route>
       <Route component={NotFound} />
     </Switch>
