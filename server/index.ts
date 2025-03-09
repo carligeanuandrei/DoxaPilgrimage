@@ -56,27 +56,40 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Try to serve the app on port 5000, and if that fails, try alternative ports
-  const tryListen = (port: number, maxRetries = 3, retryCount = 0) => {
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    }).on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE' && retryCount < maxRetries) {
-        log(`Port ${port} is in use, trying port ${port + 1}...`);
-        // Try the next port
-        tryListen(port + 1, maxRetries, retryCount + 1);
-      } else {
-        log(`Failed to start server: ${err.message}`);
-        throw err;
-      }
-    });
-  };
+  // Simplified approach to starting server on an available port
+  const preferredPort = 5000;
+  let actualPort = preferredPort;
   
-  // Start with the default port
-  const defaultPort = 5000;
-  tryListen(defaultPort);
+  // Close the server if it's already listening (which might happen during hot reload)
+  if (server.listening) {
+    log("Server is already running, closing and restarting...");
+    server.close();
+  }
+  
+  // First try to detect if the preferred port is available by creating a test server
+  const testServer = require('http').createServer();
+  testServer.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      log(`Default port ${preferredPort} is already in use`);
+      // Use alternative port
+      actualPort = preferredPort + 1;
+      
+      // Now start the real server on the alternative port
+      server.listen(actualPort, "0.0.0.0", () => {
+        log(`⚡ Server is running on port ${actualPort}`);
+      });
+    } else {
+      log(`Error checking port availability: ${err.message}`);
+      process.exit(1);
+    }
+  });
+  
+  testServer.listen(preferredPort, "0.0.0.0", () => {
+    // If we got here, port is available, close test server and start real server
+    testServer.close(() => {
+      server.listen(preferredPort, "0.0.0.0", () => {
+        log(`⚡ Server is running on preferred port ${preferredPort}`);
+      });
+    });
+  });
 })();
