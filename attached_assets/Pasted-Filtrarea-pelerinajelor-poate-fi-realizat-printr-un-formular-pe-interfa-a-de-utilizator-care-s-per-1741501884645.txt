@@ -1,0 +1,184 @@
+Filtrarea pelerinajelor poate fi realizată printr-un formular pe interfața de utilizator care să permită alegerea criteriilor de filtrare, cum ar fi luna, tipul de transport și cuvintele cheie. Iată cum poate arăta acest formular și implementarea în frontend:
+
+4. Filtrarea pelerinajelor (continuare)
+
+Formular de filtrare
+
+Adaugă un formular pentru a filtra pelerinajele în funcție de diferite criterii (luna, tipul de transport, cuvinte cheie):
+
+<form id="filterPilgrimagesForm">
+    <select id="monthFilter">
+        <option value="">Alege luna</option>
+        <option value="1">Ianuarie</option>
+        <option value="2">Februarie</option>
+        <option value="3">Martie</option>
+        <option value="4">Aprilie</option>
+        <option value="5">Mai</option>
+        <option value="6">Iunie</option>
+        <option value="7">Iulie</option>
+        <option value="8">August</option>
+        <option value="9">Septembrie</option>
+        <option value="10">Octombrie</option>
+        <option value="11">Noiembrie</option>
+        <option value="12">Decembrie</option>
+    </select>
+
+    <input type="text" id="transportFilter" placeholder="Tip transport (ex: autocar)" />
+
+    <input type="text" id="keywordFilter" placeholder="Cuvinte cheie (separate prin virgulă)" />
+
+    <button type="submit">Filtrează</button>
+</form>
+
+<div id="pilgrimagesList"></div>
+
+Logica de filtrare și afisare a pelerinajelor
+
+După ce utilizatorul selectează opțiunile de filtrare și trimite formularul, o cerere va fi trimisă către server pentru a obține pelerinajele corespunzătoare criteriilor alese.
+
+<script>
+document.getElementById('filterPilgrimagesForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const month = document.getElementById('monthFilter').value;
+    const transport = document.getElementById('transportFilter').value;
+    const keywords = document.getElementById('keywordFilter').value;
+
+    const queryParams = new URLSearchParams();
+    if (month) queryParams.append('month', month);
+    if (transport) queryParams.append('transport', transport);
+    if (keywords) queryParams.append('keywords', keywords);
+
+    const response = await fetch(`/pilgrimages/filter?${queryParams.toString()}`);
+    const pilgrimages = await response.json();
+
+    displayPilgrimages(pilgrimages);
+});
+
+function displayPilgrimages(pilgrimages) {
+    const container = document.getElementById('pilgrimagesList');
+    container.innerHTML = ''; // Curățăm lista existentă
+
+    if (pilgrimages.length === 0) {
+        container.innerHTML = '<p>Nu există pelerinaje care să corespundă filtrelor selectate.</p>';
+        return;
+    }
+
+    pilgrimages.forEach(pilgrimage => {
+        const pilgrimageDiv = document.createElement('div');
+        pilgrimageDiv.classList.add('pilgrimage-item');
+        pilgrimageDiv.innerHTML = `
+            <h3>${pilgrimage.name}</h3>
+            <p>${pilgrimage.description}</p>
+            <p><strong>Ghid:</strong> ${pilgrimage.guide_name}</p>
+            <p><strong>Număr de persoane:</strong> ${pilgrimage.max_persons}</p>
+            <p><strong>Transport:</strong> ${pilgrimage.transport_type}</p>
+            <p><strong>Preț:</strong> ${pilgrimage.price} lei</p>
+            <p><strong>Data început:</strong> ${new Date(pilgrimage.start_date).toLocaleDateString()}</p>
+            <p><strong>Data sfârșit:</strong> ${new Date(pilgrimage.end_date).toLocaleDateString()}</p>
+        `;
+        container.appendChild(pilgrimageDiv);
+    });
+}
+</script>
+
+5. Raportarea rezervărilor
+
+Pentru a permite organizatorilor să vizualizeze raportul complet al rezervărilor pentru fiecare pelerinaj, va trebui să creăm o funcționalitate pentru a adăuga și a vizualiza rezervările.
+
+Tabelul reservations
+
+Pentru a salva informațiile despre rezervări, vom crea un tabel reservations care va conține informații despre cine a făcut rezervarea și pentru ce pelerinaj.
+
+Backend - Vizualizarea raportului de rezervări
+
+Vom crea un endpoint care să aducă informațiile despre rezervările pentru fiecare pelerinaj:
+
+@app.route('/pilgrimage/<int:pilgrimage_id>/reservations', methods=['GET'])
+@auth_required
+def get_reservations_for_pilgrimage(pilgrimage_id):
+    organizer_id = get_authenticated_user()
+
+    cursor.execute("""
+        SELECT r.id, r.num_persons, r.total_price, r.reservation_date, u.username 
+        FROM reservations r
+        JOIN users u ON r.user_id = u.id
+        WHERE r.pilgrimage_id = %s AND p.organizer_id = %s
+    """, (pilgrimage_id, organizer_id))
+    reservations = cursor.fetchall()
+
+    return jsonify(reservations)
+
+6. Raportul financiar
+
+Pe lângă detaliile despre rezervări, organizatorii trebuie să poată vizualiza sumele totale din rezervările realizate pentru fiecare pelerinaj. Pentru acest lucru, vom calcula suma totală a rezervărilor pentru fiecare pelerinaj.
+
+@app.route('/pilgrimage/<int:pilgrimage_id>/financial-report', methods=['GET'])
+@auth_required
+def get_financial_report(pilgrimage_id):
+    organizer_id = get_authenticated_user()
+
+    cursor.execute("""
+        SELECT SUM(r.total_price) AS total_income
+        FROM reservations r
+        WHERE r.pilgrimage_id = %s
+    """, (pilgrimage_id,))
+    total_income = cursor.fetchone()
+
+    return jsonify({'total_income': total_income['total_income'] if total_income else 0})
+
+7. Frontend - Vizualizarea rezervărilor și raportului financiar
+
+În frontend, poți crea un buton care, atunci când este apăsat, va aduce detaliile rezervărilor și ale raportului financiar pentru pelerinajul respectiv:
+
+<button onclick="getReservations(pilgrimageId)">Vezi rezervările</button>
+<button onclick="getFinancialReport(pilgrimageId)">Vezi raportul financiar</button>
+
+<div id="reservationsList"></div>
+<div id="financialReport"></div>
+
+<script>
+async function getReservations(pilgrimageId) {
+    const response = await fetch(`/pilgrimage/${pilgrimageId}/reservations`);
+    const reservations = await response.json();
+    displayReservations(reservations);
+}
+
+function displayReservations(reservations) {
+    const container = document.getElementById('reservationsList');
+    container.innerHTML = ''; // Curățăm lista existentă
+
+    if (reservations.length === 0) {
+        container.innerHTML = '<p>Nu sunt rezervări pentru acest pelerinaj.</p>';
+        return;
+    }
+
+    reservations.forEach(reservation => {
+        const reservationDiv = document.createElement('div');
+        reservationDiv.classList.add('reservation-item');
+        reservationDiv.innerHTML = `
+            <p><strong>Utilizator:</strong> ${reservation.username}</p>
+            <p><strong>Număr de persoane:</strong> ${reservation.num_persons}</p>
+            <p><strong>Total:</strong> ${reservation.total_price} lei</p>
+            <p><strong>Data rezervării:</strong> ${new Date(reservation.reservation_date).toLocaleDateString()}</p>
+        `;
+        container.appendChild(reservationDiv);
+    });
+}
+
+async function getFinancialReport(pilgrimageId) {
+    const response = await fetch(`/pilgrimage/${pilgrimageId}/financial-report`);
+    const report = await response.json();
+    displayFinancialReport(report);
+}
+
+function displayFinancialReport(report) {
+    const container = document.getElementById('financialReport');
+    container.innerHTML = `<p><strong>Total venituri:</strong> ${report.total_income} lei</p>`;
+}
+</script>
+
+Concluzie
+
+Prin aceste modificări, organizatorii vor putea să își creeze, să gestioneze și să publice pelerinajele în aplicație, să le filtreze pe baza diverselor criterii și să vizualizeze raportul complet al
+

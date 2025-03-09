@@ -58,6 +58,7 @@ export interface IStorage {
   
   // Booking operations
   getBookings(userId: number): Promise<Booking[]>;
+  getBookingsByPilgrimageId(pilgrimageId: number): Promise<Booking[]>;
   createBooking(booking: InsertBooking): Promise<Booking>;
   updateBooking(id: number, bookingData: Partial<Booking>): Promise<Booking | undefined>;
   

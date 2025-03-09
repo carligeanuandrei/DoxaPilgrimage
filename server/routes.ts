@@ -287,6 +287,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rute pentru gestionarea pelerinajelor de către organizatori
+  
+  // Obținerea pelerinajelor organizatorului curent
+  app.get("/api/organizer/pilgrimages", isOrganizer, async (req, res) => {
+    try {
+      // Obținem toate pelerinajele organizatorului autentificat
+      const pilgrimages = await storage.getPilgrimages({ organizerId: req.user.id });
+      res.json(pilgrimages);
+    } catch (error) {
+      console.error("Error fetching organizer pilgrimages:", error);
+      res.status(500).json({ message: "Eroare la preluarea pelerinajelor" });
+    }
+  });
+  
+  // Obținerea rezervărilor pentru un pelerinaj specific al organizatorului
+  app.get("/api/organizer/pilgrimages/:id/bookings", isOrganizer, async (req, res) => {
+    try {
+      const pilgrimageId = parseInt(req.params.id);
+      const pilgrimage = await storage.getPilgrimage(pilgrimageId);
+      
+      if (!pilgrimage) {
+        return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
+      }
+      
+      // Verificăm dacă pelerinajul aparține organizatorului
+      if (pilgrimage.organizerId !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu aveți acces la rezervările acestui pelerinaj" });
+      }
+      
+      // Obținem rezervările pentru acest pelerinaj
+      const bookings = await storage.getBookingsByPilgrimageId(pilgrimageId);
+      
+      // Pentru fiecare rezervare, adăugăm informații despre utilizator
+      const bookingsWithUsers = await Promise.all(
+        bookings.map(async (booking) => {
+          const user = await storage.getUser(booking.userId);
+          return {
+            ...booking,
+            user: user ? {
+              id: user.id,
+              username: user.username,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              phone: user.phone
+            } : null
+          };
+        })
+      );
+      
+      res.json(bookingsWithUsers);
+    } catch (error) {
+      console.error("Error fetching pilgrimage bookings:", error);
+      res.status(500).json({ message: "Eroare la preluarea rezervărilor" });
+    }
+  });
+  
+  // Obținerea raportului financiar pentru un pelerinaj specific
+  app.get("/api/organizer/pilgrimages/:id/financial-report", isOrganizer, async (req, res) => {
+    try {
+      const pilgrimageId = parseInt(req.params.id);
+      const pilgrimage = await storage.getPilgrimage(pilgrimageId);
+      
+      if (!pilgrimage) {
+        return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
+      }
+      
+      // Verificăm dacă pelerinajul aparține organizatorului
+      if (pilgrimage.organizerId !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu aveți acces la informațiile financiare ale acestui pelerinaj" });
+      }
+      
+      // Obținem toate rezervările pentru acest pelerinaj
+      const bookings = await storage.getBookingsByPilgrimageId(pilgrimageId);
+      
+      // Calculăm sumele totale
+      const totalAmount = bookings.reduce((sum, booking) => sum + booking.totalPrice, 0);
+      const confirmedAmount = bookings
+        .filter(booking => booking.status === "confirmed")
+        .reduce((sum, booking) => sum + booking.totalPrice, 0);
+      const pendingAmount = bookings
+        .filter(booking => booking.status === "pending")
+        .reduce((sum, booking) => sum + booking.totalPrice, 0);
+      
+      // Contabilizăm numărul de persoane
+      const totalPersons = bookings.reduce((sum, booking) => sum + booking.persons, 0);
+      const confirmedPersons = bookings
+        .filter(booking => booking.status === "confirmed")
+        .reduce((sum, booking) => sum + booking.persons, 0);
+      
+      res.json({
+        pilgrimage: {
+          id: pilgrimage.id,
+          title: pilgrimage.title,
+          price: pilgrimage.price,
+          availableSpots: pilgrimage.availableSpots
+        },
+        bookings: {
+          total: bookings.length,
+          confirmed: bookings.filter(booking => booking.status === "confirmed").length,
+          pending: bookings.filter(booking => booking.status === "pending").length,
+          cancelled: bookings.filter(booking => booking.status === "cancelled").length
+        },
+        financial: {
+          totalAmount,
+          confirmedAmount,
+          pendingAmount,
+          currency: pilgrimage.currency
+        },
+        persons: {
+          total: totalPersons,
+          confirmed: confirmedPersons,
+          spotsFilled: totalPersons,
+          spotsRemaining: pilgrimage.availableSpots - totalPersons
+        }
+      });
+    } catch (error) {
+      console.error("Error generating financial report:", error);
+      res.status(500).json({ message: "Eroare la generarea raportului financiar" });
+    }
+  });
+  
+  // Publicarea unui pelerinaj
+  app.post("/api/organizer/pilgrimages/:id/publish", isOrganizer, async (req, res) => {
+    try {
+      const pilgrimageId = parseInt(req.params.id);
+      const pilgrimage = await storage.getPilgrimage(pilgrimageId);
+      
+      if (!pilgrimage) {
+        return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
+      }
+      
+      // Verificăm dacă pelerinajul aparține organizatorului
+      if (pilgrimage.organizerId !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu aveți permisiunea de a publica acest pelerinaj" });
+      }
+      
+      // Actualizăm statusul pelerinajului la verificat (publicat)
+      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { verified: true });
+      
+      res.json(updatedPilgrimage);
+    } catch (error) {
+      console.error("Error publishing pilgrimage:", error);
+      res.status(500).json({ message: "Eroare la publicarea pelerinajului" });
+    }
+  });
+  
+  // Depublicarea unui pelerinaj
+  app.post("/api/organizer/pilgrimages/:id/unpublish", isOrganizer, async (req, res) => {
+    try {
+      const pilgrimageId = parseInt(req.params.id);
+      const pilgrimage = await storage.getPilgrimage(pilgrimageId);
+      
+      if (!pilgrimage) {
+        return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
+      }
+      
+      // Verificăm dacă pelerinajul aparține organizatorului
+      if (pilgrimage.organizerId !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu aveți permisiunea de a depublica acest pelerinaj" });
+      }
+      
+      // Actualizăm statusul pelerinajului la neverificat (nepublicat)
+      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { verified: false });
+      
+      res.json(updatedPilgrimage);
+    } catch (error) {
+      console.error("Error unpublishing pilgrimage:", error);
+      res.status(500).json({ message: "Eroare la depublicarea pelerinajului" });
+    }
+  });
+
   // Payment endpoint
   app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
     try {

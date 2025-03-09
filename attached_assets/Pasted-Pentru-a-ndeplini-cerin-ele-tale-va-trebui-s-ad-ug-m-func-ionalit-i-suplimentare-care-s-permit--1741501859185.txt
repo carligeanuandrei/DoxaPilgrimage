@@ -1,0 +1,165 @@
+Pentru a îndeplini cerințele tale, va trebui să adăugăm funcționalități suplimentare care să permită organizatorilor să adauge mai multe informații despre pelerinaje, să le publice, să le asocieze cu filtre, și să le facă private (unpublish) atunci când doresc. Iată pașii detaliați pentru a implementa aceste funcționalități.
+
+1. Extinderea structurii bazei de date
+
+Vom extinde structura bazei de date pentru a include câmpuri suplimentare necesare pentru publicarea și gestionarea pelerinajelor, cum ar fi ghidul, numărul de persoane, statusul de publicare și filtrele asociate.
+
+Tabelul pilgrimages
+
+Am adăugat câmpuri noi pentru:
+
+status - pentru a marca pelerinajul ca public sau nepublic (unpublished).
+
+guide_name - numele ghidului.
+
+max_persons - numărul maxim de persoane.
+
+filters - cuvintele cheie asociate pelerinajului.
+
+transport_type - tipul de transport.
+
+published_at - data când pelerinajul a fost publicat.
+
+
+Tabelul filters (opțional pentru gestionarea filtrelor)
+
+Un alt tabel pentru gestionarea filtrelor ar putea arăta astfel, dar poate fi opțional în funcție de preferințele tale:
+
+2. Backend - Endpointuri pentru gestionarea pelerinajelor
+
+Vom crea endpointuri pentru a permite organizatorilor să modifice, publice, depublice și vizualizeze pelerinajele.
+
+Crearea unui pelerinaj cu informații adiționale
+
+@app.route('/pilgrimage', methods=['POST'])
+@auth_required
+def create_pilgrimage():
+    data = request.get_json()
+    name = data['name']
+    description = data['description']
+    start_date = data['start_date']
+    end_date = data['end_date']
+    price = data['price']
+    guide_name = data['guide_name']
+    max_persons = data['max_persons']
+    filters = data['filters']
+    transport_type = data['transport_type']
+    status = 'unpublished'  # inițial pelerinajul este nepublicat
+    organizer_id = get_authenticated_user()
+
+    cursor.execute("""
+        INSERT INTO pilgrimages (name, description, start_date, end_date, price, guide_name, max_persons, filters, transport_type, status, organizer_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (name, description, start_date, end_date, price, guide_name, max_persons, filters, transport_type, status, organizer_id))
+    conn.commit()
+    return jsonify({'message': 'Pelerinaj creat cu succes!'}), 201
+
+Publicarea unui pelerinaj
+
+@app.route('/pilgrimage/<int:pilgrimage_id>/publish', methods=['POST'])
+@auth_required
+def publish_pilgrimage(pilgrimage_id):
+    organizer_id = get_authenticated_user()
+
+    cursor.execute("UPDATE pilgrimages SET status = 'published', published_at = NOW() WHERE id = %s AND organizer_id = %s", 
+                   (pilgrimage_id, organizer_id))
+    conn.commit()
+    return jsonify({'message': 'Pelerinajul a fost publicat cu succes!'})
+
+Deblocarea unui pelerinaj (Unpublish)
+
+@app.route('/pilgrimage/<int:pilgrimage_id>/unpublish', methods=['POST'])
+@auth_required
+def unpublish_pilgrimage(pilgrimage_id):
+    organizer_id = get_authenticated_user()
+
+    cursor.execute("UPDATE pilgrimages SET status = 'unpublished' WHERE id = %s AND organizer_id = %s", 
+                   (pilgrimage_id, organizer_id))
+    conn.commit()
+    return jsonify({'message': 'Pelerinajul a fost debloctat cu succes!'})
+
+Vizualizarea pelerinajelor și filtrarea acestora
+
+@app.route('/pilgrimages', methods=['GET'])
+@auth_required
+def get_user_pilgrimages():
+    organizer_id = get_authenticated_user()
+    cursor.execute("SELECT * FROM pilgrimages WHERE organizer_id = %s", (organizer_id,))
+    pilgrimages = cursor.fetchall()
+    return jsonify(pilgrimages)
+
+Filtrarea pelerinajelor
+
+Poți implementa un endpoint care să permită filtrarea pelerinajelor pe baza diferitelor criterii (ex: luna, transport, cuvinte cheie):
+
+@app.route('/pilgrimages/filter', methods=['GET'])
+def filter_pilgrimages():
+    filters = request.args.to_dict()  # Obține parametrii din URL
+
+    query = "SELECT * FROM pilgrimages WHERE status = 'published'"
+    params = []
+
+    if 'month' in filters:
+        query += " AND MONTH(start_date) = %s"
+        params.append(filters['month'])
+    
+    if 'transport' in filters:
+        query += " AND transport_type = %s"
+        params.append(filters['transport'])
+
+    if 'keywords' in filters:
+        query += " AND filters LIKE %s"
+        params.append('%' + filters['keywords'] + '%')
+
+    cursor.execute(query, tuple(params))
+    pilgrimages = cursor.fetchall()
+    return jsonify(pilgrimages)
+
+3. Frontend - Interfață pentru gestionarea pelerinajelor
+
+Crearea unui pelerinaj cu informații adiționale
+
+Formularul pentru crearea unui pelerinaj ar putea arăta astfel:
+
+<form id="createPilgrimageForm">
+    <input type="text" id="name" placeholder="Numele pelerinajului" required>
+    <textarea id="description" placeholder="Descriere" required></textarea>
+    <input type="datetime-local" id="start_date" required>
+    <input type="datetime-local" id="end_date" required>
+    <input type="number" id="price" placeholder="Preț pe persoană" required>
+    <input type="text" id="guide_name" placeholder="Numele ghidului" required>
+    <input type="number" id="max_persons" placeholder="Număr maxim de persoane" required>
+    <input type="text" id="filters" placeholder="Cuvinte cheie (separate prin virgulă)" required>
+    <input type="text" id="transport_type" placeholder="Tip transport" required>
+    <button type="submit">Creează Pelerinaj</button>
+</form>
+
+Publicarea și debloarea pelerinajului
+
+Adaugă opțiuni pentru a publica sau a deblocta pelerinajul:
+
+<button onclick="publishPilgrimage(pilgrimageId)">Publică</button>
+<button onclick="unpublishPilgrimage(pilgrimageId)">Deblochează</button>
+
+<script>
+async function publishPilgrimage(pilgrimageId) {
+    const response = await fetch(`/pilgrimage/${pilgrimageId}/publish`, {
+        method: 'POST',
+    });
+    const data = await response.json();
+    alert(data.message);
+}
+
+async function unpublishPilgrimage(pilgrimageId) {
+    const response = await fetch(`/pilgrimage/${pilgrimageId}/unpublish`, {
+        method: 'POST',
+    });
+    const data = await response.json();
+    alert(data.message);
+}
+</script>
+
+4. Filtrarea pelerinajelor
+
+Pentru a filtra pelerinajele, poți adăuga un formular de
+
