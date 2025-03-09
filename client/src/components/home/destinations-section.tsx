@@ -8,7 +8,7 @@ export default function DestinationsSection() {
           {/* Terra Sfântă */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
             <img 
-              src="https://images.unsplash.com/photo-1552423314-cf29ab68ad81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+              src="/images/demo/placeholder-4.svg" 
               alt="Terra Sfântă" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -28,7 +28,7 @@ export default function DestinationsSection() {
           {/* Grecia Ortodoxă */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
             <img 
-              src="https://images.unsplash.com/photo-1579420656258-edf27446e151?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+              src="/images/demo/placeholder-3.svg" 
               alt="Grecia Ortodoxă" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -48,7 +48,7 @@ export default function DestinationsSection() {
           {/* România Creștină */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
             <img 
-              src="https://images.unsplash.com/photo-1549875231-2f59d18dbf76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+              src="/images/demo/placeholder-2.svg" 
               alt="România Creștină" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -68,7 +68,7 @@ export default function DestinationsSection() {
           {/* Italia Catolică */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
             <img 
-              src="https://images.unsplash.com/photo-1633502401334-fef6fe0e3316?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+              src="/images/demo/placeholder-5.svg" 
               alt="Italia Catolică" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />

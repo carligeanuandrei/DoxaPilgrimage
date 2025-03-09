@@ -8,7 +8,7 @@ export default function HeroSection() {
       {/* Hero background image */}
       <div className="absolute inset-0 w-full h-full">
         <img 
-          src="/images/home/hero-background.svg" 
+          src="/images/demo/placeholder-1.svg" 
           alt="Mănăstiri ortodoxe în peisaj montan" 
           className="w-full h-full object-cover" 
         />
