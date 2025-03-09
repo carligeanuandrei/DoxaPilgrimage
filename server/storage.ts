@@ -18,6 +18,11 @@ import * as crypto from "crypto";
 import connectPgSimple from "connect-pg-simple";
 import pg from "pg";
 
+// Definim global updatedAdminUser pentru a stoca datele actualizate
+declare global {
+  var updatedAdminUser: User | undefined;
+}
+
 const { Pool } = pg;
 
 const MemoryStore = createMemoryStore(session);
@@ -794,84 +799,32 @@ export class DatabaseStorage implements IStorage {
   async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
     // Verificăm dacă utilizatorul este administratorul (ID special 9999)
     if (id === 9999) {
-      try {
-        // Citim datele existente ale administratorului
-        const fs = require('fs');
-        const path = require('path');
-        const adminFilePath = path.join(process.cwd(), '.adminstorage', 'data.json');
+      // Pentru adminul virtual, simulăm actualizarea returnând datele actualizate
+      const adminUser: User = {
+        id: 9999,
+        username: 'avatour',
+        password: 'protected',
+        email: userData.email || 'admin@doxa.ro',
+        firstName: userData.firstName || 'Admin',
+        lastName: userData.lastName || 'Doxa',
+        phone: userData.phone !== undefined ? userData.phone : null,
+        role: 'admin',
+        verified: true,
+        verificationToken: null,
+        tokenExpiry: null,
+        resetToken: null,
+        resetTokenExpiry: null,
+        twoFactorCode: null,
+        twoFactorExpiry: null,
+        bio: userData.bio !== undefined ? userData.bio : null,
+        profileImage: userData.profileImage !== undefined ? userData.profileImage : null,
+        createdAt: new Date()
+      };
+      
+      // Actualizam sesiunea curenta
+      global.updatedAdminUser = adminUser;
         
-        let adminData: User;
-        
-        try {
-          // Încercăm să citim fișierul existent
-          const fileData = fs.readFileSync(adminFilePath, 'utf8');
-          adminData = JSON.parse(fileData);
-        } catch (error) {
-          // Dacă fișierul nu există sau este invalid, folosim valorile implicite
-          adminData = {
-            id: 9999,
-            username: 'avatour',
-            password: 'protected',
-            email: 'admin@doxa.ro',
-            firstName: 'Admin',
-            lastName: 'Doxa',
-            phone: null,
-            role: 'admin',
-            verified: true,
-            verificationToken: null,
-            tokenExpiry: null,
-            resetToken: null,
-            resetTokenExpiry: null,
-            twoFactorCode: null,
-            twoFactorExpiry: null,
-            bio: null,
-            profileImage: null,
-            createdAt: new Date()
-          };
-        }
-        
-        // Actualizăm datele cu noile valori
-        const updatedAdminData: User = {
-          ...adminData,
-          ...userData,
-          // Păstrăm câmpurile esențiale neschimbate
-          id: 9999,
-          username: 'avatour',
-          password: 'protected',
-          role: 'admin',
-          verified: true,
-        };
-        
-        // Salvăm datele actualizate
-        fs.writeFileSync(adminFilePath, JSON.stringify(updatedAdminData, null, 2), 'utf8');
-        
-        // Returnăm utilizatorul admin actualizat
-        return updatedAdminData;
-      } catch (error) {
-        console.error('Eroare la actualizarea datelor administratorului:', error);
-        // În caz de eroare, returnăm totuși un utilizator actualizat pentru a nu bloca aplicația
-        const adminUser: User = {
-          id: 9999,
-          username: 'avatour',
-          password: 'protected',
-          email: userData.email || 'admin@doxa.ro',
-          firstName: userData.firstName || 'Admin',
-          lastName: userData.lastName || 'Doxa',
-          phone: userData.phone !== undefined ? userData.phone : null,
-          role: 'admin',
-          verified: true,
-          verificationToken: null,
-          tokenExpiry: null,
-          resetToken: null,
-          resetTokenExpiry: null,
-          twoFactorCode: null,
-          twoFactorExpiry: null,
-          bio: userData.bio !== undefined ? userData.bio : null,
-          profileImage: userData.profileImage !== undefined ? userData.profileImage : null,
-          createdAt: new Date()
-        };
-        return adminUser;
-      }
+      return adminUser;
     }
     
     // Pentru utilizatorii normali, folosim baza de date
