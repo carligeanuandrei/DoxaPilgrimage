@@ -74,6 +74,7 @@ export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   fromUserId: integer("from_user_id").notNull(),
   toUserId: integer("to_user_id").notNull(),
+  subject: text("subject").notNull(),
   content: text("content").notNull(),
   read: boolean("read").default(false),
   createdAt: timestamp("created_at").defaultNow()
@@ -190,8 +191,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   pilgrimages: many(pilgrimages, { relationName: "userPilgrimages" }),
   reviews: many(reviews, { relationName: "userReviews" }),
   bookings: many(bookings, { relationName: "userBookings" }),
-  sentMessages: many(messages, { relationName: "sentMessages", foreignKey: "fromUserId" }),
-  receivedMessages: many(messages, { relationName: "receivedMessages", foreignKey: "toUserId" }),
+  sentMessages: many(messages, { relationName: "sentMessages" }),
+  receivedMessages: many(messages, { relationName: "receivedMessages" }),
   products: many(products, { relationName: "userProducts" }),
   orders: many(orders, { relationName: "userOrders" }),
   productReviews: many(productReviews, { relationName: "userProductReviews" }),
