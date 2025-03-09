@@ -104,7 +104,6 @@ export const insertPilgrimageSchema = createInsertSchema(pilgrimages).omit({
   createdAt: true,
   verified: true,
   featured: true,
-  status: true,
   promoted: true,
   promotionLevel: true,
   promotionExpiry: true,

@@ -5,7 +5,7 @@ import { ro } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Clock, User, DollarSign, Info } from "lucide-react";
+import { MapPin, Calendar, Clock, User, DollarSign, Info, Activity } from "lucide-react";
 
 interface PilgrimageCardProps {
   pilgrimage: Pilgrimage;
@@ -18,6 +18,28 @@ export default function PilgrimageCard({ pilgrimage, viewType = 'grid' }: Pilgri
   const startDate = new Date(pilgrimage.startDate);
   const endDate = new Date(pilgrimage.endDate);
   const formattedDate = formatDistanceToNow(startDate, { addSuffix: true, locale: ro });
+  
+  // Funcție pentru a obține culoarea badge-ului de status
+  const getStatusBadgeClass = () => {
+    switch(pilgrimage.status) {
+      case 'published': return 'bg-green-100 text-green-800 border-green-200';
+      case 'draft': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'unpublished': return 'bg-slate-100 text-slate-800 border-slate-200';
+      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-slate-100 text-slate-800 border-slate-200';
+    }
+  };
+  
+  // Funcție pentru a obține textul statusului tradus în română
+  const getStatusText = () => {
+    switch(pilgrimage.status) {
+      case 'published': return 'Publicat';
+      case 'draft': return 'Ciornă';
+      case 'unpublished': return 'Nepublicat';
+      case 'cancelled': return 'Anulat';
+      default: return 'Ciornă';
+    }
+  };
   
   // Generate a pilgrimage-specific image based on location
   const getPilgrimageImage = () => {
@@ -84,6 +106,11 @@ export default function PilgrimageCard({ pilgrimage, viewType = 'grid' }: Pilgri
             </div>
             
             <div className="flex flex-wrap gap-2 mb-4">
+              <Badge className={getStatusBadgeClass()}>
+                <Activity className="h-3 w-3 mr-1" />
+                {getStatusText()}
+              </Badge>
+              
               {pilgrimage.saint && (
                 <Badge variant="outline" className="bg-background">
                   <div className="w-3 h-3 mr-1">
@@ -155,6 +182,11 @@ export default function PilgrimageCard({ pilgrimage, viewType = 'grid' }: Pilgri
         </div>
         
         <div className="flex flex-wrap gap-2 mb-4">
+          <Badge className={getStatusBadgeClass()}>
+            <Activity className="h-3 w-3 mr-1" />
+            {getStatusText()}
+          </Badge>
+        
           {pilgrimage.saint && (
             <Badge variant="outline" className="bg-background">
               <div className="w-3 h-3 mr-1">
