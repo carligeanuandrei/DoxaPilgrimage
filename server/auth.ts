@@ -70,7 +70,7 @@ export function setupAuth(app: Express) {
             resetToken: null,
             resetTokenExpiry: null,
             twoFactorCode: null,
-            twoFactorEnabled: false,
+            twoFactorExpiry: null,
             bio: null,
             profileImage: null,
             createdAt: new Date()
@@ -124,7 +124,7 @@ export function setupAuth(app: Express) {
           resetToken: null,
           resetTokenExpiry: null,
           twoFactorCode: null,
-          twoFactorEnabled: false,
+          twoFactorExpiry: null,
           bio: null,
           profileImage: null,
           createdAt: new Date()

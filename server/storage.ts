@@ -792,6 +792,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    // Verificăm dacă utilizatorul este administratorul (ID special 9999)
+    if (id === 9999) {
+      // Pentru adminul virtual, simulăm actualizarea returnând datele actualizate
+      const adminUser: User = {
+        id: 9999,
+        username: 'avatour',
+        password: 'protected',
+        email: userData.email || 'admin@doxa.ro',
+        firstName: userData.firstName || 'Admin',
+        lastName: userData.lastName || 'Doxa',
+        phone: userData.phone !== undefined ? userData.phone : null,
+        role: 'admin',
+        verified: true,
+        verificationToken: null,
+        tokenExpiry: null,
+        resetToken: null,
+        resetTokenExpiry: null,
+        twoFactorCode: null,
+        twoFactorExpiry: null,
+        bio: userData.bio !== undefined ? userData.bio : null,
+        profileImage: userData.profileImage !== undefined ? userData.profileImage : null,
+        createdAt: new Date()
+      };
+      return adminUser;
+    }
+    
+    // Pentru utilizatorii normali, folosim baza de date
     const [updatedUser] = await db.update(users)
       .set(userData)
       .where(eq(users.id, id))
