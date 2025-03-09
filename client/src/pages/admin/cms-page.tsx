@@ -535,8 +535,18 @@ export default function CmsPage() {
                   
                   try {
                     // Utilizăm noua rută pentru inițializare în masă
-                    const response = await apiRequest('POST', '/api/cms/initialize', footerItems, { 
-                      credentials: 'include' // Asigurăm transmiterea cookie-urilor
+                    // Verificăm parametri API pentru depanare
+                    console.log("Pregătire cerere API pentru inițializare CMS", { 
+                      itemCount: footerItems.length,
+                      firstItem: footerItems[0]
+                    });
+                    
+                    // Trimitem cererea fără alte opțiuni (credentials deja setat în queryClient)
+                    const response = await fetch('/api/cms/initialize', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(footerItems),
+                      credentials: 'include'
                     });
                     
                     if (!response.ok) {
