@@ -1,0 +1,108 @@
+Dacă proiectul tău folosește Drizzle ORM, trebuie să ne asigurăm că tipurile de date sunt corect definite în shared/schema.ts și că baza de date a fost actualizată conform acestor modificări.
+
+🔹 1. Verifică schema în shared/schema.ts
+Deschide fișierul shared/schema.ts și caută definiția tabelului pilgrimages.
+Ar trebui să arate ceva de genul:
+
+typescript
+Copiază
+Editează
+import { pgTable, serial, text, timestamp, numeric } from "drizzle-orm/pg-core";
+
+export const pilgrimages = pgTable("pilgrimages", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  price: numeric("price").notNull(),
+  description: text("description"),
+  status: text("status").default("pending"),
+});
+🔹 Dacă startDate și endDate sunt de tip text(), trebuie să le schimbăm în timestamp().
+Salvează modificările după actualizare.
+
+🔹 2. Aplică migrarea bazei de date cu Drizzle ORM
+După ce ai modificat schema, trebuie să rulezi migrarea pentru a actualiza baza de date.
+
+În terminal, rulează:
+
+sh
+Copiază
+Editează
+npx drizzle-kit generate:pg
+npx drizzle-kit push
+sau, dacă folosești SQLite:
+
+sh
+Copiază
+Editează
+npx drizzle-kit generate:sqlite
+npx drizzle-kit push
+🔹 Verifică în baza de date dacă modificările au fost aplicate.
+
+Dacă folosești PostgreSQL, poți rula:
+
+sql
+Copiază
+Editează
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'pilgrimages';
+Dacă folosești SQLite:
+
+sh
+Copiază
+Editează
+sqlite3 dev.db ".schema pilgrimages"
+Dacă startDate și endDate apar încă ca TEXT, atunci migrările nu au fost aplicate corect.
+
+🔹 3. Conversia datelor în Backend (server/routes.ts)
+În fișierul server/routes.ts, asigură-te că înainte de salvare, transformi datele din string în Date:
+
+typescript
+Copiază
+Editează
+const startDate = new Date(req.body.startDate);
+const endDate = new Date(req.body.endDate);
+
+if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+  return res.status(400).json({ message: "Invalid date format" });
+}
+
+await db.insert(pilgrimages).values({
+  title: req.body.title,
+  startDate,
+  endDate,
+  price: parseFloat(req.body.price),
+  description: req.body.description,
+  status: req.body.status || "pending",
+});
+🔹 Adaugă console.log(req.body.startDate, startDate); pentru a verifica dacă datele ajung corect la server.
+
+🔹 4. Conversia în Frontend (create-pilgrimage-new.tsx)
+Dacă datele din frontend sunt trimise ca string, modifică astfel:
+
+typescript
+Copiază
+Editează
+const formData = {
+  title,
+  startDate: new Date(startDate).toISOString(), // Convertim la format corect
+  endDate: new Date(endDate).toISOString(),
+  price: parseFloat(price),
+  description,
+  status,
+};
+
+await fetch("/api/create-pilgrimage", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(formData),
+});
+🔹 Asigură-te că datele sunt trimise în format ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ).
+
+📌 Recapitulare:
+✅ Verifică schema în shared/schema.ts și schimbă text() în timestamp().
+✅ Rulează migrarea bazei de date cu npx drizzle-kit push.
+✅ În backend, convertește datele la Date înainte de salvare.
+✅ În frontend, convertește datele la .toISOString() înainte de a le trimite.
+
+După ce aplici aceste modificări, încearcă din nou salvarea pelerinajului și spune-mi dacă mai apare eroarea!
