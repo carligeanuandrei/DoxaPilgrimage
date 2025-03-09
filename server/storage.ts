@@ -1,13 +1,26 @@
-import { users, pilgrimages, reviews, bookings, messages } from "@shared/schema";
+import { 
+  users, pilgrimages, reviews, bookings, messages,
+  products, orders, orderItems, productReviews
+} from "@shared/schema";
 import type { 
   User, InsertUser, Pilgrimage, InsertPilgrimage, 
   Review, InsertReview, Booking, InsertBooking,
-  Message, InsertMessage, VerificationData
+  Message, InsertMessage, VerificationData,
+  Product, InsertProduct, Order, InsertOrder,
+  OrderItem, InsertOrderItem, ProductReview, InsertProductReview
 } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
+import { db } from "./db";
+import { eq, and, like, ilike, or, desc } from "drizzle-orm";
+import * as crypto from "crypto";
+import connectPgSimple from "connect-pg-simple";
+import pg from "pg";
+
+const { Pool } = pg;
 
 const MemoryStore = createMemoryStore(session);
+const PostgresStore = connectPgSimple(session);
 
 // Interface for storage operations
 export interface IStorage {
@@ -44,7 +57,7 @@ export interface IStorage {
   markMessageAsRead(id: number): Promise<Message | undefined>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
 export class MemStorage implements IStorage {
@@ -54,7 +67,7 @@ export class MemStorage implements IStorage {
   private bookings: Map<number, Booking>;
   private messages: Map<number, Message>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: any;
   
   private currentUserId: number;
   private currentPilgrimageId: number;
@@ -162,7 +175,7 @@ export class MemStorage implements IStorage {
     if (!user) throw new Error("User not found");
     
     // Create a random token
-    const token = require('crypto').randomBytes(32).toString('hex');
+    const token = crypto.randomBytes(32).toString('hex');
     
     // Set expiry for 24 hours
     const tokenExpiry = new Date();
@@ -562,4 +575,219 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Implementarea storage-ului pentru PostgreSQL
+export class DatabaseStorage implements IStorage {
+  sessionStore: any;
+
+  constructor() {
+    // Importăm Pool din pachetul pg ce a fost importat global
+    // Inițializăm session store pentru PostgreSQL
+    this.sessionStore = new PostgresStore({
+      pool: new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
+      }),
+      createTableIfMissing: true
+    });
+  }
+
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values({
+      ...insertUser,
+      verified: insertUser.role === "admin", // Admin is verified by default
+      createdAt: new Date(),
+      verificationToken: null,
+      tokenExpiry: null
+    }).returning();
+    return user;
+  }
+
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    const [updatedUser] = await db.update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
+  // Verification operations
+  async createVerificationToken(userId: number, email: string): Promise<string> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    // Create a random token
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // Set expiry for 24 hours
+    const tokenExpiry = new Date();
+    tokenExpiry.setHours(tokenExpiry.getHours() + 24);
+
+    // Update user with token and expiry
+    await this.updateUser(userId, {
+      verificationToken: token,
+      tokenExpiry
+    });
+
+    return token;
+  }
+
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.verificationToken, token));
+    return user;
+  }
+
+  async verifyUserEmail(token: string): Promise<boolean> {
+    const user = await this.getUserByVerificationToken(token);
+    if (!user) return false;
+
+    // Check if token expired
+    const now = new Date();
+    if (user.tokenExpiry && user.tokenExpiry < now) {
+      return false;
+    }
+
+    // Verify the user
+    await this.updateUser(user.id, {
+      verified: true,
+      verificationToken: null,
+      tokenExpiry: null
+    });
+
+    return true;
+  }
+
+  // Pilgrimage operations
+  async getPilgrimage(id: number): Promise<Pilgrimage | undefined> {
+    const [pilgrimage] = await db.select().from(pilgrimages).where(eq(pilgrimages.id, id));
+    return pilgrimage;
+  }
+
+  async getPilgrimages(filters?: Partial<Pilgrimage>): Promise<Pilgrimage[]> {
+    if (!filters) {
+      return db.select().from(pilgrimages);
+    }
+
+    let query = db.select().from(pilgrimages);
+
+    // Aplicăm filtrele
+    if (filters.location) {
+      query = query.where(ilike(pilgrimages.location, `%${filters.location}%`));
+    }
+    if (filters.month) {
+      query = query.where(eq(pilgrimages.month, filters.month));
+    }
+    if (filters.saint) {
+      query = query.where(ilike(pilgrimages.saint || '', `%${filters.saint}%`));
+    }
+    if (filters.transportation) {
+      query = query.where(eq(pilgrimages.transportation, filters.transportation));
+    }
+    if (filters.guide) {
+      query = query.where(ilike(pilgrimages.guide, `%${filters.guide}%`));
+    }
+
+    return query;
+  }
+
+  async createPilgrimage(insertPilgrimage: InsertPilgrimage): Promise<Pilgrimage> {
+    const [pilgrimage] = await db.insert(pilgrimages).values({
+      ...insertPilgrimage,
+      verified: false,
+      featured: false,
+      createdAt: new Date()
+    }).returning();
+    return pilgrimage;
+  }
+
+  async updatePilgrimage(id: number, pilgrimageData: Partial<Pilgrimage>): Promise<Pilgrimage | undefined> {
+    const [updatedPilgrimage] = await db.update(pilgrimages)
+      .set(pilgrimageData)
+      .where(eq(pilgrimages.id, id))
+      .returning();
+    return updatedPilgrimage;
+  }
+
+  // Review operations
+  async getReviews(pilgrimageId: number): Promise<Review[]> {
+    return db.select().from(reviews).where(eq(reviews.pilgrimageId, pilgrimageId));
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db.insert(reviews).values({
+      ...insertReview,
+      verified: false,
+      createdAt: new Date()
+    }).returning();
+    return review;
+  }
+
+  // Booking operations
+  async getBookings(userId: number): Promise<Booking[]> {
+    return db.select().from(bookings).where(eq(bookings.userId, userId));
+  }
+
+  async createBooking(insertBooking: InsertBooking): Promise<Booking> {
+    const [booking] = await db.insert(bookings).values({
+      ...insertBooking,
+      status: "pending",
+      paymentStatus: "pending",
+      paymentId: null,
+      createdAt: new Date()
+    }).returning();
+    return booking;
+  }
+
+  async updateBooking(id: number, bookingData: Partial<Booking>): Promise<Booking | undefined> {
+    const [updatedBooking] = await db.update(bookings)
+      .set(bookingData)
+      .where(eq(bookings.id, id))
+      .returning();
+    return updatedBooking;
+  }
+
+  // Message operations
+  async getMessages(userId: number): Promise<Message[]> {
+    return db.select().from(messages).where(
+      or(
+        eq(messages.toUserId, userId),
+        eq(messages.fromUserId, userId)
+      )
+    );
+  }
+
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const [message] = await db.insert(messages).values({
+      ...insertMessage,
+      read: false,
+      createdAt: new Date()
+    }).returning();
+    return message;
+  }
+
+  async markMessageAsRead(id: number): Promise<Message | undefined> {
+    const [updatedMessage] = await db.update(messages)
+      .set({ read: true })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+}
+
+// Folosim DatabaseStorage în loc de MemStorage
+export const storage = new DatabaseStorage();
