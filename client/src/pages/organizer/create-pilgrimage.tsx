@@ -41,6 +41,9 @@ const formSchema = insertPilgrimageSchema.extend({
   endDate: z.coerce.date({
     required_error: "Data de sfârșit este obligatorie",
   }),
+  status: z.enum(["draft", "published", "unpublished", "cancelled"], {
+    required_error: "Statusul pelerinajului este obligatoriu",
+  }),
 }).refine(data => data.endDate > data.startDate, {
   message: "Data de sfârșit trebuie să fie după data de început",
   path: ["endDate"],
@@ -76,7 +79,8 @@ export default function CreatePilgrimagePage() {
       duration: 1,
       availableSpots: 20,
       guide: "",
-      images: []
+      images: [],
+      status: "draft"
     }
   });
 
@@ -453,6 +457,36 @@ export default function CreatePilgrimagePage() {
                           </div>
                         </FormControl>
                         <FormDescription>Numele ghidului sau însoțitorului grupului</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Rând cu status */}
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Status */}
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status pelerinaj</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <Activity className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <SelectValue placeholder="Selectează statusul" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="draft">Ciornă (vizibil doar pentru tine)</SelectItem>
+                            <SelectItem value="published">Publicat (vizibil pentru toți)</SelectItem>
+                            <SelectItem value="unpublished">Nepublicat (în așteptare)</SelectItem>
+                            <SelectItem value="cancelled">Anulat</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>Statusul curent al pelerinajului</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
