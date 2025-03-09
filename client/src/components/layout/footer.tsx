@@ -186,7 +186,8 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} <DirectCmsText contentKey="footer_copyright" fallback="Doxa Pelerinaje. Toate drepturile rezervate." />
           </p>
           
-          <div className="flex space-x-6">
+          <div className="flex flex-wrap gap-4 md:gap-6">
+            {/* Link-uri standard */}
             <a href="#" onClick={(e) => { 
               e.preventDefault(); 
               const href = document.querySelector('[data-cms-key="footer_terms_url"]')?.textContent || '/termeni-si-conditii';
@@ -211,6 +212,26 @@ export default function Footer() {
               <DirectCmsText contentKey="footer_cookies_url" fallback="/cookies" className="hidden" />
               <DirectCmsText contentKey="footer_cookies" fallback="Cookies" />
             </a>
+            
+            {/* Link-uri personalizate - legal links */}
+            {[1, 2, 3, 4, 5].map((index) => (
+              <a 
+                key={`legal-link-${index}`}
+                href="#" 
+                onClick={(e) => { 
+                  e.preventDefault();
+                  const href = document.querySelector(`[data-cms-key="footer_legal_link${index}_url"]`)?.textContent;
+                  if (href) window.location.href = href;
+                }} 
+                className="text-neutral-400 hover:text-white text-sm transition duration-300"
+                style={{ display: 'contents' }}
+              >
+                <DirectCmsText contentKey={`footer_legal_link${index}_url`} fallback="" className="hidden" />
+                <span className="text-neutral-400 hover:text-white text-sm transition duration-300">
+                  <DirectCmsText contentKey={`footer_legal_link${index}_text`} fallback="" />
+                </span>
+              </a>
+            ))}
           </div>
         </div>
       </div>

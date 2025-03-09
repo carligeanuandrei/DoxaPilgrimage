@@ -329,6 +329,48 @@ export const CookiesInitializer: React.FC<{refetch: () => Promise<any>}> = ({ re
   );
 };
 
+// Componenta pentru inițializarea link-urilor personalizate în footer
+export const FooterLinksInitializer: React.FC<{refetch: () => Promise<any>}> = ({ refetch }) => {
+  const { toast } = useToast();
+  
+  const footerLinksItems: CmsItem[] = [
+    // Link-uri dinamice pentru secțiunea de linkuri legale din footer (lângă Termeni și Condiții)
+    { key: 'footer_legal_links_title', contentType: 'text', value: 'Informații Legale' },
+    
+    // Link 1 - ANPC
+    { key: 'footer_legal_link1_text', contentType: 'text', value: 'ANPC' },
+    { key: 'footer_legal_link1_url', contentType: 'text', value: 'https://anpc.ro/' },
+    
+    // Link 2 - SOL (Soluționarea Online a Litigiilor)
+    { key: 'footer_legal_link2_text', contentType: 'text', value: 'SOL' },
+    { key: 'footer_legal_link2_url', contentType: 'text', value: 'https://ec.europa.eu/consumers/odr/' },
+    
+    // Link 3 - Licențe și autorizații
+    { key: 'footer_legal_link3_text', contentType: 'text', value: 'Licențe' },
+    { key: 'footer_legal_link3_url', contentType: 'text', value: '/licente' },
+    
+    // Link 4 - FAQ
+    { key: 'footer_legal_link4_text', contentType: 'text', value: 'Întrebări Frecvente' },
+    { key: 'footer_legal_link4_url', contentType: 'text', value: '/faq' },
+    
+    // Link 5 - Blog
+    { key: 'footer_legal_link5_text', contentType: 'text', value: 'Blog' },
+    { key: 'footer_legal_link5_url', contentType: 'text', value: '/blog' },
+  ];
+  
+  return (
+    <Button 
+      variant="outline" 
+      size="sm"
+      className="bg-gray-50 hover:bg-gray-100"
+      onClick={() => initializeCmsContent(footerLinksItems, 'Link-uri Footer', toast, refetch)}
+    >
+      <FileIcon className="h-4 w-4 mr-1" />
+      Inițializează Link-uri Footer
+    </Button>
+  );
+};
+
 // Export componenta principală care include toți inițializatorii
 export const CmsInitializers: React.FC<{refetch: () => Promise<any>}> = ({ refetch }) => {
   return (
@@ -338,6 +380,7 @@ export const CmsInitializers: React.FC<{refetch: () => Promise<any>}> = ({ refet
       <TermsInitializer refetch={refetch} />
       <PrivacyInitializer refetch={refetch} />
       <CookiesInitializer refetch={refetch} />
+      <FooterLinksInitializer refetch={refetch} />
     </div>
   );
 };
