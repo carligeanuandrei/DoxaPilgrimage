@@ -340,9 +340,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Vom folosi valorile așa cum sunt deoarece în schema insertPilgrimageSchema
       // am definit deja transformarea datelor în string-uri ISO pentru a fi compatibile cu baza de date
       
-      // Folosim direct validData care are deja toate câmpurile necesare și procesate corect
+      // Procesăm datele pentru a le face compatibile cu baza de date
+      // În special, asigurăm că datele pentru timestamp sunt în formatul corect
+      
+      // Preluăm și formatăm date înregistrare
+      let startDateValue = validData.startDate;
+      let endDateValue = validData.endDate;
+      
+      // Asigurăm că avem date în format string pentru baza de date
+      if (startDateValue instanceof Date) {
+        startDateValue = startDateValue.toISOString();
+      }
+      
+      if (endDateValue instanceof Date) {
+        endDateValue = endDateValue.toISOString();
+      }
+      
+      // Creem obiectul final
       const pilgrimageData = {
         ...validData,
+        // Actualizăm valorile de date cu cele formatate explicit
+        startDate: startDateValue,
+        endDate: endDateValue,
         // Asigurăm că valorile numerice sunt corecte
         availableSpots: Number(validData.availableSpots || 0),
         price: Number(validData.price || 0),

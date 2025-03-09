@@ -100,14 +100,12 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true
 });
 
-// Schema pentru inserarea pelerinajelor cu transformări de date
+// Schema pentru inserarea pelerinajelor - acceptă string sau date pentru datele de început și sfârșit
 export const insertPilgrimageSchema = createInsertSchema(pilgrimages, {
-  startDate: z.string().or(z.date()).transform(val => 
-    typeof val === 'string' ? val : val.toISOString()
-  ),
-  endDate: z.string().or(z.date()).transform(val => 
-    typeof val === 'string' ? val : val.toISOString()
-  )
+  // Pentru startDate și endDate, acceptăm atât string cât și Date
+  // dar nu mai facem transformarea aici, ci în server la nevoie
+  startDate: z.string().or(z.date()),
+  endDate: z.string().or(z.date())
 }).omit({
   id: true,
   createdAt: true,
