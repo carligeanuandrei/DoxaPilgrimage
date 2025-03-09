@@ -680,7 +680,7 @@ export class DatabaseStorage implements IStorage {
 
   async getPilgrimages(filters?: Partial<Pilgrimage>): Promise<Pilgrimage[]> {
     if (!filters) {
-      return db.select().from(pilgrimages);
+      return await db.select().from(pilgrimages);
     }
 
     let query = db.select().from(pilgrimages);
@@ -692,8 +692,8 @@ export class DatabaseStorage implements IStorage {
     if (filters.month) {
       query = query.where(eq(pilgrimages.month, filters.month));
     }
-    if (filters.saint) {
-      query = query.where(ilike(pilgrimages.saint || '', `%${filters.saint}%`));
+    if (filters.saint && filters.saint.length > 0) {
+      query = query.where(ilike(pilgrimages.saint, `%${filters.saint}%`));
     }
     if (filters.transportation) {
       query = query.where(eq(pilgrimages.transportation, filters.transportation));
@@ -702,7 +702,7 @@ export class DatabaseStorage implements IStorage {
       query = query.where(ilike(pilgrimages.guide, `%${filters.guide}%`));
     }
 
-    return query;
+    return await query;
   }
 
   async createPilgrimage(insertPilgrimage: InsertPilgrimage): Promise<Pilgrimage> {
@@ -725,7 +725,7 @@ export class DatabaseStorage implements IStorage {
 
   // Review operations
   async getReviews(pilgrimageId: number): Promise<Review[]> {
-    return db.select().from(reviews).where(eq(reviews.pilgrimageId, pilgrimageId));
+    return await db.select().from(reviews).where(eq(reviews.pilgrimageId, pilgrimageId));
   }
 
   async createReview(insertReview: InsertReview): Promise<Review> {
@@ -739,7 +739,7 @@ export class DatabaseStorage implements IStorage {
 
   // Booking operations
   async getBookings(userId: number): Promise<Booking[]> {
-    return db.select().from(bookings).where(eq(bookings.userId, userId));
+    return await db.select().from(bookings).where(eq(bookings.userId, userId));
   }
 
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
@@ -763,7 +763,7 @@ export class DatabaseStorage implements IStorage {
 
   // Message operations
   async getMessages(userId: number): Promise<Message[]> {
-    return db.select().from(messages).where(
+    return await db.select().from(messages).where(
       or(
         eq(messages.toUserId, userId),
         eq(messages.fromUserId, userId)
