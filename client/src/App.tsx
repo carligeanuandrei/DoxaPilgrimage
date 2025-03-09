@@ -15,7 +15,7 @@ import TermsPage from "@/pages/terms-page";
 import PrivacyPolicyPage from "@/pages/privacy-policy-page";
 import CookiesPage from "@/pages/cookies-page";
 import OrganizerDashboard from "@/pages/organizer/new-dashboard";
-import CreatePilgrimagePage from "@/pages/organizer/create-pilgrimage";
+import CreatePilgrimageNewPage from "@/pages/organizer/create-pilgrimage-new";
 import CmsPage from "@/pages/admin/cms-page";
 import UsersPage from "@/pages/admin/users-page";
 import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
@@ -49,7 +49,7 @@ function Router() {
         <ProtectedRoute component={OrganizerDashboard} path="/organizer/dashboard" />
       </Route>
       <Route path="/organizer/create-pilgrimage">
-        <ProtectedRoute component={CreatePilgrimagePage} path="/organizer/create-pilgrimage" />
+        <ProtectedRoute component={CreatePilgrimageNewPage} path="/organizer/create-pilgrimage" />
       </Route>
       {/* Admin routes */}
       <Route path="/admin/cms">
