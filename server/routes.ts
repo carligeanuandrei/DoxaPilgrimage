@@ -16,7 +16,7 @@ import {
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
-  apiVersion: "2023-10-16",
+  apiVersion: "2023-10-16" as any,
 });
 
 // Configurare multer pentru încărcarea imaginilor
@@ -265,21 +265,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Trying to fetch pilgrimages with filters:", filters);
       const pilgrimages = await storage.getPilgrimages(filters);
       
+      // Asigurăm că datele pentru fiecare pelerinaj sunt formatate corect
+      const formattedPilgrimages = pilgrimages.map(pilgrimage => {
+        return {
+          ...pilgrimage,
+          // Convertim explicit câmpurile de date pentru a ne asigura că sunt formatate corect
+          startDate: pilgrimage.startDate instanceof Date ? pilgrimage.startDate : new Date(pilgrimage.startDate),
+          endDate: pilgrimage.endDate instanceof Date ? pilgrimage.endDate : new Date(pilgrimage.endDate),
+          // Asigurăm că valorile booleene sunt definite
+          featured: pilgrimage.featured === null ? false : pilgrimage.featured,
+          verified: pilgrimage.verified === null ? false : pilgrimage.verified,
+          promoted: pilgrimage.promoted === null ? false : pilgrimage.promoted
+        };
+      });
+      
       // Sortăm pelerinajele - featured first
       try {
-        const featuredPilgrimages = pilgrimages.filter(p => p.featured === true);
-        const regularPilgrimages = pilgrimages.filter(p => p.featured !== true);
+        const featuredPilgrimages = formattedPilgrimages.filter(p => p.featured === true);
+        const regularPilgrimages = formattedPilgrimages.filter(p => p.featured !== true);
         
         // Combinăm cele două liste, cu pelerinajele featured la început
         const sortedPilgrimages = [...featuredPilgrimages, ...regularPilgrimages];
         
         return res.json(sortedPilgrimages);
       } catch (err) {
-        // În caz de erori la sortare, returnăm lista originală
+        // În caz de erori la sortare, returnăm lista procesată
         console.error("Error sorting pilgrimages:", err);
-        return res.json(pilgrimages);
+        return res.json(formattedPilgrimages);
       }
-      
 
     } catch (error) {
       console.error("Error fetching pilgrimages:", error);
@@ -644,11 +657,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/organizer/pilgrimages", isOrganizer, async (req, res) => {
     try {
       // Obținem toate pelerinajele organizatorului autentificat
-      const pilgrimages = await storage.getPilgrimages({ organizerId: req.user.id });
-      res.json(pilgrimages);
+      const pilgrimages = await storage.getPilgrimages({ organizerId: req.user?.id });
+      
+      // Asigurăm că datele pentru fiecare pelerinaj sunt formatate corect
+      const formattedPilgrimages = pilgrimages.map(pilgrimage => {
+        return {
+          ...pilgrimage,
+          // Convertim explicit câmpurile de date pentru a ne asigura că sunt formatate corect
+          startDate: pilgrimage.startDate instanceof Date ? pilgrimage.startDate : new Date(pilgrimage.startDate),
+          endDate: pilgrimage.endDate instanceof Date ? pilgrimage.endDate : new Date(pilgrimage.endDate),
+          // Asigurăm că valorile booleene sunt definite
+          featured: pilgrimage.featured === null ? false : pilgrimage.featured,
+          verified: pilgrimage.verified === null ? false : pilgrimage.verified,
+          promoted: pilgrimage.promoted === null ? false : pilgrimage.promoted
+        };
+      });
+      
+      res.json(formattedPilgrimages);
     } catch (error) {
       console.error("Error fetching organizer pilgrimages:", error);
-      res.status(500).json({ message: "Eroare la preluarea pelerinajelor" });
+      res.status(500).json({ message: "Eroare la preluarea pelerinajelor", error: String(error) });
     }
   });
   

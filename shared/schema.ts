@@ -104,8 +104,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const insertPilgrimageSchema = createInsertSchema(pilgrimages, {
   // Pentru startDate și endDate, acceptăm atât string cât și Date
   // dar nu mai facem transformarea aici, ci în server la nevoie
-  startDate: z.string().or(z.date()),
-  endDate: z.string().or(z.date())
+  startDate: z.union([z.string(), z.date()]),
+  endDate: z.union([z.string(), z.date()])
 }).omit({
   id: true,
   createdAt: true,
