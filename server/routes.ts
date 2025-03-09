@@ -304,18 +304,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/pilgrimages", isOrganizer, async (req, res) => {
     try {
+      console.log("Date primite pentru crearea pelerinajului:", req.body);
+      
       const validData = insertPilgrimageSchema.parse(req.body);
+      
+      // Verificăm organizerId pentru debugging
+      const organizerId = req.user?.id || req.body.organizerId;
+      console.log("OrganizerId folosit:", organizerId);
+      
       const pilgrimage = await storage.createPilgrimage({
         ...validData,
-        organizerId: req.user.id
+        organizerId: organizerId
       });
       
+      console.log("Pelerinaj creat cu succes:", pilgrimage.id);
       res.status(201).json(pilgrimage);
     } catch (error) {
+      console.error("Eroare la crearea pelerinajului:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Date invalide", errors: error.errors });
       }
-      res.status(500).json({ message: "Eroare la crearea pelerinajului" });
+      res.status(500).json({ message: "Eroare la crearea pelerinajului", error: error.message });
     }
   });
 

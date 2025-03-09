@@ -89,9 +89,14 @@ export default function CreatePilgrimagePage() {
     mutationFn: async (pilgrimageData: z.infer<typeof formSchema>) => {
       console.log('Trimit date:', pilgrimageData); // debugging
       
+      // Verificăm dacă user?.id există
+      if (!user?.id) {
+        throw new Error("Trebuie să fiți autentificat ca organizator pentru a crea un pelerinaj");
+      }
+      
       const modifiedData = {
         ...pilgrimageData,
-        organizerId: user?.id,
+        organizerId: user.id, // Id-ul e garantat acum
         // Asigurăm-ne că toate numerele sunt parsate corect
         price: Number(pilgrimageData.price),
         duration: Number(pilgrimageData.duration),
@@ -137,8 +142,8 @@ export default function CreatePilgrimagePage() {
       availableSpots: Number(data.availableSpots),
       // Asigurăm-ne că și imaginile sunt procesate corect
       images: Array.isArray(data.images) ? data.images : [],
-      // Includerea organizatorului
-      organizerId: user?.id
+      // Includerea organizatorului - verificăm dacă există
+      ...(user?.id ? { organizerId: user.id } : {})
     };
 
     console.log('Date formatate formular:', formattedData); // debugging
