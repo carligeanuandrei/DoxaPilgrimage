@@ -19,6 +19,7 @@ import CreatePilgrimagePage from "@/pages/organizer/create-pilgrimage";
 import CmsPage from "@/pages/admin/cms-page";
 import UsersPage from "@/pages/admin/users-page";
 import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
+import OrganizerStatsPage from "@/pages/admin/organizer-stats-page";
 import AdminLoginPage from "@/pages/admin/admin-login";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
@@ -59,6 +60,9 @@ function Router() {
       </Route>
       <Route path="/admin/pilgrimages">
         <ProtectedRoute component={AdminPilgrimagesPage} path="/admin/pilgrimages" adminOnly={true} />
+      </Route>
+      <Route path="/admin/organizer-stats">
+        <ProtectedRoute component={OrganizerStatsPage} path="/admin/organizer-stats" adminOnly={true} />
       </Route>
       <Route component={NotFound} />
     </Switch>

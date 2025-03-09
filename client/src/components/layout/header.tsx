@@ -132,6 +132,12 @@ export default function Header() {
                           <span>Gestiune Pelerinaje</span>
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/organizer-stats" className="cursor-pointer w-full">
+                          <BarChart3 className="mr-2 h-4 w-4" />
+                          <span>Statistici Organizatori</span>
+                        </Link>
+                      </DropdownMenuItem>
                     </>
                   )}
                   
@@ -224,6 +230,10 @@ export default function Header() {
                       <Link href="/admin/pilgrimages" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
                         <Church className="inline mr-2 h-4 w-4" />
                         Gestiune Pelerinaje
+                      </Link>
+                      <Link href="/admin/organizer-stats" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <BarChart3 className="inline mr-2 h-4 w-4" />
+                        Statistici Organizatori
                       </Link>
                     </>
                   )}
