@@ -58,9 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // După înregistrarea cu succes, redirecționăm către pagina de verificare email
+      window.location.href = "/verify-account";
+      
       toast({
         title: "Înregistrare reușită",
-        description: `Bine ai venit în comunitatea Doxa, ${user.firstName}!`,
+        description: `Bine ai venit în comunitatea Doxa, ${user.firstName}! Verifică-ți adresa de email pentru a-ți activa contul.`,
       });
     },
     onError: (error: Error) => {
