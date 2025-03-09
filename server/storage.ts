@@ -959,11 +959,11 @@ export class DatabaseStorage implements IStorage {
     try {
       if (key) {
         // Returnează un singur element după cheie
-        const [content] = await db.select().from(schema.cmsContent).where(eq(schema.cmsContent.key, key));
+        const [content] = await db.select().from(cmsContent).where(eq(cmsContent.key, key));
         return content;
       } else {
         // Returnează toate elementele
-        return await db.select().from(schema.cmsContent);
+        return await db.select().from(cmsContent);
       }
     } catch (error) {
       console.error("Error fetching CMS content:", error);
@@ -972,7 +972,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCmsContent(content: InsertCmsContent): Promise<CmsContent> {
-    const [cmsItem] = await db.insert(schema.cmsContent).values({
+    const [cmsItem] = await db.insert(cmsContent).values({
       ...content,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -981,19 +981,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined> {
-    const [updatedContent] = await db.update(schema.cmsContent)
+    const [updatedContent] = await db.update(cmsContent)
       .set({
         ...content,
         updatedAt: new Date()
       })
-      .where(eq(schema.cmsContent.key, key))
+      .where(eq(cmsContent.key, key))
       .returning();
     return updatedContent;
   }
 
   async deleteCmsContent(key: string): Promise<boolean> {
-    const result = await db.delete(schema.cmsContent)
-      .where(eq(schema.cmsContent.key, key));
+    const result = await db.delete(cmsContent)
+      .where(eq(cmsContent.key, key));
     return result.count > 0;
   }
 }
