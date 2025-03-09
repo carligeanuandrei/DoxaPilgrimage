@@ -61,7 +61,8 @@ export default function CmsPage() {
   const createMutation = useMutation({
     mutationFn: (data: CmsFormValues) => apiRequest('POST', '/api/cms', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+      // Invalidează toate interogările pentru a re-încărca datele în toate componentele
+      queryClient.invalidateQueries();
       toast({
         title: 'Succes!',
         description: 'Conținutul a fost adăugat cu succes.',
@@ -82,7 +83,8 @@ export default function CmsPage() {
   const updateMutation = useMutation({
     mutationFn: (data: CmsFormValues) => apiRequest('PATCH', `/api/cms/${data.key}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+      // Invalidează toate interogările pentru a re-încărca datele în toate componentele
+      queryClient.invalidateQueries();
       toast({
         title: 'Succes!',
         description: 'Conținutul a fost actualizat cu succes.',
@@ -105,7 +107,8 @@ export default function CmsPage() {
   const deleteMutation = useMutation({
     mutationFn: (key: string) => apiRequest('DELETE', `/api/cms/${key}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
+      // Invalidează toate interogările pentru a re-încărca datele în toate componentele
+      queryClient.invalidateQueries();
       toast({
         title: 'Succes!',
         description: 'Conținutul a fost șters cu succes.',
