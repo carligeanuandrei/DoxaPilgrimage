@@ -890,47 +890,56 @@ export class DatabaseStorage implements IStorage {
   async getPilgrimages(filters?: Partial<Pilgrimage>): Promise<Pilgrimage[]> {
     let query = db.select().from(pilgrimages);
 
-    if (!filters) {
-      // În mod implicit, arătăm doar pelerinajele publicate pentru utilizatorii standard
-      console.log("Fără filtre specificate, arătăm doar pelerinajele publicate");
-      return await query.where(eq(pilgrimages.status, "published"));
+    // Verificăm dacă există coloana status în tabelă
+    let hasStatusColumn = true;
+    try {
+      // Încercăm să facem o interogare simplă pentru a verifica existența coloanei
+      await db.select({ status: pilgrimages.status }).from(pilgrimages).limit(1);
+    } catch (err) {
+      console.log("Coloana status nu există în tabela pilgrimages");
+      hasStatusColumn = false;
     }
 
     // Aplicăm filtrele
-    if (filters.location) {
-      query = query.where(ilike(pilgrimages.location, `%${filters.location}%`));
-    }
-    if (filters.month) {
-      query = query.where(eq(pilgrimages.month, filters.month));
-    }
-    if (filters.saint && filters.saint.length > 0) {
-      query = query.where(ilike(pilgrimages.saint, `%${filters.saint}%`));
-    }
-    if (filters.transportation) {
-      query = query.where(eq(pilgrimages.transportation, filters.transportation));
-    }
-    if (filters.guide) {
-      query = query.where(ilike(pilgrimages.guide, `%${filters.guide}%`));
-    }
-    if (filters.organizerId) {
-      query = query.where(eq(pilgrimages.organizerId, filters.organizerId));
-    }
-    // Folosim doar featured pentru a determina promoțiile
-    if (filters.featured !== undefined) {
-      query = query.where(eq(pilgrimages.featured, filters.featured));
-    }
-    // Filtrare după status
-    if (filters.status) {
-      query = query.where(eq(pilgrimages.status, filters.status));
-      console.log(`Filtrez pelerinajele după status: ${filters.status}`);
-    } else if (!filters.organizerId) {
-      // Dacă nu este specificat organizerId (adică nu suntem în dashboard-ul organizatorului)
-      // și nu este specificat un status, arătăm doar pelerinajele publicate
-      query = query.where(eq(pilgrimages.status, "published"));
-      console.log("Arăt doar pelerinajele publicate pentru utilizatorii obișnuiți");
+    if (filters) {
+      if (filters.location) {
+        query = query.where(ilike(pilgrimages.location, `%${filters.location}%`));
+      }
+      if (filters.month) {
+        query = query.where(eq(pilgrimages.month, filters.month));
+      }
+      if (filters.saint && filters.saint.length > 0) {
+        query = query.where(ilike(pilgrimages.saint, `%${filters.saint}%`));
+      }
+      if (filters.transportation) {
+        query = query.where(eq(pilgrimages.transportation, filters.transportation));
+      }
+      if (filters.guide) {
+        query = query.where(ilike(pilgrimages.guide, `%${filters.guide}%`));
+      }
+      if (filters.organizerId) {
+        query = query.where(eq(pilgrimages.organizerId, filters.organizerId));
+      }
+      // Folosim doar featured pentru a determina promoțiile
+      if (filters.featured !== undefined) {
+        query = query.where(eq(pilgrimages.featured, filters.featured));
+      }
+      // Filtrare după verified
+      if (filters.verified !== undefined) {
+        query = query.where(eq(pilgrimages.verified, filters.verified));
+      }
+      
+      // Aplicăm status doar dacă există coloana în tabelă
+      if (hasStatusColumn && filters.status) {
+        query = query.where(eq(pilgrimages.status, filters.status));
+      }
+    } else {
+      // Implicit filtrăm după verified pentru a arăta doar pelerinajele verificate
+      query = query.where(eq(pilgrimages.verified, true));
+      console.log("Arăt doar pelerinajele verificate pentru utilizatorii obișnuiți");
     }
 
-    console.log("Filtre aplicate pentru lista de pelerinaje:", filters);
+    console.log("Filtre aplicate pentru lista de pelerinaje:", filters || { verified: true });
     return await query;
   }
 
@@ -938,16 +947,32 @@ export class DatabaseStorage implements IStorage {
     console.log("Storage: Creez pelerinaj cu datele:", insertPilgrimage);
     
     try {
-      // Setăm explicit statusul 'draft' pentru pelerinajele noi
-      const [pilgrimage] = await db.insert(pilgrimages).values({
+      // Verificăm dacă coloana status există în tabelă
+      let valuesObject: any = {
         ...insertPilgrimage,
-        status: "draft", // Status explicit setat la "draft"
         verified: false,
         featured: false,
         promoted: false,
         promotionLevel: 'none',
         createdAt: new Date()
-      }).returning();
+      };
+      
+      // Verificăm schema tabelei pentru a vedea dacă există coloana status
+      try {
+        // Încercăm să facem o interogare simplă pentru a verifica existența coloanei
+        const result = await db.select({ status: pilgrimages.status }).from(pilgrimages).limit(1);
+        // Dacă ajungem aici, înseamnă că coloana există, așa că o setăm
+        valuesObject.status = "draft";
+        console.log("Storage: Coloana status există, setez status=draft");
+      } catch (err) {
+        // Dacă avem eroare, probabil coloana nu există, așa că nu o includem
+        console.log("Storage: Coloana status nu există, ignorăm acest câmp");
+        // Eliminăm statutul din obiect pentru a evita eroarea
+        delete valuesObject.status;
+      }
+      
+      // Inserăm în baza de date
+      const [pilgrimage] = await db.insert(pilgrimages).values(valuesObject).returning();
       
       console.log("Storage: Pelerinaj creat cu succes:", pilgrimage.id);
       return pilgrimage;

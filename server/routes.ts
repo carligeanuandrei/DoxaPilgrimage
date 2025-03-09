@@ -332,17 +332,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log(">>> Date primite pentru crearea pelerinajului:", JSON.stringify(req.body, null, 2));
       
-      // Logăm tipurile de date primite pentru debug
-      console.log(">>> Tipuri de date primite:");
-      console.log(">>> startDate type:", typeof req.body.startDate, "value:", req.body.startDate);
-      console.log(">>> endDate type:", typeof req.body.endDate, "value:", req.body.endDate);
+      // Preluăm organizerId din utilizatorul autentificat sau din date
+      const organizerId = req.user?.id || req.body.organizerId;
       
-      console.log(">>> Schema validare:", insertPilgrimageSchema);
+      if (!organizerId) {
+        console.error(">>> Error: ID organizator lipsă");
+        return res.status(400).json({ message: "ID organizator lipsă" });
+      }
+      
+      // Pregătim datele pentru validare
+      const formData = {
+        ...req.body,
+        organizerId
+      };
       
       // Validăm datele de intrare
       let validData;
       try {
-        validData = insertPilgrimageSchema.parse(req.body);
+        validData = insertPilgrimageSchema.parse(formData);
         console.log(">>> Date validate cu success prin Zod:", JSON.stringify(validData));
       } catch (validationError) {
         console.error(">>> Eroare detaliată de validare Zod:", JSON.stringify(validationError, null, 2));
@@ -352,100 +359,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Verificăm organizerId pentru debugging și ne asigurăm că există
-      const organizerId = req.user?.id || req.body.organizerId;
-      
-      if (!organizerId) {
-        console.error(">>> Error: ID organizator lipsă");
-        return res.status(400).json({ message: "ID organizator lipsă" });
-      }
-      
-      console.log(">>> OrganizerId folosit:", organizerId);
-      
-      // Trimitem datele direct, sunt deja procesate de schema Zod
-      // Vom folosi valorile așa cum sunt deoarece în schema insertPilgrimageSchema
-      // am definit deja transformarea datelor în string-uri ISO pentru a fi compatibile cu baza de date
-      
       // Procesăm datele pentru a le face compatibile cu baza de date
-      // În special, asigurăm că datele pentru timestamp sunt în formatul corect
-      
-      // Preluăm și formatăm date înregistrare
-      let startDateValue = validData.startDate;
-      let endDateValue = validData.endDate;
-      
-      // Asigurăm că avem date în format string pentru baza de date
-      try {
-        // Verificăm dacă avem un obiect Date valid
-        if (startDateValue instanceof Date && !isNaN(startDateValue.getTime())) {
-          startDateValue = startDateValue.toISOString();
-        } else if (typeof startDateValue === 'string') {
-          // Dacă e string, încercăm să-l păstrăm dacă e un format ISO valid
-          // sau convertim la ISO dacă e posibil
-          try {
-            const testDate = new Date(startDateValue);
-            if (!isNaN(testDate.getTime())) {
-              startDateValue = testDate.toISOString();
-            }
-          } catch (e) {
-            console.error(">>> Eroare la conversia startDate din string:", e);
-          }
-        }
+      const startDate = validData.startDate instanceof Date 
+        ? validData.startDate 
+        : new Date(validData.startDate);
         
-        // Aceeași logică pentru endDate
-        if (endDateValue instanceof Date && !isNaN(endDateValue.getTime())) {
-          endDateValue = endDateValue.toISOString();
-        } else if (typeof endDateValue === 'string') {
-          try {
-            const testDate = new Date(endDateValue);
-            if (!isNaN(testDate.getTime())) {
-              endDateValue = testDate.toISOString();
-            }
-          } catch (e) {
-            console.error(">>> Eroare la conversia endDate din string:", e);
-          }
-        }
-      } catch (dateError) {
-        console.error(">>> Eroare la procesarea datelor:", dateError);
+      const endDate = validData.endDate instanceof Date 
+        ? validData.endDate 
+        : new Date(validData.endDate);
+        
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return res.status(400).json({ 
+          message: "Datele de început și sfârșit trebuie să fie valide"
+        });
       }
       
-      // Creem obiectul final
+      // Creem obiectul final pentru baza de date
       const pilgrimageData = {
-        ...validData,
-        // Actualizăm valorile de date cu cele formatate explicit
-        startDate: startDateValue,
-        endDate: endDateValue,
-        // Asigurăm că valorile numerice sunt corecte
-        availableSpots: Number(validData.availableSpots || 0),
-        price: Number(validData.price || 0),
-        duration: Number(validData.duration || 0),
-        // Adăugăm organizatorul
-        organizerId,
-        // Asigurăm că avem structuri de date valide pentru câmpurile opționale
+        title: validData.title,
+        description: validData.description,
+        location: validData.location,
+        month: validData.month,
+        startDate, 
+        endDate,
+        price: Number(validData.price),
+        currency: validData.currency || "EUR",
+        transportation: validData.transportation,
+        guide: validData.guide,
+        saint: validData.saint || "",
+        duration: Number(validData.duration),
+        includedServices: validData.includedServices || [],
         images: validData.images || [],
-        includedServices: validData.includedServices || []
+        organizerId,
+        availableSpots: Number(validData.availableSpots)
       };
       
       console.log(">>> Date finale pentru creare pelerinaj:", JSON.stringify(pilgrimageData, null, 2));
       
+      // Creăm pelerinajul în baza de date
       try {
         const pilgrimage = await storage.createPilgrimage(pilgrimageData);
         console.log(">>> Pelerinaj creat cu succes:", pilgrimage.id);
         res.status(201).json(pilgrimage);
       } catch (dbError) {
         console.error(">>> Eroare la inserarea în baza de date:", dbError);
-        throw new Error(`Eroare la stocarea pelerinajului: ${dbError.message}`);
+        return res.status(500).json({ 
+          message: "Eroare la stocarea pelerinajului", 
+          details: dbError.message 
+        });
       }
     } catch (error) {
       console.error(">>> Eroare la crearea pelerinajului:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Date invalide pentru schema",
-          details: error.message || "Eroare de validare"
-        });
-      }
       res.status(500).json({ 
         message: "Eroare la crearea pelerinajului", 
-        details: error.message || "Eroare neașteptată" 
+        details: error instanceof Error ? error.message : "Eroare neașteptată" 
       });
     }
   });
