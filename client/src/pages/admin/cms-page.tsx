@@ -481,26 +481,45 @@ export default function CmsPage() {
                   const createCmsItem = async (item: any) => {
                     try {
                       // Verificăm dacă elementul există deja pentru a evita duplicatele
-                      const checkResp = await apiRequest('GET', `/api/cms/${item.key}`);
-                      
-                      // Dacă există, sărim peste
-                      if (checkResp.status === 200) {
-                        console.log(`Elementul ${item.key} există deja.`);
-                        skippedCount++;
-                        return;
-                      }
-                      
-                      // Dacă avem 404, înseamnă că elementul nu există și trebuie creat
-                      if (checkResp.status === 404) {
-                        const resp = await apiRequest('POST', '/api/cms', item);
+                      try {
+                        const checkResp = await apiRequest('GET', `/api/cms/${item.key}`);
                         
-                        if (resp.status === 201 || resp.status === 200) {
-                          console.log(`Creat element CMS: ${item.key}`);
-                          createdCount++;
-                        } else {
-                          console.error(`Eroare la crearea elementului ${item.key}:`, resp.statusText);
-                          errorCount++;
+                        // Dacă există, sărim peste
+                        if (checkResp.status === 200) {
+                          console.log(`Elementul ${item.key} există deja.`);
+                          skippedCount++;
+                          return;
                         }
+                        
+                        // Dacă avem 404, înseamnă că elementul nu există și trebuie creat
+                        if (checkResp.status === 404) {
+                          // Verificăm dacă suntem autentificați ca admin
+                          const userResp = await apiRequest('GET', '/api/user');
+                          console.log('Autentificare user:', userResp.status);
+                          
+                          if (userResp.status !== 200) {
+                            toast({
+                              title: "Eroare de autentificare",
+                              description: "Nu sunteți autentificat ca administrator. Vă rugăm să vă autentificați pentru a crea elemente CMS.",
+                              variant: "destructive",
+                            });
+                            errorCount++;
+                            return;
+                          }
+                          
+                          const resp = await apiRequest('POST', '/api/cms', item);
+                          
+                          if (resp.status === 201 || resp.status === 200) {
+                            console.log(`Creat element CMS: ${item.key}`);
+                            createdCount++;
+                          } else {
+                            console.error(`Eroare la crearea elementului ${item.key}:`, resp.statusText);
+                            errorCount++;
+                          }
+                        }
+                      } catch (error) {
+                        console.error(`Excepție la procesarea elementului ${item.key}:`, error);
+                        errorCount++;
                       }
                     } catch (error) {
                       console.error(`Eroare la procesarea elementului ${item.key}:`, error);
