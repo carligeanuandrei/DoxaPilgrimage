@@ -42,6 +42,7 @@ export const pilgrimages = pgTable("pilgrimages", {
   saint: text("saint"),
   duration: integer("duration").notNull(),
   includedServices: json("included_services").$type<string[]>(),
+  excludedServices: json("excluded_services").$type<string[]>(),
   images: json("images").$type<string[]>(),
   createdAt: timestamp("created_at").defaultNow(),
   organizerId: integer("organizer_id").notNull(),
