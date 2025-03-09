@@ -1,3 +1,5 @@
+import { DirectCmsImage } from "@/components/shared/direct-cms";
+
 export default function DestinationsSection() {
   return (
     <section className="py-12 md:py-16 bg-spirituality-light">
@@ -7,8 +9,9 @@ export default function DestinationsSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {/* Terra Sfântă */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
-            <img 
-              src="/images/demo/destination-card-3.svg" 
+            <DirectCmsImage 
+              contentKey="destination_image_israel" 
+              fallbackSrc="/images/demo/destination-card-3.svg" 
               alt="Terra Sfântă" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -27,8 +30,9 @@ export default function DestinationsSection() {
           
           {/* Grecia Ortodoxă */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
-            <img 
-              src="/images/demo/destination-card-2.svg" 
+            <DirectCmsImage 
+              contentKey="destination_image_greece" 
+              fallbackSrc="/images/demo/destination-card-2.svg" 
               alt="Grecia Ortodoxă" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -47,8 +51,9 @@ export default function DestinationsSection() {
           
           {/* România Creștină */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
-            <img 
-              src="/images/demo/destination-card-1.svg" 
+            <DirectCmsImage 
+              contentKey="destination_image_romania"
+              fallbackSrc="/images/demo/destination-card-1.svg" 
               alt="România Creștină" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
@@ -67,8 +72,9 @@ export default function DestinationsSection() {
           
           {/* Italia Catolică */}
           <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
-            <img 
-              src="/images/demo/destination-card-4.svg" 
+            <DirectCmsImage 
+              contentKey="destination_image_italy"
+              fallbackSrc="/images/demo/destination-card-4.svg" 
               alt="Italia Catolică" 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
             />
