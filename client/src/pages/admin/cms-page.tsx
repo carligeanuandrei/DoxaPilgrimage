@@ -394,10 +394,20 @@ export default function CmsPage() {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="__placeholder">Selectați o cheie predefinită</SelectItem>
-                                <SelectItem value="homepage_banner_1">Banner 1 (homepage_banner_1)</SelectItem>
-                                <SelectItem value="homepage_banner_2">Banner 2 (homepage_banner_2)</SelectItem>
-                                <SelectItem value="homepage_banner_3">Banner 3 (homepage_banner_3)</SelectItem>
-                                <SelectItem value="homepage_banner_4">Banner 4 (homepage_banner_4)</SelectItem>
+                                {/* Bannere principale */}
+                                <SelectItem value="homepage_banner_1">Banner Principal 1 (homepage_banner_1)</SelectItem>
+                                <SelectItem value="homepage_banner_2">Banner Principal 2 (homepage_banner_2)</SelectItem>
+                                <SelectItem value="homepage_banner_3">Banner Principal 3 (homepage_banner_3)</SelectItem>
+                                <SelectItem value="homepage_banner_4">Banner Principal 4 (homepage_banner_4)</SelectItem>
+                                
+                                {/* Bannere secundare */}
+                                <SelectItem value="promo_banner_1">Banner Promoțional 1 (promo_banner_1)</SelectItem>
+                                <SelectItem value="promo_banner_2">Banner Promoțional 2 (promo_banner_2)</SelectItem>
+                                <SelectItem value="promo_banner_3">Banner Promoțional 3 (promo_banner_3)</SelectItem>
+                                <SelectItem value="promo_banner_4">Banner Promoțional 4 (promo_banner_4)</SelectItem>
+                                <SelectItem value="promo_banner_section_title">Titlu Secțiune Promoții (promo_banner_section_title)</SelectItem>
+                                
+                                {/* Imagini destinații */}
                                 <SelectItem value="destination_image_romania">Img România (destination_image_romania)</SelectItem>
                                 <SelectItem value="destination_image_greece">Img Grecia (destination_image_greece)</SelectItem>
                                 <SelectItem value="destination_image_israel">Img Israel (destination_image_israel)</SelectItem>
@@ -544,7 +554,8 @@ export default function CmsPage() {
                         <Input placeholder="Adăugați o descriere scurtă" {...field} />
                       </FormControl>
                       <FormDescription className="mt-1 text-xs">
-                        {form.watch('contentType') === 'image' && form.watch('key')?.startsWith('homepage_banner_') && 
+                        {form.watch('contentType') === 'image' && 
+                          (form.watch('key')?.startsWith('homepage_banner_') || form.watch('key')?.startsWith('promo_banner_')) && 
                           "Pentru bannere, descrierea va fi folosită ca titlu afișat pe banner."
                         }
                       </FormDescription>

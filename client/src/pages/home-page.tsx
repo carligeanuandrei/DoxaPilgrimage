@@ -2,6 +2,7 @@ import HeroSection from "@/components/home/hero-section";
 import SearchBox from "@/components/home/search-box";
 import FeaturedPilgrimages from "@/components/home/featured-pilgrimages";
 import DestinationsSection from "@/components/home/destinations-section";
+import PromoBannersSection from "@/components/home/promo-banners-section";
 import HowItWorks from "@/components/home/how-it-works";
 import Testimonials from "@/components/home/testimonials";
 import CTASection from "@/components/home/cta-section";
@@ -31,6 +32,7 @@ export default function HomePage() {
       )}
       
       <DestinationsSection />
+      <PromoBannersSection />
       <HowItWorks />
       <Testimonials />
       <CTASection />
