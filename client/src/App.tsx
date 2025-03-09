@@ -6,6 +6,7 @@ import AuthPage from "@/pages/auth-page";
 import PilgrimagesPage from "@/pages/pilgrimages-page";
 import PilgrimageDetailsPage from "@/pages/pilgrimage-details-page";
 import ProfilePage from "@/pages/profile-page";
+import EditProfilePage from "@/pages/edit-profile-page";
 import OrthodoxCalendarPage from "@/pages/orthodox-calendar-page";
 import OrganizerDashboard from "@/pages/organizer/dashboard";
 import CmsPage from "@/pages/admin/cms-page";
@@ -27,6 +28,9 @@ function Router() {
       <Route path="/orthodox-calendar" component={OrthodoxCalendarPage} />
       <Route path="/profile">
         <ProtectedRoute component={ProfilePage} path="/profile" />
+      </Route>
+      <Route path="/edit-profile">
+        <ProtectedRoute component={EditProfilePage} path="/edit-profile" />
       </Route>
       <Route path="/organizer/dashboard">
         <ProtectedRoute component={OrganizerDashboard} path="/organizer/dashboard" />
