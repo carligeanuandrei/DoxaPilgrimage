@@ -19,14 +19,8 @@ export function DirectCmsText({ contentKey, fallback = '', className = '', refre
   
   const fetchContent = useCallback(async () => {
     try {
-      const response = await fetch(`/api/cms/${contentKey}`, {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
+      // Folosim apiRequest în loc de fetch pentru a gestiona mai bine erorile
+      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -71,14 +65,8 @@ export function DirectCmsHtml({ contentKey, fallback = '', className = '', refre
   
   const fetchContent = useCallback(async () => {
     try {
-      const response = await fetch(`/api/cms/${contentKey}`, {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
+      // Utilizăm apiRequest pentru a gestiona mai bine erorile
+      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -121,14 +109,8 @@ export function DirectCmsImage({ contentKey, fallbackSrc = '', alt = '', classNa
   
   const fetchContent = useCallback(async () => {
     try {
-      const response = await fetch(`/api/cms/${contentKey}`, {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
+      // Utilizăm apiRequest pentru a gestiona mai bine erorile
+      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
       
       if (response.ok) {
         const data = await response.json();
