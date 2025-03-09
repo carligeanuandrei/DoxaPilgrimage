@@ -1,32 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
-  <rect width="800" height="600" fill="#5b7c99"/>
+  <rect width="800" height="600" fill="#a7c5d9"/>
   
-  <!-- Hills and mountains -->
-  <path d="M0,400 Q200,250 400,350 Q600,200 800,450 L800,600 L0,600 Z" fill="#3a5f76"/>
+  <!-- Aegean Sea -->
+  <path d="M0,300 L800,300 L800,600 L0,600 Z" fill="#3b7ea0"/>
   
-  <!-- Mount Athos monastery complex -->
-  <rect x="200" y="350" width="400" height="100" fill="#e6d2b5"/>
+  <!-- Mount Athos peninsula -->
+  <path d="M200,300 Q300,150 400,300 Q500,200 600,300" fill="#7a9b76"/>
   
-  <!-- Main building -->
-  <rect x="350" y="280" width="100" height="70" fill="#e6d2b5"/>
+  <!-- Byzantine style monastery complex -->
+  <rect x="280" y="250" width="240" height="120" rx="10" ry="10" fill="#ecddc3"/>
   
-  <!-- Main dome and cross -->
-  <path d="M350,280 Q400,230 450,280" stroke="#e6d2b5" stroke-width="10" fill="none"/>
-  <circle cx="400" cy="230" r="15" fill="#e6d2b5"/>
-  <path d="M400,215 L400,190 M385,200 L415,200" stroke="#e6d2b5" stroke-width="4" fill="none"/>
+  <!-- Main church building -->
+  <rect x="330" y="200" width="140" height="70" rx="5" ry="5" fill="#ecddc3"/>
   
-  <!-- Smaller buildings -->
-  <rect x="250" y="320" width="50" height="30" fill="#e6d2b5"/>
-  <rect x="500" y="320" width="50" height="30" fill="#e6d2b5"/>
+  <!-- Main dome -->
+  <circle cx="400" cy="180" r="40" fill="#dd9662"/>
+  <circle cx="400" cy="180" r="30" fill="#ecddc3"/>
+  <path d="M400,150 L400,120 M380,135 L420,135" stroke="#ecddc3" stroke-width="6" fill="none"/>
   
   <!-- Smaller domes -->
-  <path d="M250,320 Q275,300 300,320" stroke="#e6d2b5" stroke-width="5" fill="none"/>
-  <path d="M500,320 Q525,300 550,320" stroke="#e6d2b5" stroke-width="5" fill="none"/>
+  <circle cx="330" cy="200" r="20" fill="#dd9662"/>
+  <circle cx="330" cy="200" r="15" fill="#ecddc3"/>
   
-  <!-- Sea at the bottom -->
-  <path d="M0,550 Q100,530 200,550 Q300,570 400,550 Q500,530 600,550 Q700,570 800,550 L800,600 L0,600 Z" fill="#2c4f6e"/>
+  <circle cx="470" cy="200" r="20" fill="#dd9662"/>
+  <circle cx="470" cy="200" r="15" fill="#ecddc3"/>
   
-  <!-- Text label - would be removed for real image -->
-  <text x="400" y="500" font-family="serif" font-size="30" text-anchor="middle" fill="white">Mount Athos</text>
+  <!-- Bell tower -->
+  <rect x="500" y="220" width="30" height="80" fill="#ecddc3"/>
+  <path d="M500,220 Q515,200 530,220" fill="#dd9662"/>
+  
+  <!-- Cypress trees -->
+  <path d="M200,350 C190,270 210,270 200,350 Z" fill="#2d4c29"/>
+  <path d="M230,320 C220,240 240,240 230,320 Z" fill="#2d4c29"/>
+  <path d="M600,330 C590,250 610,250 600,330 Z" fill="#2d4c29"/>
+  <path d="M630,350 C620,270 640,270 630,350 Z" fill="#2d4c29"/>
+  
+  <!-- Small boat -->
+  <path d="M500,400 L530,400 L520,410 L510,410 Z" fill="#8b4513"/>
+  <line x1="515" y1="380" x2="515" y2="400" stroke="#8b4513" stroke-width="2"/>
+  
+  <!-- Reflections in water -->
+  <path d="M280,370 L520,370 L520,380 L280,380 Z" fill="#ecddc3" opacity="0.3"/>
+  
+  <!-- Labels -->
+  <text x="400" y="470" font-family="serif" font-size="35" text-anchor="middle" fill="white">Grecia Ortodoxă</text>
+  <text x="400" y="510" font-family="serif" font-size="20" text-anchor="middle" fill="white">Muntele Athos • Meteora • Corfu</text>
 </svg>
