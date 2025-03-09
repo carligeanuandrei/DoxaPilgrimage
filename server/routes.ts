@@ -152,13 +152,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pilgrimages = await storage.getPilgrimages(filters);
       
       // Sortăm pelerinajele - featured first
-      const featuredPilgrimages = pilgrimages.filter(p => p.featured);
-      const regularPilgrimages = pilgrimages.filter(p => !p.featured);
+      try {
+        const featuredPilgrimages = pilgrimages.filter(p => p.featured === true);
+        const regularPilgrimages = pilgrimages.filter(p => p.featured !== true);
+        
+        // Combinăm cele două liste, cu pelerinajele featured la început
+        const sortedPilgrimages = [...featuredPilgrimages, ...regularPilgrimages];
+        
+        return res.json(sortedPilgrimages);
+      } catch (err) {
+        // În caz de erori la sortare, returnăm lista originală
+        console.error("Error sorting pilgrimages:", err);
+        return res.json(pilgrimages);
+      }
       
-      // Combinăm cele două liste, cu pelerinajele featured la început
-      const sortedPilgrimages = [...featuredPilgrimages, ...regularPilgrimages];
-      
-      res.json(sortedPilgrimages);
+
     } catch (error) {
       console.error("Error fetching pilgrimages:", error);
       res.status(500).json({ message: "Eroare la preluarea pelerinajelor", error: String(error) });
