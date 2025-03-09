@@ -1,0 +1,103 @@
+Voi crea un flux complet pentru gestionarea pelerinajelor cu Flask și SQLite.
+
+🔹 Ce va conține soluția?
+✅ Formular HTML pentru adăugarea unui pelerinaj (titlu, dată, preț, descriere, status).
+✅ Backend Flask pentru salvarea pelerinajelor în baza de date.
+✅ Pagină Dashboard (/organizer/dashboard) unde se afișează toate pelerinajele adăugate.
+
+📌 1. Structura Proiectului
+bash
+Copiază
+Editează
+/pelerinaje_app
+│── /templates
+│   │── formular.html       # Formular pentru adăugarea pelerinajelor
+│   │── dashboard.html      # Pagina dashboard cu toate pelerinajele
+│── app.py                  # Backend Flask
+│── pelerinaje.db           # Baza de date SQLite (se creează automat)
+│── static/
+│   │── style.css           # CSS pentru stilizare (opțional)
+2. Codul Flask (app.py)
+Acest cod gestionează salvarea și afișarea pelerinajelor.
+
+Editat
+
+Răspunde, în schimb, în discuție
+3. Formular HTML (templates/formular.html)
+Această pagină conține un formular pentru adăugarea unui nou pelerinaj.
+
+html
+Copiază
+Editează
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Adaugă Pelerinaj</title>
+</head>
+<body>
+    <h2>Adaugă un Pelerinaj</h2>
+    <form action="/adauga" method="post">
+        <label>Titlu:</label>
+        <input type="text" name="titlu" required><br>
+
+        <label>Data:</label>
+        <input type="date" name="data" required><br>
+
+        <label>Preț:</label>
+        <input type="number" name="pret" step="0.01" required><br>
+
+        <label>Descriere:</label>
+        <textarea name="descriere" required></textarea><br>
+
+        <label>Status:</label>
+        <select name="status">
+            <option value="activ">Activ</option>
+            <option value="complet">Complet</option>
+            <option value="anulat">Anulat</option>
+        </select><br>
+
+        <button type="submit">Adaugă</button>
+    </form>
+</body>
+</html>
+4. Pagina Dashboard (templates/dashboard.html)
+Aceasta afișează toate pelerinajele salvate în baza de date.
+
+html
+Copiază
+Editează
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Pelerinaje</title>
+</head>
+<body>
+    <h2>Pelerinajele Tale</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Titlu</th>
+            <th>Data</th>
+            <th>Preț</th>
+            <th>Descriere</th>
+            <th>Status</th>
+        </tr>
+        {% for p in pelerinaje %}
+        <tr>
+            <td>{{ p[0] }}</td>
+            <td>{{ p[1] }}</td>
+            <td>{{ p[2] }}</td>
+            <td>{{ p[3] }} RON</td>
+            <td>{{ p[4] }}</td>
+            <td>{{ p[5] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+✅ Ce face acest cod?
+/ → Afișează formularul pentru adăugarea unui pelerinaj.
+/adauga → Primește datele și le salvează în baza de date.
+/organizer/dashboard → Afișează toate pelerinajele într-un tabel.
