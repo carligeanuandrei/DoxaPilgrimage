@@ -560,8 +560,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Nu aveți permisiunea de a publica acest pelerinaj" });
       }
       
-      // Actualizăm statusul pelerinajului la verificat (publicat)
-      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { verified: true });
+      // Actualizăm statusul pelerinajului la verificat (publicat) și scoatem din draft
+      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
+        verified: true,
+        draft: false 
+      });
       
       res.json(updatedPilgrimage);
     } catch (error) {
@@ -586,12 +589,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Actualizăm statusul pelerinajului la neverificat (nepublicat)
-      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { verified: false });
+      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
+        verified: false,
+        draft: false
+      });
       
       res.json(updatedPilgrimage);
     } catch (error) {
       console.error("Error unpublishing pilgrimage:", error);
       res.status(500).json({ message: "Eroare la depublicarea pelerinajului" });
+    }
+  });
+  
+  // Marcarea unui pelerinaj ca draft
+  app.post("/api/organizer/pilgrimages/:id/draft", isOrganizer, async (req, res) => {
+    try {
+      const pilgrimageId = parseInt(req.params.id);
+      const pilgrimage = await storage.getPilgrimage(pilgrimageId);
+      
+      if (!pilgrimage) {
+        return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
+      }
+      
+      // Verificăm dacă pelerinajul aparține organizatorului
+      if (pilgrimage.organizerId !== req.user.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Nu aveți permisiunea de a modifica acest pelerinaj" });
+      }
+      
+      // Actualizăm statusul pelerinajului la draft (neverificat și marcat ca draft)
+      const updatedPilgrimage = await storage.updatePilgrimage(pilgrimageId, { 
+        verified: false,
+        draft: true 
+      });
+      
+      res.json(updatedPilgrimage);
+    } catch (error) {
+      console.error("Error marking pilgrimage as draft:", error);
+      res.status(500).json({ message: "Eroare la marcarea pelerinajului ca draft" });
     }
   });
 

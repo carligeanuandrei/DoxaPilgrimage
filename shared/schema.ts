@@ -46,11 +46,12 @@ export const pilgrimages = pgTable("pilgrimages", {
   organizerId: integer("organizer_id").notNull(),
   featured: boolean("featured").default(false),
   verified: boolean("verified").default(false),
-  // Temporar am comentat coloanele de promovare până facem migrarea bazei de date
-  // promoted: boolean("promoted").default(false),
-  // promotionLevel: text("promotion_level", { enum: ["none", "basic", "premium", "exclusive"] }).notNull().default("none"),
-  // promotionExpiry: timestamp("promotion_expiry"),
-  // promotionStartedAt: timestamp("promotion_started_at"),
+  draft: boolean("draft").default(true), // Sistem cu trei stări: draft, publicat, depublicat
+  // Opțiuni de promovare - acum sunt active
+  promoted: boolean("promoted").default(false),
+  promotionLevel: text("promotion_level", { enum: ["none", "basic", "premium", "exclusive"] }).notNull().default("none"),
+  promotionExpiry: timestamp("promotion_expiry"),
+  promotionStartedAt: timestamp("promotion_started_at"),
   availableSpots: integer("available_spots").notNull()
 });
 
@@ -102,7 +103,12 @@ export const insertPilgrimageSchema = createInsertSchema(pilgrimages).omit({
   id: true,
   createdAt: true,
   verified: true,
-  featured: true
+  featured: true,
+  draft: true,
+  promoted: true,
+  promotionLevel: true,
+  promotionExpiry: true,
+  promotionStartedAt: true
 });
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
