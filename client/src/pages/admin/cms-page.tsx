@@ -86,12 +86,19 @@ export default function CmsPage() {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: (data: CmsFormValues) => apiRequest('PATCH', `/api/cms/${data.key}`, data),
+    mutationFn: (data: CmsFormValues) => apiRequest('PUT', `/api/cms/${data.key}`, data),
     onSuccess: () => {
       // Invalidează specific interogările CMS pentru a re-încărca datele
       queryClient.invalidateQueries({ queryKey: ['/api/cms'] });
-      // Forțează reîmprospătarea pentru alte componente care utilizează date CMS
+      
+      // Forțează reîmprospătarea TUTUROR datelor pentru a actualiza și componentele care folosesc CMS
       queryClient.invalidateQueries();
+      
+      // Forțează reîmprospătarea imediată
+      setTimeout(() => {
+        refetch();
+      }, 300);
+      
       toast({
         title: 'Succes!',
         description: 'Conținutul a fost actualizat cu succes.',

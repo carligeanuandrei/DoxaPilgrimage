@@ -1,91 +1,87 @@
-import { useEffect, createContext, useContext, useState, ReactNode } from 'react';
-import { CmsContent } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { createContext, ReactNode, useContext, useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CmsContent } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+// Tipul pentru datele CMS
+type CmsData = {
+  [key: string]: string;
+};
 
 // Context pentru datele CMS
-const CmsContentContext = createContext<{
-  cmsData: Record<string, string>;
+type CmsContextType = {
+  cmsData: CmsData;
   isLoading: boolean;
-  isError: boolean;
-  refreshCmsData: () => Promise<void>;
-}>({
-  cmsData: {},
-  isLoading: true,
-  isError: false,
-  refreshCmsData: async () => {}
-});
+  error: Error | null;
+  refreshCmsContent: () => Promise<void>;
+};
 
+const CmsContext = createContext<CmsContextType | null>(null);
+
+// Provider pentru conținutul CMS - asigură că datele sunt disponibile în întreaga aplicație
 export function CmsContentProvider({ children }: { children: ReactNode }) {
-  const [cmsData, setCmsData] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
   const { toast } = useToast();
-
-  // Funcție pentru încărcarea datelor CMS
-  const fetchCmsData = async () => {
+  const queryClient = useQueryClient();
+  const [cmsData, setCmsData] = useState<CmsData>({});
+  
+  // Query pentru a prelua tot conținutul CMS
+  const { data, isLoading, error, refetch } = useQuery<CmsContent[]>({
+    queryKey: ["/api/cms"],
+    refetchInterval: 2000, // Reîmprospătăm automat la fiecare 2 secunde
+    refetchOnWindowFocus: true,
+    staleTime: 1000, // Marcăm datele ca fiind expirate după 1 secundă
+  });
+  
+  // Transformăm array-ul de conținut CMS într-un obiect cu key->value pentru acces ușor
+  useEffect(() => {
+    if (data) {
+      const formattedData: CmsData = {};
+      data.forEach((item) => {
+        formattedData[item.key] = item.value;
+      });
+      setCmsData(formattedData);
+    }
+  }, [data]);
+  
+  // Funcție pentru reîmprospătarea manuală a conținutului
+  const refreshCmsContent = async () => {
     try {
-      setIsLoading(true);
-      const response = await apiRequest('GET', '/api/cms');
-      const data = await response.json() as CmsContent[];
-      
-      // Transformă array-ul în obiect pentru acces mai ușor prin cheie
-      const dataObject: Record<string, string> = {};
-      data.forEach(item => {
-        dataObject[item.key] = item.value;
-      });
-      
-      setCmsData(dataObject);
-      setIsError(false);
-    } catch (error) {
-      console.error('Error fetching CMS data:', error);
-      setIsError(true);
+      await queryClient.invalidateQueries({ queryKey: ["/api/cms"] });
+      await refetch();
+    } catch (err) {
       toast({
-        title: 'Eroare la încărcarea conținutului',
-        description: 'Nu s-a putut încărca conținutul CMS. Vă rugăm reîncărcați pagina.',
-        variant: 'destructive'
+        title: "Eroare la reîmprospătarea conținutului",
+        description: "Nu s-a putut actualiza conținutul CMS.",
+        variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  // Încarcă datele inițial
-  useEffect(() => {
-    fetchCmsData();
-    
-    // Setează un interval pentru a reîncărca datele periodic
-    const intervalId = setInterval(() => {
-      fetchCmsData();
-    }, 5000); // Verifică la fiecare 5 secunde
-    
-    return () => clearInterval(intervalId);
-  }, []);
-
-  // Permite reîmprospătarea manuală a datelor
-  const refreshCmsData = async () => {
-    await fetchCmsData();
-  };
-
+  
   return (
-    <CmsContentContext.Provider value={{ cmsData, isLoading, isError, refreshCmsData }}>
+    <CmsContext.Provider
+      value={{
+        cmsData,
+        isLoading,
+        error: error instanceof Error ? error : null,
+        refreshCmsContent,
+      }}
+    >
       {children}
-    </CmsContentContext.Provider>
+    </CmsContext.Provider>
   );
 }
 
-// Hook pentru utilizarea conținutului CMS
+// Hook custom pentru utilizarea conținutului CMS în orice componentă
 export function useCmsContent() {
-  const context = useContext(CmsContentContext);
-  
+  const context = useContext(CmsContext);
   if (!context) {
-    throw new Error('useCmsContent trebuie utilizat în interiorul unui CmsContentProvider');
+    throw new Error("useCmsContent must be used within a CmsContentProvider");
   }
-  
   return context;
 }
 
-// Componentă care afișează conținut din CMS
+// Componente pentru diferite tipuri de conținut CMS
 interface CmsTextProps {
   contentKey: string;
   fallback?: string;
@@ -102,7 +98,6 @@ export function CmsText({ contentKey, fallback = '', className = '' }: CmsTextPr
   return <span className={className}>{cmsData[contentKey] || fallback}</span>;
 }
 
-// Componentă care afișează HTML din CMS
 interface CmsHtmlProps {
   contentKey: string;
   fallback?: string;
@@ -113,18 +108,17 @@ export function CmsHtml({ contentKey, fallback = '', className = '' }: CmsHtmlPr
   const { cmsData, isLoading } = useCmsContent();
   
   if (isLoading) {
-    return <div className={className}>{fallback}</div>;
+    return <div className={className} dangerouslySetInnerHTML={{ __html: fallback }} />;
   }
   
   return (
     <div 
       className={className} 
-      dangerouslySetInnerHTML={{ __html: cmsData[contentKey] || fallback }}
+      dangerouslySetInnerHTML={{ __html: cmsData[contentKey] || fallback }} 
     />
   );
 }
 
-// Componentă care afișează imagini din CMS
 interface CmsImageProps {
   contentKey: string;
   fallbackSrc?: string;
@@ -140,7 +134,6 @@ export function CmsImage({ contentKey, fallbackSrc = '', alt = '', className = '
   }
   
   const src = cmsData[contentKey] || fallbackSrc;
-  
   if (!src) {
     return null;
   }
