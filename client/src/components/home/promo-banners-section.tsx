@@ -82,6 +82,11 @@ export default function PromoBannersSection() {
   if (promoBanners.length === 0 && !loading) {
     return null;
   }
+  
+  // Dacă sunt în proces de încărcare și încă nu avem date, nu afișăm nimic momentan
+  if (loading && promoBanners.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-12 md:py-16 bg-amber-50">
