@@ -502,10 +502,10 @@ export default function CreatePilgrimagePage() {
                           {/* Afișarea imaginilor încărcate */}
                           {field.value && field.value.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-2">
-                              {Array.isArray(field.value) && field.value.map((url, index) => (
+                              {Array.isArray(field.value) && field.value.map((url: unknown, index: number) => (
                                 <div key={index} className="relative group">
                                   <img 
-                                    src={url} 
+                                    src={typeof url === 'string' ? url : String(url)} 
                                     alt={`Imagine ${index + 1}`} 
                                     className="h-20 w-20 object-cover rounded-md border" 
                                   />
@@ -546,7 +546,8 @@ export default function CreatePilgrimagePage() {
 
                                       if (response.ok) {
                                         const data = await response.json();
-                                        field.onChange([...field.value, data.imageUrl]);
+                                        const currentValues = Array.isArray(field.value) ? field.value : [];
+                                        field.onChange([...currentValues, data.imageUrl]);
                                         // Reset input value
                                         e.target.value = '';
                                       } else {
@@ -571,7 +572,12 @@ export default function CreatePilgrimagePage() {
                               <Button 
                                 type="button" 
                                 variant="outline"
-                                onClick={() => document.querySelector('input[type="file"]')?.click()}
+                                onClick={() => {
+                                  const fileInput = document.querySelector('input[type="file"]');
+                                  if (fileInput instanceof HTMLElement) {
+                                    fileInput.click();
+                                  }
+                                }}
                               >
                                 <Image className="h-4 w-4 mr-2" />
                                 Încarcă
@@ -580,7 +586,7 @@ export default function CreatePilgrimagePage() {
                             <FormDescription>Sau adaugă URL-uri de imagini separate prin virgulă</FormDescription>
                             <Input
                               placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                              value={field.value.join(', ')}
+                              value={Array.isArray(field.value) ? field.value.join(', ') : ''}
                               onChange={(e) => {
                                 const values = e.target.value.split(',').map(url => url.trim()).filter(Boolean);
                                 field.onChange(values);
