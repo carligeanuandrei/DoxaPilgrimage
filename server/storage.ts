@@ -83,6 +83,33 @@ export class MemStorage implements IStorage {
       lastName: "Doxa",
       role: "admin",
     });
+    
+    // Add a tour operator
+    this.createUser({
+      username: "touroperator",
+      password: "operator123", // This will be hashed by auth.ts
+      email: "operator@doxa.com",
+      firstName: "Orthodox",
+      lastName: "Tours",
+      role: "operator",
+      phone: "+40722123456",
+      bio: "Organizator de pelerinaje cu experiență de peste 10 ani.",
+    });
+    
+    // Add a monastery account
+    this.createUser({
+      username: "putnamonastery",
+      password: "putna123", // This will be hashed by auth.ts
+      email: "putna@monastery.ro",
+      firstName: "Mănăstirea",
+      lastName: "Putna",
+      role: "monastery",
+      phone: "+40723456789",
+      bio: "Mănăstirea Putna, ctitoria lui Ștefan cel Mare din 1469.",
+    });
+    
+    // Add demo pilgrimages
+    this.addDemoPilgrimages();
   }
 
   // User operations
@@ -257,6 +284,229 @@ export class MemStorage implements IStorage {
     const updatedMessage = { ...message, read: true };
     this.messages.set(id, updatedMessage);
     return updatedMessage;
+  }
+  
+  // Helper method to add demo pilgrimages
+  private addDemoPilgrimages(): void {
+    // Helper function to create dates X days from now
+    const daysFromNow = (days: number): Date => {
+      const date = new Date();
+      date.setDate(date.getDate() + days);
+      return date;
+    };
+    
+    // Get IDs of our demo users
+    const operatorId = 2; // touroperator
+    const monasteryId = 3; // putnamonastery
+    
+    // 1. Romania - North Moldova (Putna, Sihăstria, Nicula)
+    this.createPilgrimage({
+      title: "Pelerinaj la Mănăstirile din Moldova de Nord",
+      description: "Vizitați cele mai importante mănăstiri din nordul Moldovei, inclusiv Putna, Sucevița, Moldovița, Voroneț și Humor. Bucurați-vă de peisajele pitorești și descoperiți istoria bogată a acestor lăcașuri de cult ortodoxe.",
+      location: "Moldova - România",
+      month: "Iunie",
+      saint: "Ștefan cel Mare",
+      startDate: daysFromNow(30),
+      endDate: daysFromNow(35),
+      price: 450,
+      currency: "EUR",
+      transportation: "Autocar",
+      guide: "Părintele Vasile",
+      duration: 6,
+      includedServices: ["Transport", "Cazare 5 nopți", "Mic dejun", "Ghid spiritual", "Intrări la obiective"],
+      images: ["putna.jpg", "voronet.jpg", "moldovita.jpg"],
+      organizerId: monasteryId,
+      availableSpots: 30
+    });
+    
+    this.createPilgrimage({
+      title: "Pelerinaj la Mănăstirea Sihăstria - Părintele Cleopa",
+      description: "Mănăstirea Sihăstria este una dintre cele mai importante așezări monahale din România. Vizitați locul unde a viețuit marele duhovnic Părintele Cleopa și participați la slujbe și rugăciuni în acest loc sfânt.",
+      location: "Neamț - România",
+      month: "August",
+      saint: "Sfântul Paisie de la Neamț",
+      startDate: daysFromNow(60),
+      endDate: daysFromNow(62),
+      price: 250,
+      currency: "EUR",
+      transportation: "Autocar",
+      guide: "Părintele Nicolae",
+      duration: 3,
+      includedServices: ["Transport", "Cazare 2 nopți", "Mic dejun și cină", "Ghid spiritual"],
+      images: ["sihastria1.jpg", "sihastria2.jpg"],
+      organizerId: operatorId,
+      availableSpots: 25
+    });
+
+    this.createPilgrimage({
+      title: "Pelerinaj la Mănăstirea Nicula - Icoana Făcătoare de Minuni",
+      description: "Mănăstirea Nicula este locul unde se află celebra icoană făcătoare de minuni a Maicii Domnului. În fiecare an, mii de pelerini vin aici pentru a participa la Adormirea Maicii Domnului, una dintre cele mai mari sărbători ortodoxe.",
+      location: "Cluj - România",
+      month: "August",
+      saint: "Maica Domnului",
+      startDate: daysFromNow(75),
+      endDate: daysFromNow(77),
+      price: 220,
+      currency: "EUR",
+      transportation: "Autocar",
+      guide: "Părintele Grigore",
+      duration: 3,
+      includedServices: ["Transport", "Cazare 2 nopți", "Toate mesele", "Ghid spiritual", "Participare la slujbele de sărbătoare"],
+      images: ["nicula1.jpg", "nicula2.jpg"],
+      organizerId: operatorId,
+      availableSpots: 40
+    });
+    
+    // 2. Grecia - Muntele Athos
+    this.createPilgrimage({
+      title: "Pelerinaj la Muntele Athos - Grădina Maicii Domnului",
+      description: "Muntele Athos, cunoscut și ca Grădina Maicii Domnului, este una dintre cele mai importante comunități monahale din lume. Acest pelerinaj vă oferă posibilitatea de a vizita mănăstirile athonite, de a participa la slujbe și de a vă întâlni cu viața spirituală a călugărilor.",
+      location: "Muntele Athos - Grecia",
+      month: "Septembrie",
+      saint: "Sfântul Atanasie Athonitul",
+      startDate: daysFromNow(90),
+      endDate: daysFromNow(97),
+      price: 750,
+      currency: "EUR",
+      transportation: "Avion și feribot",
+      guide: "Părintele Atanasie",
+      duration: 8,
+      includedServices: ["Zbor București-Salonic", "Transfer port-aeroport", "Feribot", "Diamonitirion (permis Athos)", "Cazare în mănăstiri", "Ghid spiritual experimentat"],
+      images: ["athos1.jpg", "athos2.jpg", "athos3.jpg"],
+      organizerId: operatorId,
+      availableSpots: 15
+    });
+    
+    this.createPilgrimage({
+      title: "Pelerinaj Salonic și Meteora - Pe urmele Sfântului Dimitrie",
+      description: "Descoperiți locurile sfinte din Grecia de Nord, inclusiv Salonic, unde se află moaștele Sfântului Dimitrie, izvorâtorul de mir, și complexul monastic Meteora, cu mănăstirile sale spectaculoase construite pe stânci.",
+      location: "Salonic și Meteora - Grecia",
+      month: "Octombrie",
+      saint: "Sfântul Dimitrie",
+      startDate: daysFromNow(110),
+      endDate: daysFromNow(115),
+      price: 580,
+      currency: "EUR",
+      transportation: "Autocar",
+      guide: "Părintele Dimitrie",
+      duration: 6,
+      includedServices: ["Transport", "Cazare 5 nopți hotel 3*", "Mic dejun", "Ghid spiritual", "Intrări la obiective"],
+      images: ["salonic.jpg", "meteora.jpg"],
+      organizerId: operatorId,
+      availableSpots: 35
+    });
+    
+    // 3. Terra Sfântă (Israel, Palestina, Iordania)
+    this.createPilgrimage({
+      title: "Pelerinaj în Terra Sfântă - Pe urmele Mântuitorului",
+      description: "Un pelerinaj complet în Țara Sfântă, urmând pașii Mântuitorului Iisus Hristos. Veți vizita Ierusalimul, Betleemul, Nazaretul, râul Iordan, Marea Galileii și alte locuri importante menționate în Sfânta Scriptură.",
+      location: "Israel și Palestina",
+      month: "Aprilie",
+      saint: "Învierea Domnului",
+      startDate: daysFromNow(180),
+      endDate: daysFromNow(187),
+      price: 990,
+      currency: "EUR",
+      transportation: "Avion",
+      guide: "Părintele Daniel",
+      duration: 8,
+      includedServices: ["Zbor București-Tel Aviv", "Transport local", "Cazare 7 nopți hotel 4*", "Demipensiune", "Ghid spiritual", "Ghid local arabofon", "Toate intrările la obiective"],
+      images: ["ierusalim.jpg", "betleem.jpg", "nazaret.jpg"],
+      organizerId: operatorId,
+      availableSpots: 30
+    });
+    
+    this.createPilgrimage({
+      title: "Pelerinaj Israel și Iordania - Extindere la Muntele Sinai",
+      description: "Un pelerinaj complet care include atât Țara Sfântă cât și locuri importante din Iordania, inclusiv Muntele Nebo, de unde Moise a văzut Pământul Făgăduinței, și Petra. Opțional, vizită la Muntele Sinai în Egipt.",
+      location: "Israel, Palestina și Iordania",
+      month: "Noiembrie",
+      saint: "Sfântul Moise",
+      startDate: daysFromNow(200),
+      endDate: daysFromNow(210),
+      price: 1250,
+      currency: "EUR",
+      transportation: "Avion",
+      guide: "Părintele Moise",
+      duration: 11,
+      includedServices: ["Zbor București-Tel Aviv", "Transport local", "Cazare 10 nopți hotel 4*", "Demipensiune", "Ghid spiritual", "Ghid local", "Toate intrările la obiective", "Viză Iordania"],
+      images: ["iordania.jpg", "sinai.jpg", "petra.jpg"],
+      organizerId: operatorId,
+      availableSpots: 20
+    });
+    
+    // 4. Italia Catolică (Vatican, Roma, Assisi, Padova)
+    this.createPilgrimage({
+      title: "Pelerinaj la Roma și Vatican - Bazilicile Romei",
+      description: "Vizitați cele mai importante bazilici și biserici din Roma, inclusiv Bazilica Sfântul Petru din Vatican, Bazilica San Giovanni in Laterano, Santa Maria Maggiore și San Paolo fuori le mura.",
+      location: "Roma și Vatican - Italia",
+      month: "Mai",
+      saint: "Sfinții Apostoli Petru și Pavel",
+      startDate: daysFromNow(220),
+      endDate: daysFromNow(225),
+      price: 680,
+      currency: "EUR",
+      transportation: "Avion",
+      guide: "Părintele Pietro",
+      duration: 6,
+      includedServices: ["Zbor București-Roma", "Transport local", "Cazare 5 nopți hotel 3*", "Mic dejun", "Ghid spiritual", "Audiență papală (când este posibil)"],
+      images: ["vatican.jpg", "roma.jpg"],
+      organizerId: operatorId,
+      availableSpots: 25
+    });
+    
+    this.createPilgrimage({
+      title: "Pelerinaj în Italia: Assisi, Padova, Loreto și San Giovanni Rotondo",
+      description: "Vizitați locurile legate de Sfântul Francisc (Assisi), Sfântul Anton (Padova), Casa Sfântă a Maicii Domnului (Loreto) și Sfântul Padre Pio (San Giovanni Rotondo).",
+      location: "Italia",
+      month: "Iulie",
+      saint: "Sfântul Francisc și Sfântul Anton",
+      startDate: daysFromNow(240),
+      endDate: daysFromNow(248),
+      price: 790,
+      currency: "EUR",
+      transportation: "Avion",
+      guide: "Părintele Antonio",
+      duration: 9,
+      includedServices: ["Zbor București-Roma", "Transport local", "Cazare 8 nopți hotel 3*", "Mic dejun", "Ghid spiritual", "Toate intrările la obiective"],
+      images: ["assisi.jpg", "padova.jpg", "loreto.jpg"],
+      organizerId: operatorId,
+      availableSpots: 30
+    });
+
+    // Mark some pilgrimages as verified and featured
+    const pilgrimages = Array.from(this.pilgrimages.values());
+    for (const pilgrimage of pilgrimages) {
+      // Verify all pilgrimages for demo
+      this.updatePilgrimage(pilgrimage.id, { verified: true });
+      
+      // Feature some pilgrimages
+      if ([1, 4, 7, 9].includes(pilgrimage.id)) {
+        this.updatePilgrimage(pilgrimage.id, { featured: true });
+      }
+    }
+    
+    // Add some reviews
+    this.createReview({
+      pilgrimageId: 1,
+      userId: 1,
+      rating: 5,
+      comment: "O experiență spirituală deosebită. Mănăstirile din Moldova sunt incredibile, frescele de la Voroneț sunt uimitoare!"
+    });
+    
+    this.createReview({
+      pilgrimageId: 4,
+      userId: 1,
+      rating: 5,
+      comment: "Muntele Athos este cu adevărat Grădina Maicii Domnului. Experiența va rămâne în sufletul meu pentru totdeauna."
+    });
+    
+    this.createReview({
+      pilgrimageId: 7,
+      userId: 1,
+      rating: 5,
+      comment: "Să pășești pe urmele Mântuitorului este o experiență transformatoare. Ierusalimul este exact cum mi-l imaginam!"
+    });
   }
 }
 
