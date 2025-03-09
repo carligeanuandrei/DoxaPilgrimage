@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, Calendar, Church } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -61,6 +61,10 @@ export default function Header() {
             </Link>
             <Link href="/pilgrimages" className={`font-medium ${isActiveLink('/pilgrimages') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
               Pelerinaje
+            </Link>
+            <Link href="/orthodox-calendar" className={`font-medium flex items-center ${isActiveLink('/orthodox-calendar') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              <Calendar className="h-4 w-4 mr-1" />
+              Calendar Ortodox
             </Link>
             <Link href="/about" className={`font-medium ${isActiveLink('/about') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
               Despre Noi
@@ -136,6 +140,10 @@ export default function Header() {
               </Link>
               <Link href="/pilgrimages" className={`px-4 font-medium ${isActiveLink('/pilgrimages') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
                 Pelerinaje
+              </Link>
+              <Link href="/orthodox-calendar" className={`px-4 font-medium flex items-center ${isActiveLink('/orthodox-calendar') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                <Calendar className="h-4 w-4 mr-1" />
+                Calendar Ortodox
               </Link>
               <Link href="/about" className={`px-4 font-medium ${isActiveLink('/about') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
                 Despre Noi

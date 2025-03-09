@@ -6,6 +6,7 @@ import AuthPage from "@/pages/auth-page";
 import PilgrimagesPage from "@/pages/pilgrimages-page";
 import PilgrimageDetailsPage from "@/pages/pilgrimage-details-page";
 import ProfilePage from "@/pages/profile-page";
+import OrthodoxCalendarPage from "@/pages/orthodox-calendar-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -17,9 +18,8 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/pilgrimages" component={PilgrimagesPage} />
       <Route path="/pilgrimages/:id" component={PilgrimageDetailsPage} />
-      <Route path="/profile">
-        {() => <ProtectedRoute component={ProfilePage} path="/profile" />}
-      </Route>
+      <Route path="/orthodox-calendar" component={OrthodoxCalendarPage} />
+      <Route path="/profile" component={() => <ProtectedRoute component={ProfilePage} path="/profile" />} />
       <Route component={NotFound} />
     </Switch>
   );
