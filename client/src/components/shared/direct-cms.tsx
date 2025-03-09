@@ -20,7 +20,12 @@ export function DirectCmsText({ contentKey, fallback = '', className = '', refre
   const fetchContent = useCallback(async () => {
     try {
       // Folosim apiRequest în loc de fetch pentru a gestiona mai bine erorile
-      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
+      const response = await fetch(`/api/cms/${contentKey}`, {
+        credentials: "include",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -65,8 +70,13 @@ export function DirectCmsHtml({ contentKey, fallback = '', className = '', refre
   
   const fetchContent = useCallback(async () => {
     try {
-      // Utilizăm apiRequest pentru a gestiona mai bine erorile
-      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
+      // Utilizăm fetch direct pentru a evita blocajul apiRequest
+      const response = await fetch(`/api/cms/${contentKey}`, {
+        credentials: "include",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -109,8 +119,13 @@ export function DirectCmsImage({ contentKey, fallbackSrc = '', alt = '', classNa
   
   const fetchContent = useCallback(async () => {
     try {
-      // Utilizăm apiRequest pentru a gestiona mai bine erorile
-      const response = await apiRequest('GET', `/api/cms/${contentKey}`);
+      // Utilizăm fetch direct pentru a evita blocajul apiRequest
+      const response = await fetch(`/api/cms/${contentKey}`, {
+        credentials: "include",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
       
       if (response.ok) {
         const data = await response.json();
