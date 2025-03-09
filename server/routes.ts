@@ -309,9 +309,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Pelerinajul nu a fost găsit" });
       }
       
-      res.json(pilgrimage);
+      // Formatăm datele pentru a asigura compatibilitatea
+      const formattedPilgrimage = {
+        ...pilgrimage,
+        // Convertim explicit câmpurile de date pentru a ne asigura că sunt formatate corect
+        startDate: pilgrimage.startDate instanceof Date ? pilgrimage.startDate : new Date(pilgrimage.startDate),
+        endDate: pilgrimage.endDate instanceof Date ? pilgrimage.endDate : new Date(pilgrimage.endDate),
+        // Asigurăm că valorile booleene sunt definite
+        featured: pilgrimage.featured === null ? false : pilgrimage.featured,
+        verified: pilgrimage.verified === null ? false : pilgrimage.verified,
+        promoted: pilgrimage.promoted === null ? false : pilgrimage.promoted
+      };
+      
+      res.json(formattedPilgrimage);
     } catch (error) {
-      res.status(500).json({ message: "Eroare la preluarea detaliilor pelerinajului" });
+      console.error("Error fetching pilgrimage details:", error);
+      res.status(500).json({ message: "Eroare la preluarea detaliilor pelerinajului", error: String(error) });
     }
   });
 
