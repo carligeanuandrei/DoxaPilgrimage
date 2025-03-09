@@ -104,20 +104,24 @@ export default function CreatePilgrimageNewPage() {
   // Mutație pentru adăugarea unui pelerinaj nou
   const createPilgrimageMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      // Construim obiectul de date pentru API
+      console.log("Date primite pentru trimitere:", data);
+      
+      // Construim obiectul de date pentru API cu conversii explicite
       const pilgrimageData = {
         title: data.title,
         description: data.description,
         location: data.location,
         month: data.month,
         transportation: data.transportation,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        price: data.price,
+        // Convertim datele în string ISO pentru a evita erori de tip
+        startDate: data.startDate instanceof Date ? data.startDate.toISOString() : data.startDate,
+        endDate: data.endDate instanceof Date ? data.endDate.toISOString() : data.endDate,
+        // Asigurăm valori numerice
+        price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
         currency: data.currency,
-        duration: data.duration,
+        duration: typeof data.duration === 'string' ? parseInt(data.duration) : data.duration,
         guide: data.guide,
-        availableSpots: data.availableSpots,
+        availableSpots: typeof data.availableSpots === 'string' ? parseInt(data.availableSpots) : data.availableSpots,
         // Pentru simplificare, folosim doar o singură imagine pentru început
         images: data.image ? [data.image] : [],
         // Organizatorul este utilizatorul curent
@@ -236,8 +240,22 @@ export default function CreatePilgrimageNewPage() {
       return;
     }
 
+    // Ne asigurăm că datele sunt formatate corect
+    const formattedData = {
+      ...data,
+      // Convertim explicit datele în format ISO string pentru a asigura compatibilitatea
+      startDate: data.startDate instanceof Date ? data.startDate.toISOString() : data.startDate,
+      endDate: data.endDate instanceof Date ? data.endDate.toISOString() : data.endDate,
+      // Convertim valorile numerice
+      price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
+      duration: typeof data.duration === 'string' ? parseInt(data.duration) : data.duration,
+      availableSpots: typeof data.availableSpots === 'string' ? parseInt(data.availableSpots) : data.availableSpots
+    };
+
+    console.log("Date formatate pentru trimitere:", formattedData);
+
     // Trimitem datele la server
-    createPilgrimageMutation.mutate(data);
+    createPilgrimageMutation.mutate(formattedData);
   };
 
   // Verificăm dacă utilizatorul este autentificat

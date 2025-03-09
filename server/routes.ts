@@ -331,6 +331,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(">>> OrganizerId folosit:", organizerId);
       
       // Verificăm și ajustăm datele
+      const startDate = validData.startDate instanceof Date ? 
+          validData.startDate : 
+          new Date(validData.startDate);
+      
+      const endDate = validData.endDate instanceof Date ? 
+          validData.endDate : 
+          new Date(validData.endDate);
+        
+      // Verificăm dacă datele sunt valide
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new Error("Datele de început sau sfârșit ale pelerinajului sunt invalide");
+      }
+      
       const pilgrimageData = {
         ...validData,
         organizerId,
@@ -338,9 +351,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         availableSpots: Number(validData.availableSpots),
         price: Number(validData.price),
         duration: Number(validData.duration),
-        // Convertim date pentru a ne asigura că sunt obiecte Date
-        startDate: new Date(validData.startDate),
-        endDate: new Date(validData.endDate)
+        // Folosim datele convertite
+        startDate,
+        endDate
       };
       
       console.log(">>> Date finale pentru creare pelerinaj:", JSON.stringify(pilgrimageData, null, 2));
