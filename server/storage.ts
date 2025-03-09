@@ -926,6 +926,9 @@ export class DatabaseStorage implements IStorage {
       ...insertPilgrimage,
       verified: false,
       featured: false,
+      draft: true,
+      promoted: false,
+      promotionLevel: 'none',
       createdAt: new Date()
     }).returning();
     return pilgrimage;
