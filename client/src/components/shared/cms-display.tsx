@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 import { CmsContent } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';

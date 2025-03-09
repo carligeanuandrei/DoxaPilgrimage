@@ -116,7 +116,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold mb-2">Telefon</h3>
                     <p className="text-neutral-600">
-                      <CmsText contentKey="contact_phone" fallback="+40 721 234 567" />
+                      <CmsText contentKey="contact_office_phone" fallback="+40 721 234 567" />
                     </p>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold mb-2">Adresă</h3>
                     <p className="text-neutral-600">
-                      <CmsText contentKey="contact_address" fallback="Str. Biserica Amzei 19, București, România" />
+                      <CmsText contentKey="contact_office_address" fallback="Str. Biserica Amzei 19, București, România" />
                     </p>
                   </div>
                 </div>
