@@ -14,16 +14,33 @@ export default function PilgrimageCard({ pilgrimage }: PilgrimageCardProps) {
   const startDate = new Date(pilgrimage.startDate);
   const formattedDate = formatDistanceToNow(startDate, { addSuffix: true, locale: ro });
   
+  // Generate a pilgrimage-specific image based on location
+  const getPilgrimageImage = () => {
+    if (pilgrimage.images && pilgrimage.images.length > 0) {
+      return pilgrimage.images[0];
+    }
+    
+    if (pilgrimage.location.toLowerCase().includes('putna')) {
+      return '/images/locations/putna-monastery.svg';
+    }
+    
+    if (pilgrimage.location.toLowerCase().includes('athos')) {
+      return '/images/locations/mount-athos.svg';
+    }
+    
+    return '/images/pilgrimages/pilgrimage-card-bg.svg';
+  };
+  
   return (
     <Card className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
       <div className="relative h-48 md:h-56">
         <img 
-          src={pilgrimage.images && pilgrimage.images.length > 0 ? pilgrimage.images[0] : 'https://images.unsplash.com/photo-1577128777568-a159e463dde9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'} 
+          src={getPilgrimageImage()} 
           alt={pilgrimage.title} 
           className="w-full h-full object-cover" 
         />
         {pilgrimage.featured && (
-          <div className="absolute top-4 right-4 bg-yellow-500 text-white text-sm font-bold py-1 px-3 rounded">
+          <div className="absolute top-4 right-4 bg-yellow-500 text-white text-sm font-bold py-1 px-3 rounded shadow-sm">
             Popular
           </div>
         )}
@@ -31,10 +48,10 @@ export default function PilgrimageCard({ pilgrimage }: PilgrimageCardProps) {
       
       <CardContent className="p-4 md:p-6">
         <div className="flex items-center text-neutral-500 text-sm mb-2">
-          <MapPin className="w-4 h-4 mr-1" />
+          <MapPin className="w-4 h-4 mr-1 text-primary-dark" />
           <span>{pilgrimage.location}</span>
           <span className="mx-2">•</span>
-          <Calendar className="w-4 h-4 mr-1" />
+          <Calendar className="w-4 h-4 mr-1 text-primary-dark" />
           <span>{pilgrimage.month}</span>
         </div>
         
@@ -48,9 +65,9 @@ export default function PilgrimageCard({ pilgrimage }: PilgrimageCardProps) {
         <div className="flex flex-wrap gap-2 mb-4">
           {pilgrimage.saint && (
             <Badge variant="outline" className="bg-gray-100 text-primary-dark text-xs px-2 py-1 rounded-md">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
+              <div className="w-3 h-3 mr-1">
+                <img src="/images/orthodox-calendar/saint-icon.svg" alt="Saint" className="w-full h-full object-contain" />
+              </div>
               {pilgrimage.saint}
             </Badge>
           )}

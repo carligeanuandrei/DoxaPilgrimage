@@ -45,13 +45,11 @@ export default function Header() {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <span className="text-primary font-heading text-3xl font-bold">Doxa</span>
-            <span className="text-yellow-500 ml-1 text-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a.75.75 0 01.75.75v6.69l2.72-2.72a.75.75 0 111.06 1.06l-4 4a.75.75 0 01-1.06 0l-4-4a.75.75 0 111.06-1.06l2.72 2.72V2.75A.75.75 0 0110 2z" />
-                <path d="M3.5 9.5a.75.75 0 00-1.5 0v5.75a2.75 2.75 0 002.75 2.75h11.5a2.75 2.75 0 002.75-2.75V9.5a.75.75 0 00-1.5 0v5.75c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25V9.5z" />
-              </svg>
-            </span>
+            <img 
+              src="/images/logo.svg" 
+              alt="Doxa" 
+              className="h-10" 
+            />
           </Link>
 
           {/* Navigation - Desktop */}
@@ -81,7 +79,7 @@ export default function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative rounded-full h-8 w-8 p-0">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.profileImage} />
+                      <AvatarImage src={user.profileImage || '/images/user/profile-placeholder.svg'} alt={`${user.firstName} ${user.lastName}`} />
                       <AvatarFallback className="bg-primary text-white">
                         {getInitials(user.firstName, user.lastName)}
                       </AvatarFallback>
