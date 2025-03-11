@@ -72,6 +72,10 @@ function Router() {
       <Route path="/admin">
         <ProtectedRoute component={lazy(() => import('./pages/admin'))} path="/admin" adminOnly={true} />
       </Route>
+      {/* Builder Route */}
+      <Route path="/admin/builder">
+        <ProtectedRoute component={lazy(() => import('./pages/admin/builder-page'))} path="/admin/builder" adminOnly={true} />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
