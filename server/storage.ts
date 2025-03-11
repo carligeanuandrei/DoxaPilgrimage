@@ -1000,13 +1000,29 @@ export class DatabaseStorage implements IStorage {
       if (filters.organizerId) {
         query = query.where(eq(pilgrimages.organizerId, filters.organizerId));
       }
-      // Folosim doar featured pentru a determina promoțiile
+      // Folosim featured pentru a determina recomandările
       if (filters.featured !== undefined) {
-        query = query.where(eq(pilgrimages.featured, filters.featured));
+        try {
+          query = query.where(eq(pilgrimages.featured, filters.featured));
+        } catch (err) {
+          console.error("Eroare la filtrarea după featured:", err);
+        }
       }
       // Filtrare după verified
       if (filters.verified !== undefined) {
-        query = query.where(eq(pilgrimages.verified, filters.verified));
+        try {
+          query = query.where(eq(pilgrimages.verified, filters.verified));
+        } catch (err) {
+          console.error("Eroare la filtrarea după verified:", err);
+        }
+      }
+      // Filtrare după promoted (pelerinaje promovate)
+      if (filters.promoted !== undefined) {
+        try {
+          query = query.where(eq(pilgrimages.promoted, filters.promoted));
+        } catch (err) {
+          console.error("Eroare la filtrarea după promoted:", err);
+        }
       }
       
       // Aplicăm status doar dacă există coloana în tabelă

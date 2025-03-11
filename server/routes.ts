@@ -332,6 +332,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Endpoint pentru preluarea pelerinajelor promovate
+  // Notă: Acest endpoint trebuie să apară ÎNAINTEA endpointului cu parametru ID
+  // pentru a evita confuziile la rutare
   app.get("/api/pilgrimages/promoted", async (req, res) => {
     try {
       // Obținem toate pelerinajele marcate ca promovate
