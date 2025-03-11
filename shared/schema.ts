@@ -315,3 +315,47 @@ export const insertCmsContentSchema = createInsertSchema(cmsContent).omit({
 
 export type InsertCmsContent = z.infer<typeof insertCmsContentSchema>;
 export type CmsContent = typeof cmsContent.$inferSelect;
+
+// Builder Pages schema
+export const builderPages = pgTable("builder_pages", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull(), // JSON string pentru structura paginii (secțiuni, componente)
+  isPublished: boolean("is_published").notNull().default(false),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }),
+});
+
+export const insertBuilderPageSchema = createInsertSchema(builderPages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Schema pentru validarea conținutului JSON al paginii
+export const builderPageContentSchema = z.object({
+  sections: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    components: z.array(z.object({
+      id: z.string(),
+      type: z.enum(['heading', 'text', 'image', 'spacer', 'button', 'cmsContent']),
+      content: z.string().optional(),
+      cmsKey: z.string().optional(),
+      properties: z.record(z.any()).optional(),
+    }))
+  }))
+});
+
+export const builderPageRelations = relations(builderPages, ({ one }) => ({
+  creator: one(users, {
+    fields: [builderPages.createdBy],
+    references: [users.id]
+  })
+}));
+
+export type InsertBuilderPage = z.infer<typeof insertBuilderPageSchema>;
+export type BuilderPage = typeof builderPages.$inferSelect;
+export type BuilderPageContent = z.infer<typeof builderPageContentSchema>;

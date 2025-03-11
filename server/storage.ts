@@ -80,6 +80,14 @@ export interface IStorage {
   updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined>;
   deleteCmsContent(key: string): Promise<boolean>;
   
+  // Builder Pages operations
+  getBuilderPages(): Promise<BuilderPage[]>;
+  getBuilderPage(id: number): Promise<BuilderPage | undefined>;
+  getBuilderPageBySlug(slug: string): Promise<BuilderPage | undefined>;
+  createBuilderPage(page: InsertBuilderPage): Promise<BuilderPage>;
+  updateBuilderPage(id: number, page: Partial<BuilderPage>): Promise<BuilderPage | undefined>;
+  deleteBuilderPage(id: number): Promise<boolean>;
+  
   // Session store
   sessionStore: any;
 }
@@ -90,6 +98,7 @@ export class MemStorage implements IStorage {
   private reviews: Map<number, Review>;
   private bookings: Map<number, Booking>;
   private messages: Map<number, Message>;
+  private builderPages: Map<number, BuilderPage>;
   
   sessionStore: any;
   
@@ -98,6 +107,7 @@ export class MemStorage implements IStorage {
   private currentReviewId: number;
   private currentBookingId: number;
   private currentMessageId: number;
+  private currentBuilderPageId: number;
 
   constructor() {
     this.users = new Map();
