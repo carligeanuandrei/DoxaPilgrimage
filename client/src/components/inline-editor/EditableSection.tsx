@@ -946,25 +946,10 @@ export function EditableSection({
                 className="mt-1"
               />
             </div>
-            <div className="flex items-center space-x-2 mt-4">
-              <input
-                type="checkbox"
-                id="pilgrimagesFeatured"
-                checked={localContent.featured || false}
-                onChange={e => setLocalContent({...localContent, featured: e.target.checked})}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <Label htmlFor="pilgrimagesFeatured">Afișează doar pelerinaje promovate</Label>
-            </div>
-            <div className="flex items-center space-x-2 mt-2">
-              <input
-                type="checkbox"
-                id="pilgrimagesShowPromoted"
-                checked={localContent.showPromoted || false}
-                onChange={e => setLocalContent({...localContent, showPromoted: e.target.checked})}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <Label htmlFor="pilgrimagesShowPromoted">Afișează doar pelerinaje în promoție</Label>
+            <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200 mt-4">
+              <p className="text-sm text-yellow-800">
+                <strong>Notă:</strong> Această secțiune afișează doar pelerinajele promovate din sistem, marcate cu badge-ul "Promovat".
+              </p>
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
@@ -981,7 +966,7 @@ export function EditableSection({
             )}
             <PilgrimagesRenderer 
               isEditing={isEditing}
-              showPromoted={localContent.showPromoted || false}
+              showPromoted={true}
               limit={localContent.count || 6}
               backgroundColor={localContent.backgroundColor}
               textColor={localContent.textColor}
