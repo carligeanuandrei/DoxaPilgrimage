@@ -1180,6 +1180,13 @@ export class DatabaseStorage implements IStorage {
     console.log('Inserting data with adapted field names:', JSON.stringify(insertData));
     
     try {
+      // Verificăm dacă există deja un element cu această cheie
+      const existingContent = await this.getCmsContent(content.key);
+      if (existingContent) {
+        console.log(`Content with key ${content.key} already exists, updating instead of creating`);
+        return this.updateCmsContent(content.key, content) as Promise<CmsContent>;
+      }
+      
       // Executăm SQL direct pentru a evita probleme de mapare a numelor de câmpuri
       const result = await db.execute(`
         INSERT INTO cms_content (key, value, content_type, description, created_at, updated_at) 

@@ -56,30 +56,48 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Simplified approach to starting server on an available port
-  const preferredPort = 5000;
+  // Check if we're in a Replit environment
+  const isReplit = !!process.env.REPL_ID || !!process.env.REPL_OWNER;
   
-  // Close the server if it's already listening (which might happen during hot reload)
-  if (server.listening) {
-    log("Server is already running, closing and restarting...");
-    server.close();
+  // For Replit, even if we can't bind to port 5000, we need to keep the process alive
+  if (isReplit) {
+    log("Running in Replit environment - will keep process alive even if port 5000 is unavailable");
   }
   
-  // Start the server directly
-  server.listen(preferredPort, "0.0.0.0", () => {
-    log(`⚡ Server is running on preferred port ${preferredPort}`);
+  // Try all ports, starting with 5000 which is what Replit expects
+  let serverStarted = false;
+  
+  // Try to bind on port 5000 first
+  server.listen(5000, "0.0.0.0", () => {
+    log("⚡ Server is running on port 5000");
+    serverStarted = true;
+    process.env.PORT = "5000";
   }).on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      const alternativePort = preferredPort + 1;
-      log(`Default port ${preferredPort} is already in use, trying ${alternativePort}`);
+      log("Port 5000 is already in use");
       
-      // Start on alternative port
-      server.listen(alternativePort, "0.0.0.0", () => {
-        log(`⚡ Server is running on alternative port ${alternativePort}`);
-      });
+      // In Replit we need to keep the process alive even if we can't bind to port 5000
+      if (isReplit) {
+        // This is a workaround to keep the process alive for Replit
+        log("In Replit environment - keeping process alive and trying alternative port");
+        
+        // Try on port 5001
+        server.listen(5001, "0.0.0.0", () => {
+          log("⚡ Server is running on port 5001");
+          serverStarted = true;
+          process.env.PORT = "5001";
+        }).on('error', (err: any) => {
+          log(`Error starting server on port 5001: ${err.message}`);
+        });
+      } else {
+        log("Not in Replit - exiting due to port 5000 being unavailable");
+        process.exit(1);
+      }
     } else {
       log(`Error starting server: ${err.message}`);
-      process.exit(1);
+      if (!isReplit) {
+        process.exit(1);
+      }
     }
   });
 })();
