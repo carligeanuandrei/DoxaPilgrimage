@@ -661,6 +661,12 @@ export function EditableSection({
                 </Button>
               </div>
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
@@ -824,6 +830,12 @@ export function EditableSection({
                 </Button>
               </div>
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
@@ -921,6 +933,12 @@ export function EditableSection({
                 />
               </div>
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
@@ -990,6 +1008,12 @@ export function EditableSection({
                 <strong>Notă:</strong> Această secțiune afișează doar pelerinajele promovate din sistem, marcate cu badge-ul "Promovat".
               </p>
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
