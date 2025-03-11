@@ -565,6 +565,12 @@ export class MemStorage implements IStorage {
     );
   }
   
+  async getBuilderPageByType(pageType: string): Promise<BuilderPage | undefined> {
+    return Array.from(this.builderPages.values()).find(
+      (page) => page.pageType === pageType && page.isPublished
+    );
+  }
+  
   async createBuilderPage(insertPage: InsertBuilderPage): Promise<BuilderPage> {
     const id = this.currentBuilderPageId++;
     const now = new Date();
@@ -1387,6 +1393,23 @@ export class DatabaseStorage implements IStorage {
       return page;
     } catch (error) {
       console.error('Error fetching builder page by slug:', error);
+      return undefined;
+    }
+  }
+  
+  async getBuilderPageByType(pageType: string): Promise<BuilderPage | undefined> {
+    try {
+      const [page] = await db.select()
+        .from(builderPages)
+        .where(
+          and(
+            eq(builderPages.pageType, pageType),
+            eq(builderPages.isPublished, true)
+          )
+        );
+      return page;
+    } catch (error) {
+      console.error('Error fetching builder page by type:', error);
       return undefined;
     }
   }

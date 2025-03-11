@@ -1676,6 +1676,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Obținerea unei pagini builder după tipul său
+  app.get("/api/builder-pages/type/:pageType", async (req, res) => {
+    try {
+      const pageType = req.params.pageType;
+      const page = await storage.getBuilderPageByType(pageType);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Nu există o pagină publicată pentru acest tip" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      console.error("Error fetching builder page by type:", error);
+      res.status(500).json({ message: "Eroare la preluarea paginii builder după tip", error: String(error) });
+    }
+  });
+  
   // Obținerea unei pagini builder după ID
   app.get("/api/builder-pages/:id", async (req, res) => {
     try {
