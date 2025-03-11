@@ -1643,6 +1643,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Builder Pages routes
+  // ======= SISTEM NOU DE PAGINI EDITABILE INLINE =======
+  
+  // Obținerea tuturor paginilor
+  app.get("/api/pages", async (req, res) => {
+    try {
+      const pages = await storage.getBuilderPages(); // Refolosim aceeași metodă de storage
+      res.json(pages);
+    } catch (error) {
+      console.error("Error fetching pages:", error);
+      res.status(500).json({ message: "Eroare la preluarea paginilor", error: String(error) });
+    }
+  });
+  
+  // Obținerea unei pagini după slug
+  app.get("/api/pages/slug/:slug", async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      const page = await storage.getBuilderPageBySlug(slug);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Pagina nu a fost găsită" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      console.error("Error fetching page by slug:", error);
+      res.status(500).json({ message: "Eroare la preluarea paginii după slug", error: String(error) });
+    }
+  });
+  
+  // Obținerea unei pagini după tip
+  app.get("/api/pages/type/:pageType", async (req, res) => {
+    try {
+      const pageType = req.params.pageType;
+      const page = await storage.getBuilderPageByType(pageType);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Nu există o pagină publicată pentru acest tip" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      console.error("Error fetching page by type:", error);
+      res.status(500).json({ message: "Eroare la preluarea paginii după tip", error: String(error) });
+    }
+  });
+  
+  // Obținerea unei pagini după ID
+  app.get("/api/pages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const page = await storage.getBuilderPage(id);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Pagina nu a fost găsită" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      console.error("Error fetching page:", error);
+      res.status(500).json({ message: "Eroare la preluarea paginii", error: String(error) });
+    }
+  });
+  
+  // Crearea unei pagini noi (doar admin)
+  app.post("/api/pages", isAdmin, async (req, res) => {
+    try {
+      // Validăm datele de intrare
+      const { title, slug, pageType, content = '{}', meta = '{}' } = req.body;
+      
+      if (!title || !slug) {
+        return res.status(400).json({ message: "Titlul și slug-ul sunt obligatorii" });
+      }
+      
+      // Verificăm dacă există deja o pagină cu același slug
+      const existingPage = await storage.getBuilderPageBySlug(slug);
+      if (existingPage) {
+        return res.status(400).json({ message: "Există deja o pagină cu acest slug" });
+      }
+      
+      // Pregătim datele pentru pagina nouă
+      const pageData = {
+        title,
+        slug,
+        pageType: pageType || 'custom',
+        content,
+        meta,
+        isPublished: true,
+        createdBy: req.user.id,
+      };
+      
+      const page = await storage.createBuilderPage(pageData);
+      res.status(201).json(page);
+    } catch (error) {
+      console.error("Error creating page:", error);
+      res.status(500).json({ message: "Eroare la crearea paginii", error: String(error) });
+    }
+  });
+  
+  // Actualizarea unei pagini existente (doar admin)
+  app.put("/api/pages/:id", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Verificăm dacă pagina există
+      const existingPage = await storage.getBuilderPage(id);
+      if (!existingPage) {
+        return res.status(404).json({ message: "Pagina nu a fost găsită" });
+      }
+      
+      const { title, slug, pageType, content, meta } = req.body;
+      
+      // Verificăm dacă se schimbă slug-ul și dacă există altă pagină cu același slug
+      if (slug && slug !== existingPage.slug) {
+        const pageWithSameSlug = await storage.getBuilderPageBySlug(slug);
+        if (pageWithSameSlug && pageWithSameSlug.id !== id) {
+          return res.status(400).json({ message: "Există deja o pagină cu acest slug" });
+        }
+      }
+      
+      // Construim obiectul de actualizare incluzând doar câmpurile furnizate
+      const updateData: any = {};
+      if (title !== undefined) updateData.title = title;
+      if (slug !== undefined) updateData.slug = slug;
+      if (pageType !== undefined) updateData.pageType = pageType;
+      if (content !== undefined) updateData.content = content;
+      if (meta !== undefined) updateData.meta = meta;
+      
+      // Actualizăm pagina
+      const updatedPage = await storage.updateBuilderPage(id, updateData);
+      
+      if (!updatedPage) {
+        return res.status(500).json({ message: "Eroare la actualizarea paginii" });
+      }
+      
+      res.json(updatedPage);
+    } catch (error) {
+      console.error("Error updating page:", error);
+      res.status(500).json({ message: "Eroare la actualizarea paginii", error: String(error) });
+    }
+  });
+  
+  // Ștergerea unei pagini (doar admin)
+  app.delete("/api/pages/:id", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Verificăm dacă pagina există
+      const existingPage = await storage.getBuilderPage(id);
+      if (!existingPage) {
+        return res.status(404).json({ message: "Pagina nu a fost găsită" });
+      }
+      
+      // Ștergem pagina
+      const success = await storage.deleteBuilderPage(id);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Eroare la ștergerea paginii" });
+      }
+      
+      res.status(200).json({ message: "Pagina a fost ștearsă cu succes" });
+    } catch (error) {
+      console.error("Error deleting page:", error);
+      res.status(500).json({ message: "Eroare la ștergerea paginii", error: String(error) });
+    }
+  });
+  
+  // === MENȚINEM RUTELE VECHI PENTRU COMPATIBILITATE TEMPORARĂ ===
+  
   // Obținerea tuturor paginilor builder
   app.get("/api/builder-pages", async (req, res) => {
     try {
