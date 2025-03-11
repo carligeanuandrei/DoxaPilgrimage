@@ -1,7 +1,8 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useBuilderPage } from '@/hooks/use-builder-page';
-import { BuilderRenderer } from './builder-renderer';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BuilderRenderer } from './builder-renderer';
 
 interface DynamicPageProps {
   pageType: string;
@@ -9,44 +10,35 @@ interface DynamicPageProps {
   fallbackComponent?: React.ReactNode;
 }
 
-export const DynamicPage: React.FC<DynamicPageProps> = ({ 
-  pageType, 
+/**
+ * Componenta DynamicPage încarcă și redă o pagină din builder bazată pe tipul acesteia
+ * @param pageType - Tipul paginii (ex: 'home', 'about', 'contact', etc.)
+ * @param className - Clase CSS opționale
+ * @param fallbackComponent - Componentă afișată dacă nu există pagină construită
+ */
+export const DynamicPage: React.FC<DynamicPageProps> = ({
+  pageType,
   className = '',
-  fallbackComponent 
+  fallbackComponent
 }) => {
   const { data: page, isLoading, error } = useBuilderPage(pageType);
 
-  // Dacă încă se încarcă, afișăm un skeleton
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-12 w-3/4" />
-        <Skeleton className="h-12 w-1/2" />
+      <div className={`space-y-4 ${className}`}>
+        <Skeleton className="h-12 w-3/4 mb-8" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-3/4 mb-2" />
+        <Skeleton className="h-64 w-full rounded-lg mt-6" />
       </div>
     );
   }
 
-  // Dacă avem o eroare sau nu există pagina și avem o componentă de fallback
-  if ((error || !page) && fallbackComponent) {
-    return <>{fallbackComponent}</>;
-  }
-
-  // Dacă avem o eroare sau nu există pagina și NU avem o componentă de fallback
   if (error || !page) {
-    return (
-      <div className="text-center py-16">
-        <h2 className="text-2xl font-bold mb-4">
-          Această pagină nu a fost încă configurată
-        </h2>
-        <p className="text-neutral-600">
-          Administratorul site-ului poate crea o pagină cu conținut personalizat pentru această zonă.
-        </p>
-      </div>
-    );
+    console.log(`Nu există pagină de tip "${pageType}" sau a apărut o eroare:`, error);
+    return fallbackComponent ? <>{fallbackComponent}</> : null;
   }
 
-  // Altfel, afișăm conținutul paginii builder
   return <BuilderRenderer content={page.content} className={className} />;
 };

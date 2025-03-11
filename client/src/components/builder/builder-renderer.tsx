@@ -1,18 +1,30 @@
 import React from 'react';
-import { CmsHtml, CmsImage, CmsText } from '@/components/shared/cms-display';
-import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { CmsText, CmsHtml, CmsImage } from '@/components/shared/cms-display';
 
-// Definim tipurile pentru conținutul paginii builder
-export type BuilderComponent = {
+// Definim toate tipurile necesare pentru componenta
+type BuilderComponentProperties = {
+  className?: string;
+  isHtml?: boolean;
+  imageClassName?: string;
+  alt?: string;
+  height?: string | number;
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  url?: string;
+  contentType?: 'text' | 'html' | 'image';
+};
+
+type BuilderComponent = {
   id: string;
   type: 'heading' | 'text' | 'image' | 'spacer' | 'button' | 'cmsContent';
   content?: string;
   cmsKey?: string;
-  properties?: Record<string, any>;
+  properties?: BuilderComponentProperties;
 };
 
-export type BuilderSection = {
+type BuilderSection = {
   id: string;
   title: string;
   components: BuilderComponent[];

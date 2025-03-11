@@ -375,6 +375,15 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
+      
+      {/* Conținut suplimentar din builder-page dacă există */}
+      <div className="my-16">
+        <DynamicPage 
+          pageType="contact" 
+          className="container mx-auto"
+          fallbackComponent={null}
+        />
+      </div>
     </div>
   );
 }

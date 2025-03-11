@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { BuilderPage } from "@shared/schema";
+import { useQuery } from '@tanstack/react-query';
+import { getQueryFn } from '@/lib/queryClient';
+import { BuilderPage } from '@shared/schema';
 
 /**
  * Hook pentru a încărca o pagină builder după tipul său
@@ -8,19 +9,9 @@ import { BuilderPage } from "@shared/schema";
  */
 export function useBuilderPage(pageType: string) {
   return useQuery<BuilderPage>({
-    queryKey: ['/api/builder-pages/type', pageType],
-    queryFn: async () => {
-      const res = await fetch(`/api/builder-pages/type/${pageType}`);
-      if (!res.ok) {
-        if (res.status === 404) {
-          // Nu aruncăm eroare pentru 404, doar returnăm null
-          return null;
-        }
-        throw new Error(`Eroare la încărcarea paginii de tip ${pageType}: ${res.statusText}`);
-      }
-      return await res.json();
-    },
-    refetchOnWindowFocus: false,
+    queryKey: [`/api/builder-pages/type/${pageType}`],
+    queryFn: getQueryFn({ on401: 'returnNull' }),
+    staleTime: 1000 * 60 * 5, // 5 minute
   });
 }
 
@@ -33,7 +24,7 @@ export function parseBuilderContent(content: string) {
   try {
     return JSON.parse(content);
   } catch (error) {
-    console.error("Eroare la parsarea conținutului builder:", error);
+    console.error('Eroare la parsarea conținutului paginii builder:', error);
     return [];
   }
 }
