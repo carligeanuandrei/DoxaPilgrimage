@@ -37,10 +37,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // Afișăm toast-ul de autentificare reușită
       toast({
         title: "Autentificare reușită",
         description: `Bine ai revenit, ${user.firstName}!`,
       });
+      
+      // Redirecționăm utilizatorul în funcție de rolul său
+      if (user.role === "admin") {
+        // Admin merge la pagina de administrare
+        window.location.href = "/admin/pilgrimages";
+      } else if (user.role === "operator" || user.role === "monastery") {
+        // Organizatorii merg la dashboard-ul lor
+        window.location.href = "/organizer/dashboard";
+      } else {
+        // Utilizatorii normali merg la profilul lor
+        window.location.href = "/profile";
+      }
     },
     onError: (error: Error) => {
       toast({
