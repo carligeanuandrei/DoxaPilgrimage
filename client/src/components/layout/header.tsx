@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3 } from "lucide-react";
+import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -121,6 +121,12 @@ export default function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
+                        <Link href="/admin/builder" className="cursor-pointer w-full">
+                          <LayoutTemplate className="mr-2 h-4 w-4" />
+                          <span>Builder Pagini</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link href="/admin/users" className="cursor-pointer w-full">
                           <User className="mr-2 h-4 w-4" />
                           <span>Gestiune Utilizatori</span>
@@ -222,6 +228,10 @@ export default function Header() {
                       <Link href="/admin/cms" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
                         <Settings className="inline mr-2 h-4 w-4" />
                         Gestiune CMS
+                      </Link>
+                      <Link href="/admin/builder" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <LayoutTemplate className="inline mr-2 h-4 w-4" />
+                        Builder Pagini
                       </Link>
                       <Link href="/admin/users" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
                         <User className="inline mr-2 h-4 w-4" />
