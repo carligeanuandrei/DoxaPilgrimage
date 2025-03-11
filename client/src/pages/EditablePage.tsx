@@ -6,9 +6,7 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from '@/components/ui/button';
-import { PageController } from '@/components/inline-editor/PageController';
-import { SectionEditor } from '@/components/inline-editor/SectionEditor';
-import { InlineEditable } from '@/components/inline-editor/InlineEditable';
+import { SectionEditor, Section } from '@/components/inline-editor/SectionEditor';
 
 interface EditablePageProps {
   slug?: string;
@@ -18,8 +16,10 @@ interface EditablePageProps {
 export default function EditablePage({ slug, pageType }: EditablePageProps) {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
-  const [pageSections, setPageSections] = useState<any[]>([]);
+  const [pageSections, setPageSections] = useState<Section[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   // Încercăm să obținem pagina după slug dacă există
   const { 
@@ -104,8 +104,18 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
         try {
           // Dacă pagina există, încărcăm secțiunile din JSON
           const content = pageData.content ? JSON.parse(pageData.content) : { sections: [] };
-          setPageSections(content.sections || []);
-          console.log("Loaded page sections:", content.sections || []);
+          // Asigurăm-ne că secțiunile au formatul corect
+          const formattedSections = Array.isArray(content.sections) 
+            ? content.sections.map((section: any) => ({
+                id: section.id || `section-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                type: section.type || 'text',
+                content: section.content || { text: 'Conținut implicit' },
+                styles: section.styles || {}
+              }))
+            : [];
+          
+          setPageSections(formattedSections);
+          console.log("Loaded page sections:", formattedSections);
         } catch (e) {
           console.error('Error parsing page content:', e);
           setPageSections([]);
@@ -139,7 +149,7 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
   }, [pageData, isLoading, pageType, slug, isInitialized, error]);
 
   // Actualizăm conținutul paginii când se schimbă secțiunile
-  const handleSectionsChange = (sections: any[]) => {
+  const handleSectionsChange = (sections: Section[]) => {
     setPageSections(sections);
     
     // Salvăm automat modificările în baza de date
@@ -161,10 +171,6 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
   const isCreatingNewPage = error && slug && !isInitialized;
   
   if (error && !(pageType && !slug) && !isCreatingNewPage) {
-    // Verificăm autentificarea ca administrator
-    const { user } = useAuth();
-    const isAdmin = user?.role === 'admin';
-    
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
         <h1 className="text-2xl font-semibold text-gray-800 mb-3">Pagina nu a fost găsită</h1>
@@ -201,29 +207,29 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
 
   return (
     <div className="editable-page">
-      {/* Page Controller pentru administratori */}
-      <PageController 
-        pageId={pageData?.id}
-        pageTitle={pageData?.title}
-        pageSlug={pageData?.slug}
-        pageType={pageData?.pageType}
-        pageContent={pageData?.content}
-        isEditable={true}
-      />
+      {/* Afișăm informații despre pagină doar pentru administratori */}
+      {isAdmin && pageData && (
+        <div className="bg-gray-50 p-2 mb-4 text-xs text-gray-500 border-b">
+          <div className="container mx-auto flex items-center justify-between">
+            <div>
+              <strong>Pagină:</strong> {pageData.title} | 
+              <strong>Slug:</strong> {pageData.slug} | 
+              <strong>Tip:</strong> {pageData.pageType}
+            </div>
+            {pageData.updatedAt && (
+              <div>
+                <strong>Actualizat:</strong> {new Date(pageData.updatedAt).toLocaleString()}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       
-      {/* Editor de secțiuni */}
+      {/* Editorul de secțiuni nou */}
       <SectionEditor 
         sections={pageSections}
         onChange={handleSectionsChange}
       />
-      
-      {/* Dacă nu există secțiuni, afișăm un mesaj pentru administratori */}
-      {pageSections.length === 0 && (
-        <div className="py-20 text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-3">Pagină goală</h2>
-          <p className="text-gray-600 mb-6">Această pagină nu are încă conținut. Activați modul de editare pentru a adăuga secțiuni.</p>
-        </div>
-      )}
     </div>
   );
 }

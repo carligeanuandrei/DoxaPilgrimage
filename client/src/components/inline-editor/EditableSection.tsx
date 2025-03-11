@@ -1,0 +1,511 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Edit, Save, Trash2, Plus, Move, GripVertical } from 'lucide-react';
+import { useDrag, useDrop } from 'react-dnd';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { SelectColor } from './SelectColor';
+import { useAuth } from '@/hooks/use-auth';
+
+export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features';
+
+interface EditableSectionProps {
+  id: string;
+  type: SectionType;
+  content: any;
+  isEditing: boolean;
+  onUpdate: (id: string, content: any) => void;
+  onDelete: (id: string) => void;
+  onMove: (id: string, direction: 'up' | 'down') => void;
+  index: number;
+  isFirst: boolean;
+  isLast: boolean;
+  onAddNew: (position: 'before' | 'after', index: number) => void;
+}
+
+export function EditableSection({
+  id,
+  type,
+  content,
+  isEditing,
+  onUpdate,
+  onDelete,
+  onMove,
+  index,
+  isFirst,
+  isLast,
+  onAddNew
+}: EditableSectionProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isEditable, setIsEditable] = useState(false);
+  const [localContent, setLocalContent] = useState(content);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  
+  useEffect(() => {
+    setLocalContent(content);
+  }, [content]);
+
+  const handleStartEdit = () => {
+    setIsEditable(true);
+  };
+
+  const handleSave = () => {
+    onUpdate(id, localContent);
+    setIsEditable(false);
+  };
+
+  const handleCancel = () => {
+    setLocalContent(content);
+    setIsEditable(false);
+  };
+  
+  // Drag-and-drop functionality for reordering
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: 'SECTION',
+    item: { id, index },
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+    canDrag: isEditing && isAdmin
+  }));
+  
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: 'SECTION',
+    hover(item: { id: string, index: number }, monitor) {
+      if (!sectionRef.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+      
+      // Determine rectangle on screen
+      const hoverBoundingRect = sectionRef.current?.getBoundingClientRect();
+      
+      // Get vertical middle
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      
+      // Determine mouse position
+      const clientOffset = monitor.getClientOffset();
+      
+      // Get pixels to the top
+      const hoverClientY = clientOffset!.y - hoverBoundingRect.top;
+      
+      // Move upward
+      if (dragIndex > hoverIndex && hoverClientY < hoverMiddleY) {
+        onMove(item.id, 'up');
+        item.index = hoverIndex;
+      }
+      
+      // Move downward
+      if (dragIndex < hoverIndex && hoverClientY > hoverMiddleY) {
+        onMove(item.id, 'down');
+        item.index = hoverIndex;
+      }
+    },
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  }), [index, onMove]);
+  
+  // Combine drag and drop refs
+  const dragDropRef = (el: HTMLDivElement) => {
+    drag(el);
+    drop(el);
+    sectionRef.current = el;
+  };
+  
+  // Custom styles based on state
+  const sectionStyles = {
+    opacity: isDragging ? 0.5 : 1,
+    border: isOver ? '2px dashed #3182ce' : isHovered && isEditing ? '2px dashed #e2e8f0' : '2px solid transparent',
+    position: 'relative' as const,
+    transition: 'all 0.2s ease',
+    ...content.styles
+  };
+  
+  // Generate actual section content based on type
+  const renderSectionContent = () => {
+    switch (type) {
+      case 'heading':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="headingText">Text titlu</Label>
+              <Input 
+                id="headingText"
+                value={localContent.text || ''}
+                onChange={e => setLocalContent({...localContent, text: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="headingSize">Mărime (px)</Label>
+                <Input 
+                  id="headingSize"
+                  type="number"
+                  value={localContent.size || 24}
+                  onChange={e => setLocalContent({...localContent, size: parseInt(e.target.value)})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="headingColor">Culoare</Label>
+                <SelectColor 
+                  id="headingColor"
+                  value={localContent.color || '#000000'}
+                  onChange={(color) => setLocalContent({...localContent, color})}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <h2 
+            style={{
+              fontSize: `${localContent.size || 24}px`,
+              color: localContent.color || '#000000',
+              textAlign: localContent.alignment || 'left',
+              marginBottom: `${localContent.marginBottom || 0}px`,
+              marginTop: `${localContent.marginTop || 0}px`,
+            }}
+          >
+            {localContent.text || 'Titlu secțiune'}
+          </h2>
+        );
+        
+      case 'text':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="textContent">Conținut text</Label>
+              <Textarea 
+                id="textContent"
+                value={localContent.text || ''}
+                onChange={e => setLocalContent({...localContent, text: e.target.value})}
+                className="mt-1 min-h-[200px]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="textSize">Mărime (px)</Label>
+                <Input 
+                  id="textSize"
+                  type="number"
+                  value={localContent.size || 16}
+                  onChange={e => setLocalContent({...localContent, size: parseInt(e.target.value)})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="textColor">Culoare</Label>
+                <SelectColor 
+                  id="textColor"
+                  value={localContent.color || '#000000'}
+                  onChange={(color) => setLocalContent({...localContent, color})}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <p 
+            style={{
+              fontSize: `${localContent.size || 16}px`,
+              color: localContent.color || '#000000',
+              textAlign: localContent.alignment || 'left',
+              lineHeight: localContent.lineHeight || '1.5',
+            }}
+          >
+            {localContent.text || 'Text secțiune'}
+          </p>
+        );
+        
+      case 'image':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="imageUrl">URL Imagine</Label>
+              <Input 
+                id="imageUrl"
+                value={localContent.url || ''}
+                onChange={e => setLocalContent({...localContent, url: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="imageAlt">Text alternativ</Label>
+              <Input 
+                id="imageAlt"
+                value={localContent.alt || ''}
+                onChange={e => setLocalContent({...localContent, alt: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="imageWidth">Lățime (%)</Label>
+                <Input 
+                  id="imageWidth"
+                  type="number"
+                  min="10"
+                  max="100"
+                  value={localContent.width || 100}
+                  onChange={e => setLocalContent({...localContent, width: parseInt(e.target.value)})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="imageAlignment">Aliniere</Label>
+                <select
+                  id="imageAlignment"
+                  value={localContent.alignment || 'center'}
+                  onChange={e => setLocalContent({...localContent, alignment: e.target.value})}
+                  className="w-full h-10 px-3 mt-1 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="left">Stânga</option>
+                  <option value="center">Centru</option>
+                  <option value="right">Dreapta</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <div 
+            style={{
+              textAlign: localContent.alignment || 'center',
+              width: '100%',
+            }}
+          >
+            <img 
+              src={localContent.url || '/placeholder-image.jpg'} 
+              alt={localContent.alt || 'Imagine secțiune'} 
+              style={{
+                width: `${localContent.width || 100}%`,
+                maxWidth: '100%',
+                display: 'inline-block',
+              }}
+            />
+          </div>
+        );
+        
+      case 'hero':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="heroTitle">Titlu hero</Label>
+              <Input 
+                id="heroTitle"
+                value={localContent.title || ''}
+                onChange={e => setLocalContent({...localContent, title: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="heroSubtitle">Subtitlu</Label>
+              <Input 
+                id="heroSubtitle"
+                value={localContent.subtitle || ''}
+                onChange={e => setLocalContent({...localContent, subtitle: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="heroBackground">Imagine fundal URL</Label>
+              <Input 
+                id="heroBackground"
+                value={localContent.backgroundImage || ''}
+                onChange={e => setLocalContent({...localContent, backgroundImage: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="heroHeight">Înălțime (px)</Label>
+              <Input 
+                id="heroHeight"
+                type="number"
+                value={localContent.height || 400}
+                onChange={e => setLocalContent({...localContent, height: parseInt(e.target.value)})}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <div 
+            style={{
+              height: `${localContent.height || 400}px`,
+              backgroundImage: `url(${localContent.backgroundImage || '/placeholder-hero.jpg'})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              color: '#fff',
+              textAlign: 'center',
+              padding: '2rem',
+            }}
+          >
+            <div style={{ backgroundColor: 'rgba(0,0,0,0.5)', padding: '2rem', borderRadius: '0.5rem' }}>
+              <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                {localContent.title || 'Titlu secțiune Hero'}
+              </h1>
+              <p style={{ fontSize: '1.25rem' }}>
+                {localContent.subtitle || 'Subtitlu secțiune Hero'}
+              </p>
+            </div>
+          </div>
+        );
+        
+      default:
+        return (
+          <div className="p-4 bg-gray-100">
+            <p>Tip secțiune necunoscut: {type}</p>
+          </div>
+        );
+    }
+  };
+  
+  // Render section controls if editing is enabled
+  const renderControls = () => {
+    if (!isEditing || !isAdmin) return null;
+    
+    return (
+      <div 
+        className="absolute -top-10 right-0 flex items-center gap-1 bg-white shadow-md rounded-md px-2 py-1 z-10"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => onAddNew('before', index)}
+          title="Adaugă secțiune înainte"
+        >
+          <Plus size={16} className="mr-1" />
+          Adaugă înainte
+        </Button>
+        
+        {!isFirst && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onMove(id, 'up')}
+            title="Mută în sus"
+          >
+            <Move size={16} className="rotate-180" />
+          </Button>
+        )}
+        
+        {!isLast && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onMove(id, 'down')}
+            title="Mută în jos"
+          >
+            <Move size={16} />
+          </Button>
+        )}
+        
+        {isEditable ? (
+          <>
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleSave}
+              title="Salvează"
+            >
+              <Save size={16} />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleCancel}
+              title="Anulează"
+            >
+              Anulează
+            </Button>
+          </>
+        ) : (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleStartEdit}
+            title="Editează"
+          >
+            <Edit size={16} />
+          </Button>
+        )}
+        
+        <Button 
+          variant="destructive" 
+          size="sm" 
+          onClick={() => onDelete(id)}
+          title="Șterge"
+        >
+          <Trash2 size={16} />
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => onAddNew('after', index)}
+          title="Adaugă secțiune după"
+        >
+          <Plus size={16} className="mr-1" />
+          Adaugă după
+        </Button>
+        
+        {isEditing && (
+          <div 
+            className="cursor-move" 
+            title="Drag pentru reordonare"
+          >
+            <GripVertical size={16} />
+          </div>
+        )}
+      </div>
+    );
+  };
+  
+  return (
+    <div
+      ref={dragDropRef}
+      className="relative mb-8 pt-10"
+      style={sectionStyles}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {renderControls()}
+      <div className="p-4">
+        {renderSectionContent()}
+      </div>
+    </div>
+  );
+}
