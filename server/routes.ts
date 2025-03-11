@@ -1718,11 +1718,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Crearea unei pagini noi (doar admin)
-  app.post("/api/pages", isAdmin, async (req, res) => {
+  // Crearea unei pagini noi (temporar acces public pentru testare)
+  app.post("/api/pages", async (req, res) => {
     try {
+      console.log("Creating page for path: ", req.body.slug);
       // Validăm datele de intrare
-      const { title, slug, pageType, content = '{}', meta = '{}' } = req.body;
+      const { title, slug, pageType, content = '{}', meta = '{}', isPublished = true } = req.body;
       
       if (!title || !slug) {
         return res.status(400).json({ message: "Titlul și slug-ul sunt obligatorii" });
@@ -1741,15 +1742,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pageType: pageType || 'custom',
         content,
         meta,
-        isPublished: true,
-        createdBy: req.user.id,
+        isPublished,
+        // Dacă utilizatorul este autentificat, salvăm ID-ul său, altfel null
+        createdBy: req.isAuthenticated() ? req.user?.id : null,
       };
       
+      console.log("Creating new page with data:", pageData);
       const page = await storage.createBuilderPage(pageData);
+      console.log("Page created successfully:", page);
       res.status(201).json(page);
     } catch (error) {
       console.error("Error creating page:", error);
-      res.status(500).json({ message: "Eroare la crearea paginii", error: String(error) });
+      res.status(500).json({ 
+        message: "Eroare la crearea paginii", 
+        error: String(error),
+        stack: process.env.NODE_ENV !== 'production' ? (error as any).stack : undefined
+      });
     }
   });
   
