@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Edit, Save, Trash2, Plus, Move, GripVertical } from 'lucide-react';
+import { Edit, Save, Trash2, Plus, Move, GripVertical, Check, Star, Heart } from 'lucide-react';
 import { useDrag, useDrop } from 'react-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -379,6 +379,277 @@ export function EditableSection({
               <p style={{ fontSize: '1.25rem' }}>
                 {localContent.subtitle || 'Subtitlu secțiune Hero'}
               </p>
+            </div>
+          </div>
+        );
+        
+      case 'cards':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="cardsTitle">Titlu secțiune</Label>
+              <Input 
+                id="cardsTitle"
+                value={localContent.title || ''}
+                onChange={e => setLocalContent({...localContent, title: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="cardsSubtitle">Subtitlu</Label>
+              <Input 
+                id="cardsSubtitle"
+                value={localContent.subtitle || ''}
+                onChange={e => setLocalContent({...localContent, subtitle: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Carduri</Label>
+              <div className="space-y-4 mt-2">
+                {(localContent.cards || []).map((card: any, idx: number) => (
+                  <Card key={idx} className="p-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium">Card {idx + 1}</h4>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => {
+                          const updatedCards = [...(localContent.cards || [])];
+                          updatedCards.splice(idx, 1);
+                          setLocalContent({...localContent, cards: updatedCards});
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div>
+                        <Label htmlFor={`cardTitle-${idx}`}>Titlu</Label>
+                        <Input 
+                          id={`cardTitle-${idx}`}
+                          value={card.title || ''}
+                          onChange={e => {
+                            const updatedCards = [...(localContent.cards || [])];
+                            updatedCards[idx] = {...card, title: e.target.value};
+                            setLocalContent({...localContent, cards: updatedCards});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`cardDesc-${idx}`}>Descriere</Label>
+                        <Textarea 
+                          id={`cardDesc-${idx}`}
+                          value={card.description || ''}
+                          onChange={e => {
+                            const updatedCards = [...(localContent.cards || [])];
+                            updatedCards[idx] = {...card, description: e.target.value};
+                            setLocalContent({...localContent, cards: updatedCards});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`cardImage-${idx}`}>URL Imagine</Label>
+                        <Input 
+                          id={`cardImage-${idx}`}
+                          value={card.imageUrl || ''}
+                          onChange={e => {
+                            const updatedCards = [...(localContent.cards || [])];
+                            updatedCards[idx] = {...card, imageUrl: e.target.value};
+                            setLocalContent({...localContent, cards: updatedCards});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    const newCard = { title: '', description: '', imageUrl: '' };
+                    setLocalContent({
+                      ...localContent, 
+                      cards: [...(localContent.cards || []), newCard]
+                    });
+                  }}
+                  className="w-full"
+                >
+                  <Plus size={16} className="mr-1" /> Adaugă card
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <div className="py-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-2">{localContent.title || 'Titlu Secțiune Carduri'}</h2>
+              {localContent.subtitle && <p className="text-gray-600">{localContent.subtitle}</p>}
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {(localContent.cards || []).map((card: any, idx: number) => (
+                <Card key={idx} className="overflow-hidden">
+                  {card.imageUrl && (
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src={card.imageUrl} 
+                        alt={card.title} 
+                        className="w-full h-full object-cover transition-transform hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <CardContent className="p-5">
+                    <h3 className="text-xl font-semibold mb-2">{card.title || `Card ${idx + 1}`}</h3>
+                    <p className="text-gray-600">{card.description || 'Descriere card'}</p>
+                  </CardContent>
+                </Card>
+              ))}
+              {(!localContent.cards || localContent.cards.length === 0) && (
+                <Card className="col-span-3 p-8 text-center">
+                  <p className="text-gray-500">Niciun card adăugat. Editați secțiunea pentru a adăuga carduri.</p>
+                </Card>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'features':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="featuresTitle">Titlu secțiune</Label>
+              <Input 
+                id="featuresTitle"
+                value={localContent.title || ''}
+                onChange={e => setLocalContent({...localContent, title: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="featuresSubtitle">Subtitlu</Label>
+              <Input 
+                id="featuresSubtitle"
+                value={localContent.subtitle || ''}
+                onChange={e => setLocalContent({...localContent, subtitle: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Funcționalități</Label>
+              <div className="space-y-4 mt-2">
+                {(localContent.features || []).map((feature: any, idx: number) => (
+                  <Card key={idx} className="p-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium">Funcționalitate {idx + 1}</h4>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => {
+                          const updatedFeatures = [...(localContent.features || [])];
+                          updatedFeatures.splice(idx, 1);
+                          setLocalContent({...localContent, features: updatedFeatures});
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div>
+                        <Label htmlFor={`featureTitle-${idx}`}>Titlu</Label>
+                        <Input 
+                          id={`featureTitle-${idx}`}
+                          value={feature.title || ''}
+                          onChange={e => {
+                            const updatedFeatures = [...(localContent.features || [])];
+                            updatedFeatures[idx] = {...feature, title: e.target.value};
+                            setLocalContent({...localContent, features: updatedFeatures});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`featureDesc-${idx}`}>Descriere</Label>
+                        <Textarea 
+                          id={`featureDesc-${idx}`}
+                          value={feature.description || ''}
+                          onChange={e => {
+                            const updatedFeatures = [...(localContent.features || [])];
+                            updatedFeatures[idx] = {...feature, description: e.target.value};
+                            setLocalContent({...localContent, features: updatedFeatures});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`featureIcon-${idx}`}>Icon (ex: check, star, heart, etc)</Label>
+                        <Input 
+                          id={`featureIcon-${idx}`}
+                          value={feature.icon || ''}
+                          onChange={e => {
+                            const updatedFeatures = [...(localContent.features || [])];
+                            updatedFeatures[idx] = {...feature, icon: e.target.value};
+                            setLocalContent({...localContent, features: updatedFeatures});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    const newFeature = { title: '', description: '', icon: 'check' };
+                    setLocalContent({
+                      ...localContent, 
+                      features: [...(localContent.features || []), newFeature]
+                    });
+                  }}
+                  className="w-full"
+                >
+                  <Plus size={16} className="mr-1" /> Adaugă funcționalitate
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <div className="py-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-2">{localContent.title || 'Titlu Secțiune Funcționalități'}</h2>
+              {localContent.subtitle && <p className="text-gray-600 mb-4">{localContent.subtitle}</p>}
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {(localContent.features || []).map((feature: any, idx: number) => (
+                <Card key={idx} className="p-6">
+                  <div className="mb-4 text-primary">
+                    {feature.icon === 'check' && <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center"><Check className="h-6 w-6" /></div>}
+                    {feature.icon === 'star' && <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center"><Star className="h-6 w-6" /></div>}
+                    {feature.icon === 'heart' && <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center"><Heart className="h-6 w-6" /></div>}
+                    {!['check', 'star', 'heart'].includes(feature.icon) && <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center"><Check className="h-6 w-6" /></div>}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title || `Funcționalitate ${idx + 1}`}</h3>
+                  <p className="text-gray-600">{feature.description || 'Descriere funcționalitate'}</p>
+                </Card>
+              ))}
+              {(!localContent.features || localContent.features.length === 0) && (
+                <Card className="col-span-3 p-8 text-center">
+                  <p className="text-gray-500">Nicio funcționalitate adăugată. Editați secțiunea pentru a adăuga funcționalități.</p>
+                </Card>
+              )}
             </div>
           </div>
         );
