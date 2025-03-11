@@ -11,7 +11,8 @@ import {
   insertReviewSchema, 
   insertBookingSchema,
   insertMessageSchema,
-  insertCmsContentSchema
+  insertCmsContentSchema,
+  insertBuilderPageSchema
 } from "@shared/schema";
 import Stripe from "stripe";
 

@@ -1358,6 +1358,78 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+  
+  // Builder Pages operations
+  async getBuilderPages(): Promise<BuilderPage[]> {
+    try {
+      const pages = await db.select().from(builderPages);
+      return pages;
+    } catch (error) {
+      console.error('Error fetching builder pages:', error);
+      return [];
+    }
+  }
+  
+  async getBuilderPage(id: number): Promise<BuilderPage | undefined> {
+    try {
+      const [page] = await db.select().from(builderPages).where(eq(builderPages.id, id));
+      return page;
+    } catch (error) {
+      console.error('Error fetching builder page by ID:', error);
+      return undefined;
+    }
+  }
+  
+  async getBuilderPageBySlug(slug: string): Promise<BuilderPage | undefined> {
+    try {
+      const [page] = await db.select().from(builderPages).where(eq(builderPages.slug, slug));
+      return page;
+    } catch (error) {
+      console.error('Error fetching builder page by slug:', error);
+      return undefined;
+    }
+  }
+  
+  async createBuilderPage(insertPage: InsertBuilderPage): Promise<BuilderPage> {
+    try {
+      const now = new Date();
+      const [page] = await db.insert(builderPages).values({
+        ...insertPage,
+        createdAt: now,
+        updatedAt: now
+      }).returning();
+      return page;
+    } catch (error) {
+      console.error('Error creating builder page:', error);
+      throw new Error('Failed to create builder page');
+    }
+  }
+  
+  async updateBuilderPage(id: number, pageData: Partial<BuilderPage>): Promise<BuilderPage | undefined> {
+    try {
+      const [updatedPage] = await db.update(builderPages)
+        .set({
+          ...pageData,
+          updatedAt: new Date()
+        })
+        .where(eq(builderPages.id, id))
+        .returning();
+      return updatedPage;
+    } catch (error) {
+      console.error('Error updating builder page:', error);
+      return undefined;
+    }
+  }
+  
+  async deleteBuilderPage(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(builderPages).where(eq(builderPages.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error('Error deleting builder page:', error);
+      return false;
+    }
+  }
 }
 
 // Folosim DatabaseStorage în loc de MemStorage
