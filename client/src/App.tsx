@@ -18,6 +18,7 @@ import OrganizerDashboard from "@/pages/organizer/new-dashboard";
 import CreatePilgrimageNewPage from "@/pages/organizer/create-pilgrimage-new";
 import EditPilgrimagePage from "@/pages/organizer/edit-pilgrimage";
 import CmsPage from "@/pages/admin/cms-page";
+import BuilderPage from "@/pages/admin/builder-page";
 import UsersPage from "@/pages/admin/users-page";
 import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
 import OrganizerStatsPage from "@/pages/admin/organizer-stats-page";
@@ -67,6 +68,9 @@ function Router() {
       </Route>
       <Route path="/admin/organizer-stats">
         <ProtectedRoute component={OrganizerStatsPage} path="/admin/organizer-stats" adminOnly={true} />
+      </Route>
+      <Route path="/admin/builder">
+        <ProtectedRoute component={BuilderPage} path="/admin/builder" adminOnly={true} />
       </Route>
       <Route component={NotFound} />
     </Switch>

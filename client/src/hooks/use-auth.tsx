@@ -46,8 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Redirecționăm utilizatorul în funcție de rolul său
       if (user.role === "admin") {
-        // Admin merge la pagina de administrare
-        window.location.href = "/admin/pilgrimages";
+        // Admin merge la pagina de administrare CMS
+        window.location.href = "/admin/cms";
       } else if (user.role === "operator" || user.role === "monastery") {
         // Organizatorii merg la dashboard-ul lor
         window.location.href = "/organizer/dashboard";
