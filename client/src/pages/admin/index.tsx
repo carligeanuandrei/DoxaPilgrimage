@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ export const AdminPage = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Panou de Administrare</h1>
-      
+
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
           <TabsTrigger value="overview">Prezentare generală</TabsTrigger>
@@ -23,7 +22,7 @@ export const AdminPage = () => {
           <TabsTrigger value="pilgrimages">Pelerinaje</TabsTrigger>
           <TabsTrigger value="design">Design</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="overview">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card>
@@ -39,7 +38,7 @@ export const AdminPage = () => {
                 </Link>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Gestiune Utilizatori</CardTitle>
@@ -53,7 +52,7 @@ export const AdminPage = () => {
                 </Link>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Gestiune Pelerinaje</CardTitle>
@@ -67,7 +66,7 @@ export const AdminPage = () => {
                 </Link>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Statistici Organizatori</CardTitle>
@@ -81,23 +80,28 @@ export const AdminPage = () => {
                 </Link>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Gestiune CMS</CardTitle>
                 <CardDescription>Administrează conținutul site-ului</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col gap-2">
                 <Link to="/admin/cms">
                   <Button className="w-full">
-                    <FileText className="mr-2 h-4 w-4" /> CMS
+                    <FileText className="mr-2 h-4 w-4" /> Editare CMS
+                  </Button>
+                </Link>
+                <Link to="/admin/builder">
+                  <Button className="w-full">
+                    <Paintbrush className="mr-2 h-4 w-4" /> Builder Design
                   </Button>
                 </Link>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="design">
           <Card>
             <CardHeader>
@@ -114,7 +118,7 @@ export const AdminPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         {/* Alte taburi pentru secțiunile de administrare */}
         <TabsContent value="content">
           <Card>
@@ -131,7 +135,7 @@ export const AdminPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="users">
           <Card>
             <CardHeader>
@@ -147,7 +151,7 @@ export const AdminPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="pilgrimages">
           <Card>
             <CardHeader>
