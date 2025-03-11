@@ -54,7 +54,7 @@ export function EditableSection({
   const [saint, setSaint] = useState("");
   const [transport, setTransport] = useState("");
   const [duration, setDuration] = useState("");
-  const [_, navigate] = useLocation();
+  const [_, setRoute] = useLocation();
   
   // Funcție pentru navigare către pagina de pelerinaje cu parametrii selectați
   const handleSearch = () => {
@@ -66,7 +66,7 @@ export function EditableSection({
     if (transport) queryParams.append("transportation", transport);
     if (duration) queryParams.append("duration", duration);
     
-    navigate(`/pilgrimages?${queryParams.toString()}`);
+    setRoute(`/pilgrimages?${queryParams.toString()}`);
   };
   
   useEffect(() => {
