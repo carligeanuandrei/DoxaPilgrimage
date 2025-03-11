@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { SelectColor } from './SelectColor';
 import { useAuth } from '@/hooks/use-auth';
 
-export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features' | 'banners' | 'cta';
+export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features' | 'banners' | 'cta' | 'pilgrimages';
 
 interface EditableSectionProps {
   id: string;
