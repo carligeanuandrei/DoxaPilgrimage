@@ -83,13 +83,14 @@ export default function HomePage() {
   // Mutație pentru crearea paginii home dacă nu există
   const createHomePage = useMutation({
     mutationFn: async () => {
+      // Folosim un obiect nou fără createdBy - lăsăm serverul să seteze valoarea la null
       const pageData = {
         title: "Home",
         slug: "home",
         pageType: "home",
         content: JSON.stringify({ sections: createDefaultSections() }),
-        isPublished: true,
-        createdBy: null // Important: acest câmp trebuie să fie null pentru a permite crearea paginii
+        isPublished: true
+        // Eliminăm complet câmpul createdBy și lăsăm serverul să îl seteze
       };
       
       console.log("Creating home page:", pageData);

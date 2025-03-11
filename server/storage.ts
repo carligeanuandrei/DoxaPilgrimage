@@ -1417,8 +1417,10 @@ export class DatabaseStorage implements IStorage {
   async createBuilderPage(insertPage: InsertBuilderPage): Promise<BuilderPage> {
     try {
       const now = new Date();
+      // Forțăm createdBy să fie null pentru a evita erorile de cheie străină
       const [page] = await db.insert(builderPages).values({
         ...insertPage,
+        createdBy: null, // Setăm explicit la null, ignorând orice valoare primită
         createdAt: now,
         updatedAt: now
       }).returning();
