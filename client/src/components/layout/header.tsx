@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate } from "lucide-react";
+import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate, Edit } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -49,9 +49,48 @@ export default function Header() {
     return false;
   };
 
+  // Verifică dacă URL-ul curent este o pagină editabilă
+  const isEditablePage = () => {
+    // Consideră toate paginile care nu sunt în rute specifice ca fiind potențial editabile
+    const nonEditableRoutes = [
+      '/auth', 
+      '/profile', 
+      '/edit-profile',
+      '/admin',
+      '/organizer'
+    ];
+    
+    return !nonEditableRoutes.some(route => location.startsWith(route)) && 
+           location !== '/pilgrimages' &&
+           location !== '/orthodox-calendar' &&
+           !location.startsWith('/pilgrimages/');
+  };
+
+  // Activează modul de editare pentru pagina curentă
+  const activateEditMode = () => {
+    // Setează un flag în localStorage pentru a indica faptul că modul de editare este activat
+    localStorage.setItem('editModeEnabled', 'true');
+    // Reîncarcă pagina pentru ca modificarea să fie preluată
+    window.location.reload();
+  };
+
   return (
     <header className="bg-white shadow-md">
       <div className="container mx-auto px-4">
+        {/* Buton de editare pagină pentru admin */}
+        {user?.role === 'admin' && isEditablePage() && (
+          <div className="absolute top-2 right-4 z-50">
+            <Button 
+              onClick={activateEditMode}
+              size="sm" 
+              variant="outline" 
+              className="flex items-center gap-1 bg-white text-primary hover:bg-primary-100 border-primary"
+            >
+              <Edit className="h-4 w-4" />
+              Editează pagina
+            </Button>
+          </div>
+        )}
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
