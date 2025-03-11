@@ -15,11 +15,26 @@ async function fetchWithRetry(
   delay = 500
 ): Promise<Response> {
   let retries = 0;
-  let lastError: Error;
+  let lastError: Error = new Error("Unknown fetch error");
+  
+  // Funcția pentru a normaliza URL-ul (adaugă baza dacă lipsește)
+  const normalizedUrl = url.startsWith('/') ? window.location.origin + url : url;
   
   while (retries < maxRetries) {
     try {
-      const res = await fetch(url, options);
+      // Implementăm un timeout pentru a evita blocarea
+      const timeoutPromise = new Promise<Response>((_, reject) => {
+        setTimeout(() => reject(new Error(`Timeout accessing ${url}`)), 15000);
+      });
+      
+      const fetchPromise = fetch(normalizedUrl, {
+        ...options,
+        // Asigurăm-ne că avem mode: 'cors' pentru cereri externe
+        mode: 'cors' as RequestMode,
+      });
+      
+      // Race între fetch și timeout
+      const res = await Promise.race([fetchPromise, timeoutPromise]) as Response;
       return res;
     } catch (error) {
       lastError = error as Error;
@@ -35,7 +50,8 @@ async function fetchWithRetry(
   }
   
   // Dacă am ajuns aici, toate reîncercările au eșuat
-  throw lastError!;
+  console.error(`Toate încercările de fetch au eșuat pentru ${url}`, lastError);
+  throw lastError;
 }
 
 export async function apiRequest(
