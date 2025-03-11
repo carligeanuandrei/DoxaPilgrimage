@@ -1,0 +1,107 @@
+
+:root {
+  /* Colors */
+  --color-primary: #3b82f6;
+  --color-secondary: #10b981;
+  --color-accent: #8b5cf6;
+  --color-background: #ffffff;
+  --color-text: #1f2937;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+  
+  /* Spacing */
+  --spacing-small: 4px;
+  --spacing-medium: 8px;
+  --spacing-large: 16px;
+  
+  /* Typography */
+  --font-family: 'Inter', sans-serif;
+  --font-size-small: 14px;
+  --font-size-medium: 16px;
+  --font-size-large: 18px;
+  --font-size-xlarge: 24px;
+  
+  /* Border */
+  --border-radius: 8px;
+}
+
+/* Aplicăm variabilele de temă la elementele UI */
+.btn-primary, 
+.theme-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-secondary,
+.theme-secondary {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.theme-accent {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-medium);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family);
+}
+
+h1 {
+  font-size: var(--font-size-xlarge);
+}
+
+h2 {
+  font-size: var(--font-size-large);
+}
+
+.text-muted {
+  color: var(--color-muted);
+}
+
+.border {
+  border-color: var(--color-border);
+}
+
+.rounded {
+  border-radius: var(--border-radius);
+}
+
+.p-small {
+  padding: var(--spacing-small);
+}
+
+.p-medium {
+  padding: var(--spacing-medium);
+}
+
+.p-large {
+  padding: var(--spacing-large);
+}
+
+/* Utilitare pentru builder */
+.builder-preview {
+  border: 1px dashed #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.builder-element {
+  transition: all 0.2s ease;
+}
+
+.builder-element:hover {
+  outline: 2px solid var(--color-primary);
+}
+
+.sortable-ghost {
+  opacity: 0.5;
+  background-color: #f0f0f0;
+}
