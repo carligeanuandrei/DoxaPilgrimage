@@ -68,7 +68,14 @@ export default function Header() {
 
   // Activează modul de editare pentru pagina curentă
   const activateEditMode = () => {
-    // Setează un flag în localStorage pentru a indica faptul că modul de editare este activat
+    // Verifică dacă este pagina principală
+    if (location === '/') {
+      // Pentru pagina principală, redirecționează către interfața de builder
+      window.location.href = '/admin/builder';
+      return;
+    }
+    
+    // Pentru alte pagini, setează un flag în localStorage pentru a indica faptul că modul de editare este activat
     localStorage.setItem('editModeEnabled', 'true');
     // Reîncarcă pagina pentru ca modificarea să fie preluată
     window.location.reload();
