@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { SelectColor } from './SelectColor';
 import { useAuth } from '@/hooks/use-auth';
+import { PilgrimagesRenderer } from './PilgrimagesRenderer';
 
 export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features' | 'banners' | 'cta' | 'pilgrimages';
 
@@ -909,6 +910,76 @@ export function EditableSection({
             >
               {localContent.buttonText || 'Află Mai Multe'}
             </a>
+          </div>
+        );
+        
+      case 'pilgrimages':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="pilgrimagesTitle">Titlu secțiune</Label>
+              <Input 
+                id="pilgrimagesTitle"
+                value={localContent.title || 'Pelerinaje disponibile'}
+                onChange={e => setLocalContent({...localContent, title: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="pilgrimagesSubtitle">Subtitlu</Label>
+              <Input 
+                id="pilgrimagesSubtitle"
+                value={localContent.subtitle || 'Descoperă destinațiile spirituale și alege călătoria perfectă pentru tine'}
+                onChange={e => setLocalContent({...localContent, subtitle: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="pilgrimagesCount">Număr pelerinaje afișate</Label>
+              <Input 
+                id="pilgrimagesCount"
+                type="number"
+                min="1"
+                max="12"
+                value={localContent.count || 6}
+                onChange={e => setLocalContent({...localContent, count: parseInt(e.target.value)})}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex items-center space-x-2 mt-4">
+              <input
+                type="checkbox"
+                id="pilgrimagesFeatured"
+                checked={localContent.featured || false}
+                onChange={e => setLocalContent({...localContent, featured: e.target.checked})}
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <Label htmlFor="pilgrimagesFeatured">Afișează doar pelerinaje promovate</Label>
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <input
+                type="checkbox"
+                id="pilgrimagesShowPromoted"
+                checked={localContent.showPromoted || false}
+                onChange={e => setLocalContent({...localContent, showPromoted: e.target.checked})}
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <Label htmlFor="pilgrimagesShowPromoted">Afișează doar pelerinaje în promoție</Label>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full">
+            <PilgrimagesRenderer
+              title={localContent.title}
+              subtitle={localContent.subtitle}
+              count={localContent.count || 6}
+              featured={localContent.featured}
+              showPromoted={localContent.showPromoted}
+            />
           </div>
         );
         
