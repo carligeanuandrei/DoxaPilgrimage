@@ -331,6 +331,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint pentru preluarea pelerinajelor promovate
+  app.get("/api/pilgrimages/promoted", async (req, res) => {
+    try {
+      // Obținem toate pelerinajele marcate ca promovate
+      const filters = { promoted: true };
+      const pilgrimages = await storage.getPilgrimages(filters);
+      
+      // Asigurăm că datele pentru fiecare pelerinaj sunt formatate corect
+      const formattedPilgrimages = pilgrimages.map(pilgrimage => {
+        return {
+          ...pilgrimage,
+          // Convertim explicit câmpurile de date pentru a ne asigura că sunt formatate corect
+          startDate: pilgrimage.startDate instanceof Date ? pilgrimage.startDate : new Date(pilgrimage.startDate),
+          endDate: pilgrimage.endDate instanceof Date ? pilgrimage.endDate : new Date(pilgrimage.endDate),
+          // Asigurăm că valorile booleene sunt definite
+          featured: pilgrimage.featured === null ? false : pilgrimage.featured,
+          verified: pilgrimage.verified === null ? false : pilgrimage.verified,
+          promoted: true
+        };
+      });
+      
+      // Sortăm pelerinajele promovate după nivelul de promovare și data de început
+      const sortedPilgrimages = formattedPilgrimages.sort((a, b) => {
+        // Mai întâi sortăm după nivel de promovare (premium, exclusive au prioritate)
+        const promotionOrder = { "exclusive": 3, "premium": 2, "basic": 1, "none": 0 };
+        const levelDiff = (promotionOrder[b.promotionLevel] || 0) - (promotionOrder[a.promotionLevel] || 0);
+        
+        if (levelDiff !== 0) return levelDiff;
+        
+        // Apoi sortăm după data de început (cele mai apropiate mai întâi)
+        return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+      });
+      
+      return res.json(sortedPilgrimages);
+    } catch (error) {
+      console.error("Error fetching promoted pilgrimages:", error);
+      res.status(500).json({ message: "Eroare la preluarea pelerinajelor promovate", error: String(error) });
+    }
+  });
+
   app.get("/api/pilgrimages/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
