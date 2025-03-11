@@ -93,6 +93,16 @@ export default function Footer() {
                   <DirectCmsText contentKey="footer_link_auth" fallback="Autentificare" />
                 </a>
               </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-cms-key="footer_link_organizers_url"]')?.textContent || '/organizer/register';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <DirectCmsText contentKey="footer_link_organizers_url" fallback="/organizer/register" className="hidden" />
+                  <DirectCmsText contentKey="footer_link_organizers" fallback="Portal Organizatori" />
+                </a>
+              </li>
             </ul>
           </div>
           
