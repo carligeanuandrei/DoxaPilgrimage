@@ -68,6 +68,9 @@ function Router() {
       <Route path="/admin/organizer-stats">
         <ProtectedRoute component={OrganizerStatsPage} path="/admin/organizer-stats" adminOnly={true} />
       </Route>
+      <Route path="/admin">
+        <ProtectedRoute component={lazy(() => import('./pages/admin'))} path="/admin" adminOnly={true} />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
