@@ -8,10 +8,13 @@ import { CalendarIcon, MapPinIcon, ChevronRightIcon, UsersIcon } from 'lucide-re
 import { Link } from 'wouter';
 
 export const PromotedPilgrimagesSection: React.FC = () => {
-  const { data: promotedPilgrimages, isLoading, error } = useQuery({
-    queryKey: ['/api/pilgrimages/promoted'],
+  const { data: pilgrimages, isLoading, error } = useQuery<Pilgrimage[]>({
+    queryKey: ['/api/pilgrimages'],
     staleTime: 1000 * 60 * 5, // 5 minute cache
   });
+  
+  // Filtrăm pelerinajele care sunt marcate ca "promoted"
+  const promotedPilgrimages = pilgrimages?.filter(p => p.promoted === true);
 
   if (isLoading) {
     return (
