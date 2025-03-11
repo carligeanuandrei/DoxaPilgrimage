@@ -973,12 +973,20 @@ export function EditableSection({
           </div>
         ) : (
           <div className="w-full">
-            <PilgrimagesRenderer
-              title={localContent.title}
-              subtitle={localContent.subtitle}
-              count={localContent.count || 6}
-              featured={localContent.featured}
-              showPromoted={localContent.showPromoted}
+            {localContent.title && (
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold mb-2">{localContent.title}</h2>
+                {localContent.subtitle && <p className="text-muted-foreground">{localContent.subtitle}</p>}
+              </div>
+            )}
+            <PilgrimagesRenderer 
+              isEditing={isEditing}
+              showPromoted={localContent.showPromoted || false}
+              limit={localContent.count || 6}
+              backgroundColor={localContent.backgroundColor}
+              textColor={localContent.textColor}
+              className={localContent.className || ''}
+              cardClassName={localContent.cardClassName || ''}
             />
           </div>
         );
