@@ -1,51 +1,34 @@
-import { FC, ComponentType, Suspense, startTransition } from "react";
-import { Route, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 import { Redirect } from "wouter";
 
-interface ProtectedRouteProps {
-  component: ComponentType;
-  path: string;
-  adminOnly?: boolean;
-}
-
-export const ProtectedRoute: FC<ProtectedRouteProps> = ({
+export function ProtectedRoute({
   component: Component,
   path,
   adminOnly = false,
-}) => {
+}: {
+  path: string;
+  component: () => React.JSX.Element;
+  adminOnly?: boolean;
+}) {
   const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!user) {
-    startTransition(() => {
-      setLocation("/login");
-    });
-    return null;
+    return <Redirect to={adminOnly ? "/admin/login" : "/auth"} />;
   }
 
-  if (adminOnly && user.role !== "admin") {
-    startTransition(() => {
-      setLocation("/");
-    });
-    return null;
+  // Verificare pentru rute de admin
+  if (adminOnly && user.role !== 'admin') {
+    return <Redirect to="/" />;
   }
 
-  return (
-    <Suspense fallback={
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    }>
-      <Component />
-    </Suspense>
-  );
-};
+  return <Component />;
+}

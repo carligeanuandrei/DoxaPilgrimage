@@ -1,204 +1,269 @@
-import { useAuth } from '@/hooks/use-auth';
-import { CmsText, CmsImage } from '@/components/shared/cms-content';
-import { Link } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Settings, Home, Map, Info, Phone, User as UserIcon, Shield } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3 } from "lucide-react";
 
 export default function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logoutMutation } = useAuth();
-  const isMobile = useIsMobile();
+  const [location] = useLocation();
+  
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+  
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
   
   const handleLogout = () => {
     logoutMutation.mutate();
   };
   
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  const getRoleName = (role: string) => {
+    const roleMap: Record<string, string> = {
+      'admin': 'Administrator',
+      'pilgrim': 'Pelerin',
+      'operator': 'Operator de Turism',
+      'monastery': 'Administrator Mănăstire'
+    };
+    return roleMap[role] || role;
+  };
+  
+  const isActiveLink = (path: string) => {
+    if (path === '/' && location === '/') return true;
+    if (path !== '/' && location.startsWith(path)) return true;
+    return false;
+  };
+
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between py-4">
-        <div className="flex items-center gap-4">
-          <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <CmsImage 
-                contentKey="footer_brand_icon" 
-                fallbackSrc="/logo.png" 
-                alt="Doxa Logo" 
-                className="h-8 w-8" 
-              />
-              <CmsText 
-                contentKey="footer_brand_name" 
-                fallback="Doxa" 
-                className="text-xl font-bold tracking-tight" 
-              />
-            </div>
+    <header className="bg-white shadow-md">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center py-4">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <img 
+              src="/images/logo.svg" 
+              alt="Doxa" 
+              className="h-10" 
+            />
           </Link>
-          
-          {/* Main navigation - desktop only */}
-          {!isMobile && (
-            <nav className="flex items-center gap-6 text-sm ml-8">
-              <Link href="/">
-                <span className="font-medium transition-colors hover:text-primary cursor-pointer">
-                  <CmsText contentKey="footer_link_home" fallback="Acasă" />
-                </span>
+
+          {/* Navigation - Desktop */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link href="/" className={`font-medium ${isActiveLink('/') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              Acasă
+            </Link>
+            <Link href="/pilgrimages" className={`font-medium ${isActiveLink('/pilgrimages') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              Pelerinaje
+            </Link>
+            <Link href="/orthodox-calendar" className={`font-medium flex items-center ${isActiveLink('/orthodox-calendar') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              <Calendar className="h-4 w-4 mr-1" />
+              Calendar Ortodox
+            </Link>
+            <Link href="/about" className={`font-medium ${isActiveLink('/about') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              Despre Noi
+            </Link>
+            <Link href="/contact" className={`font-medium ${isActiveLink('/contact') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              Contact
+            </Link>
+          </nav>
+
+          {/* Auth buttons - Desktop */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative rounded-full h-8 w-8 p-0">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.profileImage || '/images/user/profile-placeholder.svg'} alt={`${user.firstName} ${user.lastName}`} />
+                      <AvatarFallback className="bg-primary text-white">
+                        {getInitials(user.firstName, user.lastName)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="font-medium">
+                    {user.firstName} {user.lastName}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-muted-foreground">
+                    {getRoleName(user.role)}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer w-full">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profil</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  {/* Link-uri specifice pentru admin */}
+                  {user.role === "admin" && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/cms" className="cursor-pointer w-full">
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Gestiune CMS</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/users" className="cursor-pointer w-full">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Gestiune Utilizatori</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/pilgrimages" className="cursor-pointer w-full">
+                          <Church className="mr-2 h-4 w-4" />
+                          <span>Gestiune Pelerinaje</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/organizer-stats" className="cursor-pointer w-full">
+                          <BarChart3 className="mr-2 h-4 w-4" />
+                          <span>Statistici Organizatori</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  {/* Link pentru organizatori */}
+                  {(user.role === "operator" || user.role === "monastery") && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/organizer/dashboard" className="cursor-pointer w-full">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Panou administrare</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Deconectare</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/auth" className="text-primary hover:text-primary-dark font-medium">
+                  Autentificare
+                </Link>
+                <Link href="/auth?tab=register" className="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded transition duration-300">
+                  Înregistrare
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <button 
+            type="button" 
+            className="md:hidden text-neutral-700 hover:text-primary"
+            onClick={toggleMobileMenu}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white py-4 border-t border-neutral-200">
+            <nav className="flex flex-col space-y-4">
+              <Link href="/" className={`px-4 font-medium ${isActiveLink('/') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                Acasă
               </Link>
-              <Link href="/pilgrimages">
-                <span className="font-medium transition-colors hover:text-primary cursor-pointer">
-                  <CmsText contentKey="footer_link_pilgrimages" fallback="Pelerinaje" />
-                </span>
+              <Link href="/pilgrimages" className={`px-4 font-medium ${isActiveLink('/pilgrimages') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                Pelerinaje
               </Link>
-              <Link href="/orthodox-calendar">
-                <span className="font-medium transition-colors hover:text-primary cursor-pointer">
-                  Calendar Ortodox
-                </span>
+              <Link href="/orthodox-calendar" className={`px-4 font-medium flex items-center ${isActiveLink('/orthodox-calendar') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                <Calendar className="h-4 w-4 mr-1" />
+                Calendar Ortodox
               </Link>
-              <Link href="/about">
-                <span className="font-medium transition-colors hover:text-primary cursor-pointer">
-                  <CmsText contentKey="footer_link_about" fallback="Despre noi" />
-                </span>
+              <Link href="/about" className={`px-4 font-medium ${isActiveLink('/about') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                Despre Noi
               </Link>
-              <Link href="/contact">
-                <span className="font-medium transition-colors hover:text-primary cursor-pointer">
-                  <CmsText contentKey="footer_link_contact" fallback="Contact" />
-                </span>
+              <Link href="/contact" className={`px-4 font-medium ${isActiveLink('/contact') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                Contact
               </Link>
             </nav>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-4">
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={user.profileImage || ''} alt={user.firstName} />
-                    <AvatarFallback>{user.firstName?.charAt(0) || user.username.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">{user.firstName} {user.lastName}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+            <div className="mt-4 flex flex-col space-y-2 px-4">
+              {user ? (
+                <>
+                  <div className="mb-2 pb-2 border-b border-neutral-200">
+                    <div className="font-medium">{user.firstName} {user.lastName}</div>
+                    <div className="text-sm text-neutral-500">{getRoleName(user.role)}</div>
                   </div>
-                </div>
-                <DropdownMenuSeparator />
-                
-                <Link href="/profile">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profil</span>
-                  </DropdownMenuItem>
-                </Link>
-                
-                {(user.role === 'operator' || user.role === 'monastery') && (
-                  <Link href="/organizer/dashboard">
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Map className="mr-2 h-4 w-4" />
-                      <span>Pelerinajele mele</span>
-                    </DropdownMenuItem>
+                  <Link href="/profile" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                    <User className="inline mr-2 h-4 w-4" />
+                    Profilul meu
                   </Link>
-                )}
-                
-                {user.role === 'admin' && (
-                  <Link href="/admin/pilgrimages">
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Shield className="mr-2 h-4 w-4" />
-                      <span>Administrare</span>
-                    </DropdownMenuItem>
-                  </Link>
-                )}
-                
-                <Link href="/edit-profile">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Setări</span>
-                  </DropdownMenuItem>
-                </Link>
-                
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={handleLogout}
-                  disabled={logoutMutation.isPending}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Deconectare</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link href="/auth">
-              <Button variant="default">
-                <CmsText contentKey="footer_link_auth" fallback="Autentificare" />
-              </Button>
-            </Link>
-          )}
-          
-          {/* Mobile menu button */}
-          {isMobile && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                  <span className="sr-only">Meniu navigare</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
-                <Link href="/">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Home className="mr-2 h-4 w-4" />
-                    <CmsText contentKey="footer_link_home" fallback="Acasă" />
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/pilgrimages">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Map className="mr-2 h-4 w-4" />
-                    <CmsText contentKey="footer_link_pilgrimages" fallback="Pelerinaje" />
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/orthodox-calendar">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Calendar Ortodox
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/about">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Info className="mr-2 h-4 w-4" />
-                    <CmsText contentKey="footer_link_about" fallback="Despre noi" />
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/contact">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Phone className="mr-2 h-4 w-4" />
-                    <CmsText contentKey="footer_link_contact" fallback="Contact" />
-                  </DropdownMenuItem>
-                </Link>
-                
-                {!user && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <Link href="/auth">
-                      <DropdownMenuItem className="cursor-pointer">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        <CmsText contentKey="footer_link_auth" fallback="Autentificare" />
-                      </DropdownMenuItem>
+                  
+                  {/* Linkuri pentru admin în meniul mobil */}
+                  {user.role === "admin" && (
+                    <>
+                      <Link href="/admin/cms" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <Settings className="inline mr-2 h-4 w-4" />
+                        Gestiune CMS
+                      </Link>
+                      <Link href="/admin/users" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <User className="inline mr-2 h-4 w-4" />
+                        Gestiune Utilizatori
+                      </Link>
+                      <Link href="/admin/pilgrimages" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <Church className="inline mr-2 h-4 w-4" />
+                        Gestiune Pelerinaje
+                      </Link>
+                      <Link href="/admin/organizer-stats" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <BarChart3 className="inline mr-2 h-4 w-4" />
+                        Statistici Organizatori
+                      </Link>
+                    </>
+                  )}
+                  
+                  {/* Link pentru organizatori în meniul mobil */}
+                  {(user.role === "operator" || user.role === "monastery") && (
+                    <Link href="/organizer/dashboard" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                      <Settings className="inline mr-2 h-4 w-4" />
+                      Panou administrare
                     </Link>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
+                  )}
+                  
+                  <Button variant="outline" onClick={() => { handleLogout(); closeMobileMenu(); }}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Deconectare
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                    Autentificare
+                  </Link>
+                  <Link href="/auth?tab=register" className="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded transition duration-300 text-center" onClick={closeMobileMenu}>
+                    Înregistrare
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
