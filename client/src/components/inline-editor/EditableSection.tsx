@@ -522,7 +522,11 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Destinație</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                        <select 
+                          className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                        >
                           <option value="" className="text-neutral-800">Toate locațiile</option>
                           <option value="Israel" className="text-neutral-800">Israel și Palestina</option>
                           <option value="Grecia" className="text-neutral-800">Grecia (Muntele Athos)</option>
@@ -541,7 +545,11 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Luna</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                        <select 
+                          className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          value={month}
+                          onChange={(e) => setMonth(e.target.value)}
+                        >
                           <option value="" className="text-neutral-800">Toate lunile</option>
                           <option value="Ianuarie" className="text-neutral-800">Ianuarie</option>
                           <option value="Februarie" className="text-neutral-800">Februarie</option>
@@ -567,7 +575,11 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Sfânt</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                        <select 
+                          className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          value={saint}
+                          onChange={(e) => setSaint(e.target.value)}
+                        >
                           <option value="" className="text-neutral-800">Toți Sfinții</option>
                           <option value="Sf. Maria" className="text-neutral-800">Sf. Maria</option>
                           <option value="Sf. Nicolae" className="text-neutral-800">Sf. Nicolae</option>
@@ -588,7 +600,11 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Transport</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                        <select 
+                          className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          value={transport}
+                          onChange={(e) => setTransport(e.target.value)}
+                        >
                           <option value="" className="text-neutral-800">Toate tipurile</option>
                           <option value="Autocar" className="text-neutral-800">Autocar</option>
                           <option value="Avion" className="text-neutral-800">Avion</option>
@@ -605,7 +621,11 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Durată</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                        <select 
+                          className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          value={duration}
+                          onChange={(e) => setDuration(e.target.value)}
+                        >
                           <option value="" className="text-neutral-800">Toate duratele</option>
                           <option value="1-3" className="text-neutral-800">1-3 zile</option>
                           <option value="4-7" className="text-neutral-800">4-7 zile</option>
@@ -620,7 +640,10 @@ export function EditableSection({
                       </div>
                     </div>
                     
-                    <button className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded flex items-center justify-center">
+                    <button 
+                      onClick={handleSearch}
+                      className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded flex items-center justify-center"
+                    >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                       </svg>
