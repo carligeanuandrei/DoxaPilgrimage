@@ -25,9 +25,16 @@ import AdminLoginPage from "@/pages/admin/admin-login";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { lazy } from "react"; // Added import for lazy
+import { lazy, Suspense } from "react"; // Added import for lazy and Suspense
+import { startTransition } from "react";
 
 function Router() {
+  const handleNavigation = (callback) => {
+    startTransition(() => {
+      callback();
+    });
+  };
+  
   return (
     <Switch>
       <Route path="/" component={HomePage} />
@@ -74,7 +81,9 @@ function Router() {
       </Route>
       {/* Builder Route */}
       <Route path="/admin/builder">
-        <ProtectedRoute component={lazy(() => import('./pages/admin/builder-page'))} path="/admin/builder" adminOnly={true} />
+        <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+          <ProtectedRoute component={lazy(() => import('./pages/admin/builder-page'))} path="/admin/builder" adminOnly={true} />
+        </Suspense>
       </Route>
       <Route component={NotFound} />
     </Switch>
