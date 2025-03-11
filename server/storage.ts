@@ -85,6 +85,7 @@ export interface IStorage {
   getBuilderPages(): Promise<BuilderPage[]>;
   getBuilderPage(id: number): Promise<BuilderPage | undefined>;
   getBuilderPageBySlug(slug: string): Promise<BuilderPage | undefined>;
+  getBuilderPageByType(pageType: string): Promise<BuilderPage | undefined>;
   createBuilderPage(page: InsertBuilderPage): Promise<BuilderPage>;
   updateBuilderPage(id: number, page: Partial<BuilderPage>): Promise<BuilderPage | undefined>;
   deleteBuilderPage(id: number): Promise<boolean>;

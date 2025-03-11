@@ -323,6 +323,7 @@ export const builderPages = pgTable("builder_pages", {
   slug: text("slug").notNull().unique(),
   content: text("content").notNull(), // JSON string pentru structura paginii (secțiuni, componente)
   isPublished: boolean("is_published").notNull().default(false),
+  pageType: text("page_type").default('custom'), // 'home', 'about', 'contact', 'pilgrimages', 'custom'
   createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }),
