@@ -166,27 +166,43 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Adresa de email este deja folosită" });
       }
 
+      // Verificăm dacă suntem în mediul de dezvoltare pentru a marca contul ca verificat automat
+      const isDevEnvironment = process.env.NODE_ENV !== "production";
+      
       const user = await storage.createUser({
         ...req.body,
         password: await hashPassword(req.body.password),
+        // Marcăm contul ca verificat automat în mediul de dezvoltare
+        verified: isDevEnvironment ? true : false
       });
 
-      // Generează token pentru verificarea emailului
-      const verificationToken = await storage.createVerificationToken(user.id, user.email);
-      
-      // Trimite email de verificare
-      const emailPreviewUrl = await sendVerificationEmail(user, verificationToken);
-      
-      // Pentru development, logăm URL-ul de preview al email-ului
-      if (process.env.NODE_ENV !== "production" && emailPreviewUrl) {
-        console.log("Email verification preview URL:", emailPreviewUrl);
+      // Doar în producție generăm tokenul și trimitem emailul
+      if (!isDevEnvironment) {
+        console.log("Mediu de dezvoltare detectat: Contul a fost marcat automat ca verificat.");
+      } else {
+        // Generează token pentru verificarea emailului
+        const verificationToken = await storage.createVerificationToken(user.id, user.email);
+        
+        // Trimite email de verificare
+        const emailPreviewUrl = await sendVerificationEmail(user, verificationToken);
+        
+        // Pentru development, logăm URL-ul de preview al email-ului
+        if (emailPreviewUrl) {
+          console.log("Email verification preview URL:", emailPreviewUrl);
+        }
       }
 
       req.login(user, (err) => {
         if (err) return next(err);
+        
+        // Mesaj personalizat în funcție de mediu
+        const message = isDevEnvironment 
+          ? "Contul a fost creat și verificat automat."
+          : "Un email de verificare a fost trimis la adresa ta de email.";
+        
         res.status(201).json({
           ...user,
-          message: "Un email de verificare a fost trimis la adresa ta de email."
+          message
         });
       });
     } catch (error) {
