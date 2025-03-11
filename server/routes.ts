@@ -1642,6 +1642,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Builder Pages routes
+  // Obținerea tuturor paginilor builder
+  app.get("/api/builder-pages", async (req, res) => {
+    try {
+      // Dezactivăm cache-ul pentru toate răspunsurile din API
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
+      const pages = await storage.getBuilderPages();
+      res.json(pages);
+    } catch (error) {
+      console.error("Error fetching builder pages:", error);
+      res.status(500).json({ message: "Eroare la preluarea paginilor builder", error: String(error) });
+    }
+  });
+  
+  // Obținerea unei pagini builder după slug
+  app.get("/api/builder-pages/slug/:slug", async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      const page = await storage.getBuilderPageBySlug(slug);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Pagina builder nu a fost găsită" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      console.error("Error fetching builder page by slug:", error);
+      res.status(500).json({ message: "Eroare la preluarea paginii builder după slug", error: String(error) });
+    }
+  });
+  
+  // Obținerea unei pagini builder după ID
+  app.get("/api/builder-pages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const page = await storage.getBuilderPage(id);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Pagina builder nu a fost găsită" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      console.error("Error fetching builder page:", error);
+      res.status(500).json({ message: "Eroare la preluarea paginii builder", error: String(error) });
+    }
+  });
+  
+  // Crearea unei pagini builder noi (doar admin)
+  app.post("/api/builder-pages", isAdmin, async (req, res) => {
+    try {
+      // Validăm datele de intrare
+      const validData = insertBuilderPageSchema.parse(req.body);
+      
+      // Adăugăm ID-ul utilizatorului care a creat pagina
+      const pageData = {
+        ...validData,
+        createdBy: req.user.id
+      };
+      
+      const page = await storage.createBuilderPage(pageData);
+      res.status(201).json(page);
+    } catch (error) {
+      console.error("Error creating builder page:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Date invalide pentru crearea paginii builder", 
+          errors: error.errors 
+        });
+      }
+      
+      res.status(500).json({ message: "Eroare la crearea paginii builder", error: String(error) });
+    }
+  });
+  
+  // Actualizarea unei pagini builder existente (doar admin)
+  app.put("/api/builder-pages/:id", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Verificăm dacă pagina există
+      const existingPage = await storage.getBuilderPage(id);
+      if (!existingPage) {
+        return res.status(404).json({ message: "Pagina builder nu a fost găsită" });
+      }
+      
+      // Actualizăm pagina
+      const updatedPage = await storage.updateBuilderPage(id, req.body);
+      
+      if (!updatedPage) {
+        return res.status(500).json({ message: "Eroare la actualizarea paginii builder" });
+      }
+      
+      res.json(updatedPage);
+    } catch (error) {
+      console.error("Error updating builder page:", error);
+      res.status(500).json({ message: "Eroare la actualizarea paginii builder", error: String(error) });
+    }
+  });
+  
+  // Ștergerea unei pagini builder (doar admin)
+  app.delete("/api/builder-pages/:id", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Verificăm dacă pagina există
+      const existingPage = await storage.getBuilderPage(id);
+      if (!existingPage) {
+        return res.status(404).json({ message: "Pagina builder nu a fost găsită" });
+      }
+      
+      // Ștergem pagina
+      const result = await storage.deleteBuilderPage(id);
+      
+      if (result) {
+        res.json({ message: "Pagina builder a fost ștearsă cu succes" });
+      } else {
+        res.status(500).json({ message: "A apărut o eroare la ștergerea paginii builder" });
+      }
+    } catch (error) {
+      console.error("Error deleting builder page:", error);
+      res.status(500).json({ message: "Eroare la ștergerea paginii builder", error: String(error) });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
