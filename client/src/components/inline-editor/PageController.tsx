@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,7 +38,7 @@ export const PageController: React.FC<PageControllerProps> = ({
   pageContent = '{}',
   isEditable = false
 }) => {
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [isPageSettingsOpen, setIsPageSettingsOpen] = useState(false);
@@ -115,7 +115,7 @@ export const PageController: React.FC<PageControllerProps> = ({
       
       // Navigate to the new page
       response.json().then(data => {
-        navigate(`/${data.slug}`);
+        setLocation(`/${data.slug}`);
       });
     },
     onError: (error: Error) => {
@@ -138,7 +138,7 @@ export const PageController: React.FC<PageControllerProps> = ({
         description: 'Pagina a fost ștearsă cu succes.',
       });
       setIsDeleteConfirmOpen(false);
-      navigate('/');
+      setLocation('/');
     },
     onError: (error: Error) => {
       toast({
