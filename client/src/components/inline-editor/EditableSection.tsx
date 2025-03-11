@@ -379,6 +379,46 @@ export function EditableSection({
               />
             </div>
             
+            <div className="mt-4 border-t pt-4">
+              <h3 className="font-medium mb-3">Setări overlay</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="enableOverlay"
+                    checked={localContent.showOverlay !== false}
+                    onChange={e => setLocalContent({...localContent, showOverlay: e.target.checked})}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <Label htmlFor="enableOverlay">Activează overlay pe secțiune</Label>
+                </div>
+                
+                <div>
+                  <Label htmlFor="overlayColor">Culoare overlay</Label>
+                  <SelectColor 
+                    id="overlayColor"
+                    value={localContent.overlayColor || 'rgba(0,0,0,0.5)'}
+                    onChange={(color) => setLocalContent({...localContent, overlayColor: color})}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 border-t pt-4">
+              <h3 className="font-medium mb-3">Filtru de căutare</h3>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="showSearchFilter"
+                  checked={localContent.showSearchFilter !== false}
+                  onChange={e => setLocalContent({...localContent, showSearchFilter: e.target.checked})}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <Label htmlFor="showSearchFilter">Afișează filtru de căutare pelerinaje</Label>
+              </div>
+            </div>
+            
             <SpacingControls 
               content={localContent}
               onChange={setLocalContent}
@@ -406,13 +446,144 @@ export function EditableSection({
               padding: '2rem',
             }}
           >
-            <div style={{ backgroundColor: 'rgba(0,0,0,0.5)', padding: '2rem', borderRadius: '0.5rem' }}>
+            {/* Overlay complet pentru întreaga secțiune */}
+            {localContent.showOverlay !== false && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: localContent.overlayColor || 'rgba(0,0,0,0.5)',
+                  zIndex: 1
+                }}
+              />
+            )}
+            
+            {/* Conținutul hero */}
+            <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px' }}>
               <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
                 {localContent.title || 'Titlu secțiune Hero'}
               </h1>
-              <p style={{ fontSize: '1.25rem' }}>
+              <p style={{ fontSize: '1.25rem', marginBottom: '2rem' }}>
                 {localContent.subtitle || 'Subtitlu secțiune Hero'}
               </p>
+              
+              {/* Formular de căutare */}
+              {localContent.showSearchFilter !== false && (
+                <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-4xl mx-auto mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-neutral-700 font-medium mb-1">Destinație</label>
+                      <div className="relative">
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="">Toate locațiile</option>
+                          <option value="Israel">Israel și Palestina</option>
+                          <option value="Grecia">Grecia (Muntele Athos)</option>
+                          <option value="România">România</option>
+                          <option value="Vatican">Vatican și Italia</option>
+                          <option value="Franța">Franța (Lourdes)</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-neutral-700 font-medium mb-1">Luna</label>
+                      <div className="relative">
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="">Toate lunile</option>
+                          <option value="Ianuarie">Ianuarie</option>
+                          <option value="Februarie">Februarie</option>
+                          <option value="Martie">Martie</option>
+                          <option value="Aprilie">Aprilie</option>
+                          <option value="Mai">Mai</option>
+                          <option value="Iunie">Iunie</option>
+                          <option value="Iulie">Iulie</option>
+                          <option value="August">August</option>
+                          <option value="Septembrie">Septembrie</option>
+                          <option value="Octombrie">Octombrie</option>
+                          <option value="Noiembrie">Noiembrie</option>
+                          <option value="Decembrie">Decembrie</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-neutral-700 font-medium mb-1">Sfânt</label>
+                      <div className="relative">
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="">Toți Sfinții</option>
+                          <option value="Sf. Maria">Sf. Maria</option>
+                          <option value="Sf. Nicolae">Sf. Nicolae</option>
+                          <option value="Sf. Parascheva">Sf. Parascheva</option>
+                          <option value="Sf. Dimitrie">Sf. Dimitrie</option>
+                          <option value="Sf. Gheorghe">Sf. Gheorghe</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                    <div>
+                      <label className="block text-neutral-700 font-medium mb-1">Transport</label>
+                      <div className="relative">
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="">Toate tipurile</option>
+                          <option value="Autocar">Autocar</option>
+                          <option value="Avion">Avion</option>
+                          <option value="Mixt">Mixt</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-neutral-700 font-medium mb-1">Durată</label>
+                      <div className="relative">
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="">Toate duratele</option>
+                          <option value="1-3">1-3 zile</option>
+                          <option value="4-7">4-7 zile</option>
+                          <option value="8-14">8-14 zile</option>
+                          <option value="15+">Peste 15 zile</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <button className="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                      </svg>
+                      Caută Pelerinaje
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
