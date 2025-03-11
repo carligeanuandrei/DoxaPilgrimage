@@ -654,6 +654,264 @@ export function EditableSection({
           </div>
         );
         
+      case 'banners':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="bannersTitle">Titlu secțiune</Label>
+              <Input 
+                id="bannersTitle"
+                value={localContent.title || ''}
+                onChange={e => setLocalContent({...localContent, title: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="bannersSubtitle">Subtitlu</Label>
+              <Input 
+                id="bannersSubtitle"
+                value={localContent.subtitle || ''}
+                onChange={e => setLocalContent({...localContent, subtitle: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="bannersDisplayType">Tip afișare</Label>
+              <select
+                id="bannersDisplayType"
+                value={localContent.displayType || 'carousel'}
+                onChange={e => setLocalContent({...localContent, displayType: e.target.value})}
+                className="w-full h-10 px-3 mt-1 text-sm border rounded-md"
+              >
+                <option value="carousel">Carusel</option>
+                <option value="grid">Grid</option>
+              </select>
+            </div>
+            <div>
+              <Label>Bannere</Label>
+              <div className="space-y-4 mt-2">
+                {(localContent.banners || []).map((banner: any, idx: number) => (
+                  <Card key={idx} className="p-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium">Banner {idx + 1}</h4>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => {
+                          const updatedBanners = [...(localContent.banners || [])];
+                          updatedBanners.splice(idx, 1);
+                          setLocalContent({...localContent, banners: updatedBanners});
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div>
+                        <Label htmlFor={`bannerImage-${idx}`}>Imagine URL</Label>
+                        <Input 
+                          id={`bannerImage-${idx}`}
+                          value={banner.image || ''}
+                          onChange={e => {
+                            const updatedBanners = [...(localContent.banners || [])];
+                            updatedBanners[idx] = {...banner, image: e.target.value};
+                            setLocalContent({...localContent, banners: updatedBanners});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`bannerTitle-${idx}`}>Titlu</Label>
+                        <Input 
+                          id={`bannerTitle-${idx}`}
+                          value={banner.title || ''}
+                          onChange={e => {
+                            const updatedBanners = [...(localContent.banners || [])];
+                            updatedBanners[idx] = {...banner, title: e.target.value};
+                            setLocalContent({...localContent, banners: updatedBanners});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`bannerDescription-${idx}`}>Descriere</Label>
+                        <Textarea 
+                          id={`bannerDescription-${idx}`}
+                          value={banner.description || ''}
+                          onChange={e => {
+                            const updatedBanners = [...(localContent.banners || [])];
+                            updatedBanners[idx] = {...banner, description: e.target.value};
+                            setLocalContent({...localContent, banners: updatedBanners});
+                          }}
+                          className="mt-1"
+                          rows={2}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`bannerLinkUrl-${idx}`}>URL Link</Label>
+                        <Input 
+                          id={`bannerLinkUrl-${idx}`}
+                          value={banner.linkUrl || ''}
+                          onChange={e => {
+                            const updatedBanners = [...(localContent.banners || [])];
+                            updatedBanners[idx] = {...banner, linkUrl: e.target.value};
+                            setLocalContent({...localContent, banners: updatedBanners});
+                          }}
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    const updatedBanners = [...(localContent.banners || [])];
+                    updatedBanners.push({ 
+                      image: '/placeholder-banner.jpg', 
+                      title: 'Titlu Banner', 
+                      description: 'Descriere banner', 
+                      linkUrl: '/link' 
+                    });
+                    setLocalContent({...localContent, banners: updatedBanners});
+                  }}
+                >
+                  <Plus size={16} className="mr-2" />
+                  Adaugă banner
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <div className="my-8">
+            <h3 className="text-2xl font-semibold mb-1 text-center">{localContent.title || 'Bannere Promoționale'}</h3>
+            <p className="text-gray-600 mb-6 text-center">{localContent.subtitle || 'Descoperiți ofertele speciale'}</p>
+            
+            <div className={localContent.displayType === 'grid' ? 
+              "grid grid-cols-1 md:grid-cols-2 gap-6" : 
+              "flex overflow-x-auto gap-4 pb-4"
+            }>
+              {(localContent.banners || []).map((banner: any, idx: number) => (
+                <a key={idx} 
+                  href={banner.linkUrl || '#'} 
+                  className={`block ${localContent.displayType === 'carousel' ? 'min-w-[280px] md:min-w-[320px]' : ''}`}
+                >
+                  <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div className="relative h-[200px]">
+                      <img 
+                        src={banner.image || '/placeholder-banner.jpg'} 
+                        alt={banner.title || 'Banner'} 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                        <h4 className="text-white font-medium text-lg">{banner.title || 'Titlu Banner'}</h4>
+                        <p className="text-white/90 text-sm">{banner.description || 'Descriere banner'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'cta':
+        return isEditable ? (
+          <div className="space-y-4 p-4">
+            <div>
+              <Label htmlFor="ctaTitle">Titlu secțiune</Label>
+              <Input 
+                id="ctaTitle"
+                value={localContent.title || ''}
+                onChange={e => setLocalContent({...localContent, title: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ctaSubtitle">Subtitlu</Label>
+              <Input 
+                id="ctaSubtitle"
+                value={localContent.subtitle || ''}
+                onChange={e => setLocalContent({...localContent, subtitle: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ctaButtonText">Text buton</Label>
+              <Input 
+                id="ctaButtonText"
+                value={localContent.buttonText || ''}
+                onChange={e => setLocalContent({...localContent, buttonText: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ctaButtonUrl">URL buton</Label>
+              <Input 
+                id="ctaButtonUrl"
+                value={localContent.buttonUrl || ''}
+                onChange={e => setLocalContent({...localContent, buttonUrl: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="ctaBackgroundColor">Culoare fundal</Label>
+                <SelectColor 
+                  id="ctaBackgroundColor"
+                  value={localContent.backgroundColor || '#f8fafc'}
+                  onChange={(color) => setLocalContent({...localContent, backgroundColor: color})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="ctaTextColor">Culoare text</Label>
+                <SelectColor 
+                  id="ctaTextColor"
+                  value={localContent.textColor || '#1e293b'}
+                  onChange={(color) => setLocalContent({...localContent, textColor: color})}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Anulează</Button>
+              <Button onClick={handleSave}>Salvează</Button>
+            </div>
+          </div>
+        ) : (
+          <div 
+            className="my-12 py-16 px-4 rounded-xl text-center" 
+            style={{ backgroundColor: localContent.backgroundColor || '#f8fafc' }}
+          >
+            <h3 
+              className="text-3xl font-bold mb-3" 
+              style={{ color: localContent.textColor || '#1e293b' }}
+            >
+              {localContent.title || 'Acționează Acum'}
+            </h3>
+            <p 
+              className="text-lg mb-8 max-w-2xl mx-auto" 
+              style={{ color: localContent.textColor || '#1e293b' }}
+            >
+              {localContent.subtitle || 'Nu rata această oportunitate unică'}
+            </p>
+            <a 
+              href={localContent.buttonUrl || '/contact'} 
+              className="inline-block py-3 px-8 rounded-lg font-medium transition-colors duration-200 bg-primary text-white hover:bg-primary/90"
+            >
+              {localContent.buttonText || 'Află Mai Multe'}
+            </a>
+          </div>
+        );
+        
       default:
         return (
           <div className="p-4 bg-gray-100">
