@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { SelectColor } from './SelectColor';
 import { useAuth } from '@/hooks/use-auth';
-import { PilgrimagesRenderer } from './PilgrimagesRenderer';
+import PilgrimagesRenderer from './PilgrimagesRenderer';
 
 export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features' | 'banners' | 'cta' | 'pilgrimages';
 
