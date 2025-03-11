@@ -1,6 +1,7 @@
 import { 
   users, pilgrimages, reviews, bookings, messages,
-  products, orders, orderItems, productReviews, cmsContent
+  products, orders, orderItems, productReviews, cmsContent,
+  builderPages
 } from "@shared/schema";
 import type { 
   User, InsertUser, Pilgrimage, InsertPilgrimage, 
@@ -8,7 +9,7 @@ import type {
   Message, InsertMessage, VerificationData,
   Product, InsertProduct, Order, InsertOrder,
   OrderItem, InsertOrderItem, ProductReview, InsertProductReview,
-  CmsContent, InsertCmsContent
+  CmsContent, InsertCmsContent, BuilderPage, InsertBuilderPage
 } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
@@ -115,12 +116,14 @@ export class MemStorage implements IStorage {
     this.reviews = new Map();
     this.bookings = new Map();
     this.messages = new Map();
+    this.builderPages = new Map();
     
     this.currentUserId = 1;
     this.currentPilgrimageId = 1;
     this.currentReviewId = 1;
     this.currentBookingId = 1;
     this.currentMessageId = 1;
+    this.currentBuilderPageId = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000 // 24 hours
@@ -543,6 +546,54 @@ export class MemStorage implements IStorage {
     if (!content) return false;
 
     this.cmsContent.delete(key);
+    return true;
+  }
+  
+  // Builder Pages operations
+  async getBuilderPages(): Promise<BuilderPage[]> {
+    return Array.from(this.builderPages.values());
+  }
+  
+  async getBuilderPage(id: number): Promise<BuilderPage | undefined> {
+    return this.builderPages.get(id);
+  }
+  
+  async getBuilderPageBySlug(slug: string): Promise<BuilderPage | undefined> {
+    return Array.from(this.builderPages.values()).find(
+      (page) => page.slug === slug
+    );
+  }
+  
+  async createBuilderPage(insertPage: InsertBuilderPage): Promise<BuilderPage> {
+    const id = this.currentBuilderPageId++;
+    const now = new Date();
+    const page: BuilderPage = {
+      ...insertPage,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.builderPages.set(id, page);
+    return page;
+  }
+  
+  async updateBuilderPage(id: number, pageData: Partial<BuilderPage>): Promise<BuilderPage | undefined> {
+    const page = this.builderPages.get(id);
+    if (!page) return undefined;
+    
+    const updatedPage = { 
+      ...page, 
+      ...pageData,
+      updatedAt: new Date()
+    };
+    this.builderPages.set(id, updatedPage);
+    return updatedPage;
+  }
+  
+  async deleteBuilderPage(id: number): Promise<boolean> {
+    if (!this.builderPages.has(id)) return false;
+    
+    this.builderPages.delete(id);
     return true;
   }
   
