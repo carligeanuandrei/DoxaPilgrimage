@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { SelectColor } from './SelectColor';
 import { useAuth } from '@/hooks/use-auth';
 import PilgrimagesRenderer from './PilgrimagesRenderer';
+import { SpacingControls } from './SpacingControls';
 
 export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features' | 'banners' | 'cta' | 'pilgrimages';
 
@@ -177,6 +178,12 @@ export function EditableSection({
                 />
               </div>
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
@@ -229,6 +236,12 @@ export function EditableSection({
                 />
               </div>
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
