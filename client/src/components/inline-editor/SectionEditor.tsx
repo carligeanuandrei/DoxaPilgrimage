@@ -185,6 +185,14 @@ export const SectionEditor: React.FC<SectionEditorProps> = ({ sections = [], onC
           backgroundColor: '#f8fafc',
           textColor: '#1e293b'
         };
+      case 'pilgrimages':
+        return {
+          title: 'Pelerinaje disponibile',
+          subtitle: 'Descoperă destinațiile spirituale și alege călătoria perfectă pentru tine',
+          count: 6,
+          featured: false,
+          showPromoted: false
+        };
       default:
         return {};
     }
@@ -335,6 +343,15 @@ export const SectionEditor: React.FC<SectionEditorProps> = ({ sections = [], onC
                 >
                   <span className="text-lg">🔔</span>
                   <span className="text-xs">CTA</span>
+                </Button>
+                
+                <Button
+                  variant="outline" 
+                  className="h-24 flex flex-col items-center justify-center gap-2"
+                  onClick={() => createNewSection('pilgrimages')}
+                >
+                  <span className="text-lg">⛪</span>
+                  <span className="text-xs">Pelerinaje</span>
                 </Button>
               </TabsContent>
             </Tabs>
