@@ -500,13 +500,13 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Destinație</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                          <option value="">Toate locațiile</option>
-                          <option value="Israel">Israel și Palestina</option>
-                          <option value="Grecia">Grecia (Muntele Athos)</option>
-                          <option value="România">România</option>
-                          <option value="Vatican">Vatican și Italia</option>
-                          <option value="Franța">Franța (Lourdes)</option>
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="" className="text-neutral-800">Toate locațiile</option>
+                          <option value="Israel" className="text-neutral-800">Israel și Palestina</option>
+                          <option value="Grecia" className="text-neutral-800">Grecia (Muntele Athos)</option>
+                          <option value="România" className="text-neutral-800">România</option>
+                          <option value="Vatican" className="text-neutral-800">Vatican și Italia</option>
+                          <option value="Franța" className="text-neutral-800">Franța (Lourdes)</option>
                         </select>
                         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
@@ -519,20 +519,20 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Luna</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                          <option value="">Toate lunile</option>
-                          <option value="Ianuarie">Ianuarie</option>
-                          <option value="Februarie">Februarie</option>
-                          <option value="Martie">Martie</option>
-                          <option value="Aprilie">Aprilie</option>
-                          <option value="Mai">Mai</option>
-                          <option value="Iunie">Iunie</option>
-                          <option value="Iulie">Iulie</option>
-                          <option value="August">August</option>
-                          <option value="Septembrie">Septembrie</option>
-                          <option value="Octombrie">Octombrie</option>
-                          <option value="Noiembrie">Noiembrie</option>
-                          <option value="Decembrie">Decembrie</option>
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="" className="text-neutral-800">Toate lunile</option>
+                          <option value="Ianuarie" className="text-neutral-800">Ianuarie</option>
+                          <option value="Februarie" className="text-neutral-800">Februarie</option>
+                          <option value="Martie" className="text-neutral-800">Martie</option>
+                          <option value="Aprilie" className="text-neutral-800">Aprilie</option>
+                          <option value="Mai" className="text-neutral-800">Mai</option>
+                          <option value="Iunie" className="text-neutral-800">Iunie</option>
+                          <option value="Iulie" className="text-neutral-800">Iulie</option>
+                          <option value="August" className="text-neutral-800">August</option>
+                          <option value="Septembrie" className="text-neutral-800">Septembrie</option>
+                          <option value="Octombrie" className="text-neutral-800">Octombrie</option>
+                          <option value="Noiembrie" className="text-neutral-800">Noiembrie</option>
+                          <option value="Decembrie" className="text-neutral-800">Decembrie</option>
                         </select>
                         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
@@ -545,13 +545,13 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Sfânt</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                          <option value="">Toți Sfinții</option>
-                          <option value="Sf. Maria">Sf. Maria</option>
-                          <option value="Sf. Nicolae">Sf. Nicolae</option>
-                          <option value="Sf. Parascheva">Sf. Parascheva</option>
-                          <option value="Sf. Dimitrie">Sf. Dimitrie</option>
-                          <option value="Sf. Gheorghe">Sf. Gheorghe</option>
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="" className="text-neutral-800">Toți Sfinții</option>
+                          <option value="Sf. Maria" className="text-neutral-800">Sf. Maria</option>
+                          <option value="Sf. Nicolae" className="text-neutral-800">Sf. Nicolae</option>
+                          <option value="Sf. Parascheva" className="text-neutral-800">Sf. Parascheva</option>
+                          <option value="Sf. Dimitrie" className="text-neutral-800">Sf. Dimitrie</option>
+                          <option value="Sf. Gheorghe" className="text-neutral-800">Sf. Gheorghe</option>
                         </select>
                         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
@@ -566,11 +566,11 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Transport</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                          <option value="">Toate tipurile</option>
-                          <option value="Autocar">Autocar</option>
-                          <option value="Avion">Avion</option>
-                          <option value="Mixt">Mixt</option>
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="" className="text-neutral-800">Toate tipurile</option>
+                          <option value="Autocar" className="text-neutral-800">Autocar</option>
+                          <option value="Avion" className="text-neutral-800">Avion</option>
+                          <option value="Mixt" className="text-neutral-800">Mixt</option>
                         </select>
                         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
@@ -583,12 +583,12 @@ export function EditableSection({
                     <div>
                       <label className="block text-neutral-700 font-medium mb-1">Durată</label>
                       <div className="relative">
-                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                          <option value="">Toate duratele</option>
-                          <option value="1-3">1-3 zile</option>
-                          <option value="4-7">4-7 zile</option>
-                          <option value="8-14">8-14 zile</option>
-                          <option value="15+">Peste 15 zile</option>
+                        <select className="block w-full bg-neutral-100 border border-neutral-300 rounded py-2 px-3 pr-8 text-neutral-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option value="" className="text-neutral-800">Toate duratele</option>
+                          <option value="1-3" className="text-neutral-800">1-3 zile</option>
+                          <option value="4-7" className="text-neutral-800">4-7 zile</option>
+                          <option value="8-14" className="text-neutral-800">8-14 zile</option>
+                          <option value="15+" className="text-neutral-800">Peste 15 zile</option>
                         </select>
                         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
