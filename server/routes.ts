@@ -1648,7 +1648,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Obținerea tuturor paginilor
   app.get("/api/pages", async (req, res) => {
     try {
+      console.log("Fetching all pages...");
       const pages = await storage.getBuilderPages(); // Refolosim aceeași metodă de storage
+      console.log(`Found ${pages.length} pages`);
       res.json(pages);
     } catch (error) {
       console.error("Error fetching pages:", error);
@@ -1660,12 +1662,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pages/slug/:slug", async (req, res) => {
     try {
       const slug = req.params.slug;
+      console.log(`Fetching page by slug: ${slug}`);
       const page = await storage.getBuilderPageBySlug(slug);
       
       if (!page) {
+        console.log(`Page with slug ${slug} not found`);
         return res.status(404).json({ message: "Pagina nu a fost găsită" });
       }
       
+      console.log(`Found page with slug ${slug}: ${page.title}`);
       res.json(page);
     } catch (error) {
       console.error("Error fetching page by slug:", error);
@@ -1677,12 +1682,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pages/type/:pageType", async (req, res) => {
     try {
       const pageType = req.params.pageType;
+      console.log(`Fetching page by type: ${pageType}`);
       const page = await storage.getBuilderPageByType(pageType);
       
       if (!page) {
+        console.log(`Page with type ${pageType} not found`);
         return res.status(404).json({ message: "Nu există o pagină publicată pentru acest tip" });
       }
       
+      console.log(`Found page with type ${pageType}: ${page.title}`);
       res.json(page);
     } catch (error) {
       console.error("Error fetching page by type:", error);
@@ -1694,12 +1702,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pages/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log(`Fetching page by ID: ${id}`);
       const page = await storage.getBuilderPage(id);
       
       if (!page) {
+        console.log(`Page with ID ${id} not found`);
         return res.status(404).json({ message: "Pagina nu a fost găsită" });
       }
       
+      console.log(`Found page with ID ${id}: ${page.title}`);
       res.json(page);
     } catch (error) {
       console.error("Error fetching page:", error);
