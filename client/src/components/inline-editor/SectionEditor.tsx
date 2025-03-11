@@ -20,11 +20,12 @@ export type Section = {
 export interface SectionEditorProps {
   sections: Section[];
   onChange: (sections: Section[]) => void;
+  initialEditMode?: boolean;
 }
 
-export const SectionEditor: React.FC<SectionEditorProps> = ({ sections = [], onChange }) => {
+export const SectionEditor: React.FC<SectionEditorProps> = ({ sections = [], onChange, initialEditMode = false }) => {
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(initialEditMode);
   const [currentSections, setCurrentSections] = useState<Section[]>(sections);
   const [showAddSectionDialog, setShowAddSectionDialog] = useState(false);
   const [insertPosition, setInsertPosition] = useState<number | null>(null);

@@ -18,8 +18,19 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
   const [location, setLocation] = useLocation();
   const [pageSections, setPageSections] = useState<Section[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  
+  // Verifică dacă modul de editare este activat
+  useEffect(() => {
+    const editModeEnabled = localStorage.getItem('editModeEnabled') === 'true';
+    if (editModeEnabled && isAdmin) {
+      setIsEditing(true);
+      // Elimină flag-ul după ce l-am citit pentru a nu rămâne permanent în modul de editare
+      localStorage.removeItem('editModeEnabled');
+    }
+  }, [isAdmin]);
 
   // Încercăm să obținem pagina după slug dacă există
   const { 
@@ -209,15 +220,26 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
     <div className="editable-page">
       {/* Afișăm informații despre pagină doar pentru administratori */}
       {isAdmin && pageData && (
-        <div className="bg-gray-50 p-2 mb-4 text-xs text-gray-500 border-b">
+        <div className={`p-2 mb-4 text-xs border-b ${isEditing ? "bg-yellow-50 text-yellow-800" : "bg-gray-50 text-gray-500"}`}>
           <div className="container mx-auto flex items-center justify-between">
             <div>
+              {isEditing && <span className="font-bold text-sm mr-2 text-yellow-600">MOD EDITARE ACTIV</span>}
               <strong>Pagină:</strong> {pageData.title} | 
               <strong>Slug:</strong> {pageData.slug} | 
               <strong>Tip:</strong> {pageData.pageType}
             </div>
             {pageData.updatedAt && (
               <div>
+                {isEditing && (
+                  <Button 
+                    onClick={() => setIsEditing(false)} 
+                    variant="outline" 
+                    size="sm" 
+                    className="mr-2 text-xs h-6 py-0 border-yellow-600 text-yellow-600 hover:bg-yellow-100"
+                  >
+                    Închide modul editare
+                  </Button>
+                )}
                 <strong>Actualizat:</strong> {new Date(pageData.updatedAt).toLocaleString()}
               </div>
             )}
@@ -225,10 +247,19 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
         </div>
       )}
       
+      {/* Indicator mod editare */}
+      {isAdmin && isEditing && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white py-2 px-4 rounded-full shadow-lg z-50 flex items-center">
+          <Edit className="h-4 w-4 mr-2" />
+          Mod editare activ
+        </div>
+      )}
+      
       {/* Editorul de secțiuni nou */}
       <SectionEditor 
         sections={pageSections}
         onChange={handleSectionsChange}
+        initialEditMode={isEditing}
       />
     </div>
   );
