@@ -7,18 +7,52 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Funcție pentru reîncercarea operațiunilor de rețea cu strategie de backoff exponențial
+async function fetchWithRetry(
+  url: string, 
+  options: RequestInit, 
+  maxRetries = 3, 
+  delay = 500
+): Promise<Response> {
+  let retries = 0;
+  let lastError: Error;
+  
+  while (retries < maxRetries) {
+    try {
+      const res = await fetch(url, options);
+      return res;
+    } catch (error) {
+      lastError = error as Error;
+      retries++;
+      
+      if (retries >= maxRetries) break;
+      
+      // Așteptăm un timp exponențial între reîncercări
+      const waitTime = delay * Math.pow(2, retries - 1);
+      console.log(`Reîncercare ${retries}/${maxRetries} pentru ${url} în ${waitTime}ms`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+  
+  // Dacă am ajuns aici, toate reîncercările au eșuat
+  throw lastError!;
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
   try {
-    const res = await fetch(url, {
+    const options = {
       method,
       headers: data ? { "Content-Type": "application/json" } : {},
       body: data ? JSON.stringify(data) : undefined,
-      credentials: "include",
-    });
+      credentials: "include" as RequestCredentials,
+    };
+    
+    // Folosim fetchWithRetry pentru a reîncerca automat dacă apar erori de rețea
+    const res = await fetchWithRetry(url, options);
 
     await throwIfResNotOk(res);
     return res;
@@ -35,9 +69,12 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
-      const res = await fetch(queryKey[0] as string, {
-        credentials: "include",
-      });
+      const options = {
+        credentials: "include" as RequestCredentials,
+      };
+      
+      // Folosim fetchWithRetry pentru a reîncerca automat dacă apar erori de rețea
+      const res = await fetchWithRetry(queryKey[0] as string, options);
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
         return null;
