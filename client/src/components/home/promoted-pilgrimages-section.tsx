@@ -13,8 +13,8 @@ export const PromotedPilgrimagesSection: React.FC = () => {
     staleTime: 1000 * 60 * 5, // 5 minute cache
   });
   
-  // Filtrăm pelerinajele care sunt marcate ca "promoted"
-  const promotedPilgrimages = pilgrimages?.filter(p => p.promoted === true);
+  // Filtrăm pelerinajele care sunt marcate ca "featured" (cele cu margine galbenă și etichetă Promovat)
+  const promotedPilgrimages = pilgrimages?.filter(p => p.featured === true);
 
   if (isLoading) {
     return (
@@ -77,7 +77,7 @@ export const PromotedPilgrimagesSection: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {promotedPilgrimages.map((pilgrimage: Pilgrimage) => (
             <Link key={pilgrimage.id} href={`/pilgrimages/${pilgrimage.id}`}>
-              <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer h-full flex flex-col">
+              <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer h-full flex flex-col border-2 ${pilgrimage.featured ? 'border-amber-400' : 'border-transparent'}`}>
                 <div className="relative aspect-video bg-muted">
                   {pilgrimage.images && pilgrimage.images.length > 0 ? (
                     <img 
