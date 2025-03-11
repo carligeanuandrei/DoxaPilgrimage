@@ -8,7 +8,8 @@ import {
   MailIcon, 
   InfoIcon, 
   ShieldIcon, 
-  CookieIcon
+  CookieIcon,
+  ImageIcon
 } from 'lucide-react';
 
 // Tipul de date pentru elementele CMS
@@ -424,6 +425,44 @@ export const HomeInitializer: React.FC<{refetch: () => Promise<any>}> = ({ refet
   );
 };
 
+// Componenta pentru inițializarea bannerelor promoționale
+export const PromoBannersInitializer: React.FC<{refetch: () => Promise<any>}> = ({ refetch }) => {
+  const { toast } = useToast();
+  
+  const promoBannerItems: CmsItem[] = [
+    // Titlul secțiunii de bannere promoționale
+    { key: 'promo_banner_section_title', contentType: 'text', value: 'Oferte și Evenimente Speciale' },
+    
+    // Banner promoțional 1
+    { key: 'promo_banner_1', contentType: 'image', value: '/public/images/default-promo1.jpg' },
+    { key: 'promo_banner_description_1', contentType: 'text', value: 'Pelerinaj la Muntele Athos' },
+    
+    // Banner promoțional 2
+    { key: 'promo_banner_2', contentType: 'image', value: '/public/images/default-promo2.jpg' },
+    { key: 'promo_banner_description_2', contentType: 'text', value: 'Pelerinaj în Țara Sfântă' },
+    
+    // Banner promoțional 3
+    { key: 'promo_banner_3', contentType: 'image', value: '/public/images/default-promo3.jpg' },
+    { key: 'promo_banner_description_3', contentType: 'text', value: 'Pelerinaj la Mănăstirile din Moldova' },
+    
+    // Banner promoțional 4
+    { key: 'promo_banner_4', contentType: 'image', value: '/public/images/default-promo4.jpg' },
+    { key: 'promo_banner_description_4', contentType: 'text', value: 'Pelerinaj la Sfântul Munte Sinai' },
+  ];
+  
+  return (
+    <Button 
+      variant="outline" 
+      size="sm"
+      className="bg-purple-50 hover:bg-purple-100"
+      onClick={() => initializeCmsContent(promoBannerItems, 'Bannere Promoționale', toast, refetch)}
+    >
+      <ImageIcon className="h-4 w-4 mr-1" />
+      Inițializează Bannere Promoționale
+    </Button>
+  );
+};
+
 // Export componenta principală care include toți inițializatorii
 export const CmsInitializers: React.FC<{refetch: () => Promise<any>}> = ({ refetch }) => {
   return (
@@ -435,6 +474,7 @@ export const CmsInitializers: React.FC<{refetch: () => Promise<any>}> = ({ refet
       <PrivacyInitializer refetch={refetch} />
       <CookiesInitializer refetch={refetch} />
       <FooterLinksInitializer refetch={refetch} />
+      <PromoBannersInitializer refetch={refetch} />
     </div>
   );
 };
