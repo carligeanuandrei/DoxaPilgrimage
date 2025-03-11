@@ -1,94 +1,138 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Pilgrimage } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
-import { Link } from "wouter";
-import { formatCurrency } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Pilgrimage } from '@shared/schema';
+import { formatCurrency } from '@/lib/utils';
+import { CalendarIcon, MapPinIcon, ChevronRightIcon, UsersIcon } from 'lucide-react';
+import { Link } from 'wouter';
 
-// Component pentru cardul unui pelerinaj promovat
-const PromotedPilgrimageCard = ({ pilgrimage }: { pilgrimage: Pilgrimage }) => {
-  // Verifică dacă URL-ul imaginii este o cale relativă și adaugă prefixul dacă este necesar
-  const thumbnailImage = pilgrimage.images && pilgrimage.images.length > 0 
-    ? pilgrimage.images[0] 
-    : "/assets/placeholder-pilgrimage.jpg";
-    
-  const fullImageUrl = thumbnailImage.startsWith('http') || thumbnailImage.startsWith('/') 
-    ? thumbnailImage 
-    : `/${thumbnailImage}`;
-    
-  return (
-    <div className="relative rounded-lg overflow-hidden group shadow-md h-64">
-      <img
-        src={fullImageUrl}
-        alt={pilgrimage.title}
-        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-primary-dark to-transparent opacity-80"></div>
-      <div className="absolute top-2 right-2 bg-amber-500 text-white px-2 py-1 rounded text-xs font-semibold">
-        PROMOVAT
-      </div>
-      <div className="absolute bottom-0 left-0 p-6">
-        <h3 className="text-white text-xl font-bold mb-2">{pilgrimage.title}</h3>
-        <p className="text-white opacity-90 mb-3 text-sm">
-          {pilgrimage.location} • {formatCurrency(pilgrimage.price, pilgrimage.currency)}
-        </p>
-        <Link href={`/pilgrimages/${pilgrimage.id}`} className="text-white flex items-center text-sm">
-          Detalii
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
-        </Link>
-      </div>
-    </div>
-  );
-};
-
-export default function PromotedPilgrimagesSection() {
-  // Obținem pelerinajele promovate din API
-  const { data: pilgrimages = [], isLoading } = useQuery<Pilgrimage[]>({
-    queryKey: ['/api/pilgrimages', 'promoted'],
-    queryFn: async () => {
-      try {
-        const response = await apiRequest("GET", "/api/pilgrimages/promoted");
-        return await response.json();
-      } catch (error) {
-        console.error("Eroare la încărcarea pelerinajelor promovate:", error);
-        return [];
-      }
-    }
+export const PromotedPilgrimagesSection: React.FC = () => {
+  const { data: promotedPilgrimages, isLoading, error } = useQuery({
+    queryKey: ['/api/pilgrimages/promoted'],
+    staleTime: 1000 * 60 * 5, // 5 minute cache
   });
 
-  // Nu afișăm nimic dacă nu există pelerinaje promovate
-  if (pilgrimages.length === 0 && !isLoading) {
-    return null;
-  }
-  
-  return (
-    <section className="py-12 md:py-16 bg-amber-50">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-heading font-bold text-neutral-900 text-center mb-4">
-          Pelerinaje Promovate
-        </h2>
-        <p className="text-center text-neutral-600 mb-12 max-w-2xl mx-auto">
-          Descoperă cele mai populare destinații spirituale recomandate de noi
-        </p>
-        
-        {isLoading ? (
-          <div className="flex justify-center my-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-            {pilgrimages.map(pilgrimage => (
-              <PromotedPilgrimageCard 
-                key={pilgrimage.id} 
-                pilgrimage={pilgrimage} 
-              />
+  if (isLoading) {
+    return (
+      <section className="py-12 bg-muted/30">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-10">Pelerinaje promovate</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <div className="aspect-video bg-muted animate-pulse" />
+                <CardContent className="p-4">
+                  <div className="h-6 bg-muted animate-pulse rounded my-2" />
+                  <div className="h-4 bg-muted animate-pulse rounded my-2 w-3/4" />
+                  <div className="h-4 bg-muted animate-pulse rounded my-2 w-1/2" />
+                </CardContent>
+              </Card>
             ))}
           </div>
-        )}
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !promotedPilgrimages || promotedPilgrimages.length === 0) {
+    return null; // Nu afișăm secțiunea dacă nu există pelerinaje promovate
+  }
+
+  // Formatează data pentru afișare
+  const formatDate = (dateString: string | Date) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('ro-RO', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(date);
+  };
+
+  // Determinați etichetă pentru nivelul de promovare
+  const getPromotionBadge = (promotionLevel: string) => {
+    switch (promotionLevel) {
+      case 'premium':
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Premium</Badge>;
+      case 'exclusive':
+        return <Badge className="bg-purple-600 hover:bg-purple-700">Exclusiv</Badge>;
+      case 'basic':
+        return <Badge variant="outline">Promovat</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <section className="py-12 bg-muted/30">
+      <div className="container mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-3">Pelerinaje promovate</h2>
+        <p className="text-center text-muted-foreground mb-10">
+          Descoperă cele mai populare destinații spirituale
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {promotedPilgrimages.map((pilgrimage: Pilgrimage) => (
+            <Link key={pilgrimage.id} href={`/pilgrimages/${pilgrimage.id}`}>
+              <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer h-full flex flex-col">
+                <div className="relative aspect-video bg-muted">
+                  {pilgrimage.images && pilgrimage.images.length > 0 ? (
+                    <img 
+                      src={pilgrimage.images[0]} 
+                      alt={pilgrimage.title} 
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full bg-muted">
+                      <span className="text-muted-foreground">Fără imagine</span>
+                    </div>
+                  )}
+                  <div className="absolute top-2 right-2">
+                    {getPromotionBadge(pilgrimage.promotionLevel)}
+                  </div>
+                </div>
+                
+                <CardContent className="p-4 flex flex-col flex-grow">
+                  <h3 className="text-xl font-bold mb-2 line-clamp-2">
+                    {pilgrimage.title}
+                  </h3>
+                  
+                  <div className="space-y-2 mb-4 flex-grow">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPinIcon className="w-4 h-4 mr-2" />
+                      <span>{pilgrimage.location}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <CalendarIcon className="w-4 h-4 mr-2" />
+                      <span>
+                        {formatDate(pilgrimage.startDate)} - {formatDate(pilgrimage.endDate)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <UsersIcon className="w-4 h-4 mr-2" />
+                      <span>{pilgrimage.availableSpots} locuri disponibile</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center pt-2 border-t border-muted">
+                    <div className="font-bold text-lg">
+                      {formatCurrency(pilgrimage.price, pilgrimage.currency)}
+                    </div>
+                    <div className="flex items-center text-primary hover:text-primary/80">
+                      <span className="mr-1">Detalii</span>
+                      <ChevronRightIcon className="w-4 h-4" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
-}
+};
+
+export default PromotedPilgrimagesSection;

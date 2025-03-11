@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import HeroSection from "@/components/home/hero-section";
 import FeaturedPilgrimages from "@/components/home/featured-pilgrimages";
 import DestinationsSection from "@/components/home/destinations-section";
-import PromoBannersSection from "@/components/home/promo-banners-section";
+import PromotedPilgrimagesSection from "@/components/home/promoted-pilgrimages-section";
 import HowItWorks from "@/components/home/how-it-works";
 import Testimonials from "@/components/home/testimonials";
 import CTASection from "@/components/home/cta-section";
@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 
 // Varianta clasică a paginii de acasă, utilizată cât timp nu există pagină editabilă
 function HomePageContent() {
-  // Obținem pelerinajele promovate (featured)
+  // Obținem pelerinajele recomandate (featured)
   const { data: featuredPilgrimages = [] } = useQuery<Pilgrimage[]>({
     queryKey: ['/api/pilgrimages', 'featured'],
     select: (pilgrimages) => pilgrimages.filter(p => p.featured).slice(0, 3)
@@ -41,7 +41,7 @@ function HomePageContent() {
       )}
       
       <DestinationsSection />
-      <PromoBannersSection />
+      <PromotedPilgrimagesSection />
       <HowItWorks />
       <Testimonials />
       <CTASection />
