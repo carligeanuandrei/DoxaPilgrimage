@@ -130,6 +130,14 @@ export function EditableSection({
     border: isOver ? '2px dashed #3182ce' : isHovered && isEditing ? '2px dashed #e2e8f0' : '2px solid transparent',
     position: 'relative' as const,
     transition: 'all 0.2s ease',
+    paddingTop: localContent.paddingTop,
+    paddingBottom: localContent.paddingBottom,
+    paddingLeft: localContent.paddingLeft,
+    paddingRight: localContent.paddingRight,
+    marginTop: localContent.marginTop,
+    marginBottom: localContent.marginBottom,
+    marginLeft: localContent.marginLeft,
+    marginRight: localContent.marginRight,
     ...content.styles
   };
   
