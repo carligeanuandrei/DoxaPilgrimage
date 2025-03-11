@@ -8,12 +8,52 @@ import { SectionEditor, Section } from '@/components/inline-editor/SectionEditor
 import { useToast } from '@/hooks/use-toast';
 import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from 'uuid';
+import HeroSection from "@/components/home/hero-section";
+import FeaturedPilgrimages from "@/components/home/featured-pilgrimages";
+import DestinationsSection from "@/components/home/destinations-section";
+import PromoBannersSection from "@/components/home/promo-banners-section";
+import HowItWorks from "@/components/home/how-it-works";
+import Testimonials from "@/components/home/testimonials";
+import CTASection from "@/components/home/cta-section";
+import { Pilgrimage } from "@shared/schema";
+import { Separator } from "@/components/ui/separator";
+
+// Varianta clasică a paginii de acasă, utilizată cât timp nu există pagină editabilă
+function HomePageContent() {
+  // Obținem pelerinajele promovate (featured)
+  const { data: featuredPilgrimages = [] } = useQuery<Pilgrimage[]>({
+    queryKey: ['/api/pilgrimages', 'featured'],
+    select: (pilgrimages) => pilgrimages.filter(p => p.featured).slice(0, 3)
+  });
+
+  return (
+    <div>
+      <HeroSection />
+      
+      {featuredPilgrimages.length > 0 && (
+        <>
+          <Separator className="my-4" />
+          <div className="bg-amber-50 py-2">
+            <FeaturedPilgrimages pilgrimages={featuredPilgrimages} />
+          </div>
+          <Separator className="my-4" />
+        </>
+      )}
+      
+      <DestinationsSection />
+      <PromoBannersSection />
+      <HowItWorks />
+      <Testimonials />
+      <CTASection />
+    </div>
+  );
+}
 
 export default function HomePage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  const [isLoading, setIsLoading] = useState(true);
+  const [isCreatingPage, setIsCreatingPage] = useState(false);
   
   // Încercăm să verificăm dacă există deja o pagină home în baza de date
   const { 
@@ -24,36 +64,41 @@ export default function HomePage() {
     queryKey: ['/api/pages/type/home'],
     queryFn: async () => {
       try {
-        const res = await apiRequest('GET', '/api/pages/type/home');
-        const data = await res.json();
-        return data;
+        const res = await fetch('/api/pages/type/home');
+        if (!res.ok) {
+          if (res.status === 404) {
+            return null;
+          }
+          throw new Error('Eroare la încărcarea paginii');
+        }
+        return await res.json();
       } catch (error) {
         console.error('Error fetching homepage:', error);
-        if (error instanceof Response && error.status === 404) {
-          return null;
-        }
-        throw error;
+        return null;
       }
-    }
+    },
+    retry: 1
   });
 
   // Mutație pentru crearea paginii home dacă nu există
   const createHomePage = useMutation({
     mutationFn: async () => {
-      console.log("Creating type page:", {
+      const pageData = {
         title: "Home",
         slug: "home",
         pageType: "home",
         content: JSON.stringify({ sections: createDefaultSections() }),
         isPublished: true
-      });
+      };
       
-      return apiRequest('POST', '/api/pages', {
-        title: "Home",
-        slug: "home",
-        pageType: "home",
-        content: JSON.stringify({ sections: createDefaultSections() }),
-        isPublished: true
+      console.log("Creating home page:", pageData);
+      
+      return fetch('/api/pages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pageData),
       });
     },
     onSuccess: () => {
@@ -62,6 +107,7 @@ export default function HomePage() {
         description: "Pagina de start a fost creată cu succes.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/pages/type/home'] });
+      setIsCreatingPage(false);
     },
     onError: (error: Error) => {
       toast({
@@ -70,6 +116,7 @@ export default function HomePage() {
         variant: "destructive",
       });
       console.error("Error creating page:", error);
+      setIsCreatingPage(false);
     }
   });
 
@@ -148,17 +195,14 @@ export default function HomePage() {
 
   // Verifică dacă trebuie să creăm o pagină nouă
   useEffect(() => {
-    if (!isLoadingPage && !pageData && !error && isAdmin) {
+    if (!isLoadingPage && isAdmin && !pageData && !isCreatingPage) {
+      setIsCreatingPage(true);
       createHomePage.mutate();
     }
-    
-    if (!isLoadingPage) {
-      setIsLoading(false);
-    }
-  }, [isLoadingPage, pageData, isAdmin, error]);
+  }, [isLoadingPage, pageData, isAdmin, isCreatingPage]);
 
   // Afișează loading în timp ce verificăm dacă pagina există
-  if (isLoading || isLoadingPage) {
+  if (isLoadingPage || createHomePage.isPending) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
@@ -166,6 +210,34 @@ export default function HomePage() {
     );
   }
 
-  // Pagina de start cu secțiuni editabile
-  return <EditablePage pageType="home" />;
+  // Dacă există pagina editabilă (creată anterior), o folosim
+  if (pageData && pageData.id) {
+    return <EditablePage pageType="home" />;
+  }
+  
+  // Dacă suntem admin și am încercat să creăm pagina dar nu am reușit, afișăm un buton pentru a încerca din nou
+  if (isAdmin && createHomePage.isError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <p className="text-lg text-red-500">Nu s-a putut crea pagina editabilă</p>
+        <Button 
+          onClick={() => {
+            setIsCreatingPage(true);
+            createHomePage.mutate();
+          }}
+        >
+          Încearcă din nou
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => window.location.reload()}
+        >
+          Reîncarcă pagina
+        </Button>
+      </div>
+    );
+  }
+  
+  // Altfel afișăm conținutul normal
+  return <HomePageContent />;
 }

@@ -131,8 +131,8 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
           console.error('Error parsing page content:', e);
           setPageSections([]);
         }
-      } else if (pageType && !slug) {
-        // Dacă este o pagină de tip și nu există, o creăm
+      } else if (pageType && !slug && isAdmin) {
+        // Dacă suntem admin și este o pagină de tip care nu există, o creăm
         const defaultTitle = pageType.charAt(0).toUpperCase() + pageType.slice(1);
         const newPage = {
           title: defaultTitle,
@@ -143,8 +143,8 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
         };
         console.log("Creating type page:", newPage);
         createPageMutation.mutate(newPage);
-      } else if (slug && !pageData && error) {
-        // Dacă încercăm să accesăm o pagină cu slug care nu există, o creăm
+      } else if (slug && !pageData && error && isAdmin) {
+        // Dacă suntem admin și încercăm să accesăm o pagină cu slug care nu există, o creăm
         const newPage = {
           title: slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' '),
           slug: slug,
@@ -157,7 +157,7 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
       }
       setIsInitialized(true);
     }
-  }, [pageData, isLoading, pageType, slug, isInitialized, error]);
+  }, [pageData, isLoading, pageType, slug, isInitialized, error, isAdmin]);
 
   // Actualizăm conținutul paginii când se schimbă secțiunile
   const handleSectionsChange = (sections: Section[]) => {
