@@ -25,6 +25,7 @@ import AdminLoginPage from "@/pages/admin/admin-login";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import { lazy } from "react"; // Added import for lazy
 
 function Router() {
   return (
