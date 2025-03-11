@@ -308,6 +308,12 @@ export function EditableSection({
                 </select>
               </div>
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
@@ -372,6 +378,12 @@ export function EditableSection({
                 className="mt-1"
               />
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
@@ -505,6 +517,12 @@ export function EditableSection({
                 </Button>
               </div>
             </div>
+            
+            <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
