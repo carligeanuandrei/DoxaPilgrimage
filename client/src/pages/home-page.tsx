@@ -93,19 +93,33 @@ export default function HomePage() {
       
       console.log("Creating home page:", pageData);
       
-      return fetch('/api/pages', {
+      const response = await fetch('/api/pages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(pageData),
       });
+      
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Eroare la crearea paginii');
+      }
+      
+      return response;
     },
     onSuccess: () => {
-      toast({
-        title: "Pagină creată",
-        description: "Pagina de start a fost creată cu succes.",
-      });
+      // Arătăm toast doar prima dată per sesiune
+      const hasShownToast = sessionStorage.getItem('hasShownHomePageToast') === 'true';
+      if (!hasShownToast) {
+        toast({
+          title: "Pagină creată",
+          description: "Pagina de start a fost creată cu succes.",
+        });
+        sessionStorage.setItem('hasShownHomePageToast', 'true');
+      }
+      
+      // Invalidăm query-ul și resetăm starea
       queryClient.invalidateQueries({ queryKey: ['/api/pages/type/home'] });
       setIsCreatingPage(false);
     },
@@ -117,6 +131,8 @@ export default function HomePage() {
       });
       console.error("Error creating page:", error);
       setIsCreatingPage(false);
+      // Ștergem flag-ul pentru a permite încercarea din nou
+      localStorage.removeItem('alreadyTriedToCreateHome');
     }
   });
 
@@ -195,8 +211,17 @@ export default function HomePage() {
 
   // Verifică dacă trebuie să creăm o pagină nouă
   useEffect(() => {
-    if (!isLoadingPage && isAdmin && !pageData && !isCreatingPage) {
+    // Încercăm să creăm pagina doar dacă:
+    // 1. Datele sunt încărcate
+    // 2. Suntem admin
+    // 3. Nu există deja pagina
+    // 4. Nu suntem deja în proces de creare
+    // 5. Nu am încercat deja să creăm pagina
+    const alreadyTriedToCreate = localStorage.getItem('alreadyTriedToCreateHome') === 'true';
+    
+    if (!isLoadingPage && isAdmin && !pageData && !isCreatingPage && !alreadyTriedToCreate) {
       setIsCreatingPage(true);
+      localStorage.setItem('alreadyTriedToCreateHome', 'true');
       createHomePage.mutate();
     }
   }, [isLoadingPage, pageData, isAdmin, isCreatingPage]);
