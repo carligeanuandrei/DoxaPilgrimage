@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DynamicPage } from '@/components/builder/dynamic-page';
 
 // Definim schema de validare pentru formular
 const contactFormSchema = z.object({
@@ -27,6 +28,8 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 export default function ContactPage() {
   const { toast } = useToast();
   const [formSubmitted, setFormSubmitted] = useState(false);
+  
+  // Adăugăm componenta de pagină dinamică - va încărca pagina de tip "contact" dacă există
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
