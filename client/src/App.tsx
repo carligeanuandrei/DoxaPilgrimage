@@ -23,6 +23,7 @@ import UsersPage from "@/pages/admin/users-page";
 import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
 import OrganizerStatsPage from "@/pages/admin/organizer-stats-page";
 import AdminLoginPage from "@/pages/admin/admin-login";
+import EditablePage from "@/pages/EditablePage";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -71,6 +72,10 @@ function Router() {
       </Route>
       <Route path="/admin/builder">
         <ProtectedRoute component={BuilderPage} path="/admin/builder" adminOnly={true} />
+      </Route>
+      {/* Dynamic page route - matches custom pages created in the editor */}
+      <Route path="/:slug">
+        {(params) => <EditablePage slug={params.slug} />}
       </Route>
       <Route component={NotFound} />
     </Switch>
