@@ -10,6 +10,7 @@ import { SelectColor } from './SelectColor';
 import { useAuth } from '@/hooks/use-auth';
 import PilgrimagesRenderer from './PilgrimagesRenderer';
 import { SpacingControls } from './SpacingControls';
+import { useLocation } from 'wouter';
 
 export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features' | 'banners' | 'cta' | 'pilgrimages';
 
@@ -46,6 +47,27 @@ export function EditableSection({
   const sectionRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  
+  // State pentru formularul de căutare din secțiunea hero
+  const [location, setLocation] = useState("");
+  const [month, setMonth] = useState("");
+  const [saint, setSaint] = useState("");
+  const [transport, setTransport] = useState("");
+  const [duration, setDuration] = useState("");
+  const [_, navigate] = useLocation();
+  
+  // Funcție pentru navigare către pagina de pelerinaje cu parametrii selectați
+  const handleSearch = () => {
+    let queryParams = new URLSearchParams();
+    
+    if (location) queryParams.append("location", location);
+    if (month) queryParams.append("month", month);
+    if (saint) queryParams.append("saint", saint);
+    if (transport) queryParams.append("transportation", transport);
+    if (duration) queryParams.append("duration", duration);
+    
+    navigate(`/pilgrimages?${queryParams.toString()}`);
+  };
   
   useEffect(() => {
     setLocalContent(content);
