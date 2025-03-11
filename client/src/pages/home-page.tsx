@@ -12,6 +12,7 @@ import HeroSection from "@/components/home/hero-section";
 import FeaturedPilgrimages from "@/components/home/featured-pilgrimages";
 import DestinationsSection from "@/components/home/destinations-section";
 import PromotedPilgrimagesSection from "@/components/home/promoted-pilgrimages-section";
+import AllPilgrimagesSection from "@/components/home/all-pilgrimages-section";
 import HowItWorks from "@/components/home/how-it-works";
 import Testimonials from "@/components/home/testimonials";
 import CTASection from "@/components/home/cta-section";
@@ -42,6 +43,7 @@ function HomePageContent() {
       
       <DestinationsSection />
       <PromotedPilgrimagesSection />
+      <AllPilgrimagesSection />
       <HowItWorks />
       <Testimonials />
       <CTASection />
