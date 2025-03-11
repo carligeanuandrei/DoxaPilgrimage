@@ -166,6 +166,25 @@ export const SectionEditor: React.FC<SectionEditorProps> = ({ sections = [], onC
             { title: 'Caracteristică 3', text: 'Descriere caracteristică 3', icon: '✅' }
           ]
         };
+      case 'banners':
+        return {
+          title: 'Bannere Promoționale',
+          subtitle: 'Descoperiți ofertele speciale',
+          banners: [
+            { image: '/placeholder-banner.jpg', title: 'Banner 1', description: 'Descriere banner 1', linkUrl: '/link1' },
+            { image: '/placeholder-banner.jpg', title: 'Banner 2', description: 'Descriere banner 2', linkUrl: '/link2' }
+          ],
+          displayType: 'carousel'
+        };
+      case 'cta':
+        return {
+          title: 'Acționează Acum',
+          subtitle: 'Nu rata această oportunitate unică',
+          buttonText: 'Află Mai Multe',
+          buttonUrl: '/contact',
+          backgroundColor: '#f8fafc',
+          textColor: '#1e293b'
+        };
       default:
         return {};
     }
@@ -298,6 +317,24 @@ export const SectionEditor: React.FC<SectionEditorProps> = ({ sections = [], onC
                 >
                   <span className="text-lg">✅</span>
                   <span className="text-xs">Caracteristici</span>
+                </Button>
+                
+                <Button
+                  variant="outline" 
+                  className="h-24 flex flex-col items-center justify-center gap-2"
+                  onClick={() => createNewSection('banners')}
+                >
+                  <span className="text-lg">🎯</span>
+                  <span className="text-xs">Bannere</span>
+                </Button>
+                
+                <Button
+                  variant="outline" 
+                  className="h-24 flex flex-col items-center justify-center gap-2"
+                  onClick={() => createNewSection('cta')}
+                >
+                  <span className="text-lg">🔔</span>
+                  <span className="text-xs">CTA</span>
                 </Button>
               </TabsContent>
             </Tabs>
