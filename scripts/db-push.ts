@@ -107,6 +107,35 @@ async function main() {
       );
     `);
 
+    console.log("Creating cms_content table...");
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS cms_content (
+        id SERIAL PRIMARY KEY,
+        key TEXT NOT NULL UNIQUE,
+        value TEXT NOT NULL,
+        description TEXT,
+        content_type TEXT NOT NULL,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP
+      );
+    `);
+
+    console.log("Creating builder_pages table...");
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS builder_pages (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        page_type TEXT,
+        content TEXT NOT NULL,
+        meta TEXT,
+        is_published BOOLEAN NOT NULL DEFAULT TRUE,
+        created_by INTEGER REFERENCES users(id),
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP
+      );
+    `);
+
     // Adăugare user admin
     console.log("Adding admin user...");
     await db.execute(`

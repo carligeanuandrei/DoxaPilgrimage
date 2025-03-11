@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from '@/components/ui/button';
 import { PageController } from '@/components/inline-editor/PageController';
 import { SectionEditor } from '@/components/inline-editor/SectionEditor';
@@ -68,9 +69,10 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
     },
   });
 
-  // Creăm o pagină de tip dacă nu există
+  // Creăm o pagină nouă
   const createPageMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log("Creating new page with data:", data);
       return apiRequest('POST', '/api/pages', data);
     },
     onSuccess: (response) => {
@@ -79,11 +81,14 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
           title: 'Pagină creată',
           description: 'Pagina a fost creată cu succes.',
         });
-        // Redirecționăm către noua pagină
-        setLocation(`/${data.slug}`);
+        console.log("Page created successfully:", data);
+        // Actualizăm starea locală fără redirecționare
+        queryClient.invalidateQueries({ queryKey: [`/api/pages/slug/${data.slug}`] });
+        setPageSections([]);
       });
     },
     onError: (error: Error) => {
+      console.error("Error creating page:", error);
       toast({
         title: 'Eroare la creare',
         description: error.message || 'A apărut o eroare la crearea paginii.',
@@ -100,6 +105,7 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
           // Dacă pagina există, încărcăm secțiunile din JSON
           const content = pageData.content ? JSON.parse(pageData.content) : { sections: [] };
           setPageSections(content.sections || []);
+          console.log("Loaded page sections:", content.sections || []);
         } catch (e) {
           console.error('Error parsing page content:', e);
           setPageSections([]);
@@ -114,11 +120,23 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
           content: JSON.stringify({ sections: [] }),
           isPublished: true,
         };
+        console.log("Creating type page:", newPage);
+        createPageMutation.mutate(newPage);
+      } else if (slug && !pageData && error) {
+        // Dacă încercăm să accesăm o pagină cu slug care nu există, o creăm
+        const newPage = {
+          title: slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' '),
+          slug: slug,
+          pageType: 'custom',
+          content: JSON.stringify({ sections: [] }),
+          isPublished: true,
+        };
+        console.log("Creating page for unknown slug:", newPage);
         createPageMutation.mutate(newPage);
       }
       setIsInitialized(true);
     }
-  }, [pageData, isLoading, pageType, slug, isInitialized]);
+  }, [pageData, isLoading, pageType, slug, isInitialized, error]);
 
   // Actualizăm conținutul paginii când se schimbă secțiunile
   const handleSectionsChange = (sections: any[]) => {
@@ -139,11 +157,41 @@ export default function EditablePage({ slug, pageType }: EditablePageProps) {
     );
   }
 
-  if (error && !(pageType && !slug)) {
+  // Verificăm dacă suntem în proces de creare a unei pagini noi
+  const isCreatingNewPage = error && slug && !isInitialized;
+  
+  if (error && !(pageType && !slug) && !isCreatingNewPage) {
+    // Verificăm autentificarea ca administrator
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
+    
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
         <h1 className="text-2xl font-semibold text-gray-800 mb-3">Pagina nu a fost găsită</h1>
         <p className="text-gray-600 mb-6">Ne pare rău, pagina pe care o căutați nu există sau a fost mutată.</p>
+        
+        {isAdmin && (
+          <div className="mb-4">
+            <Button 
+              variant="outline" 
+              className="mr-2"
+              onClick={() => {
+                // Creăm manual pagina cu slugul curent
+                const newPage = {
+                  title: slug!.charAt(0).toUpperCase() + slug!.slice(1).replace(/-/g, ' '),
+                  slug: slug,
+                  pageType: 'custom',
+                  content: JSON.stringify({ sections: [] }),
+                  isPublished: true,
+                };
+                createPageMutation.mutate(newPage);
+              }}
+            >
+              Creează această pagină
+            </Button>
+          </div>
+        )}
+        
         <Button onClick={() => setLocation('/')}>
           Înapoi la pagina principală
         </Button>
