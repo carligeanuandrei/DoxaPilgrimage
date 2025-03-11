@@ -402,6 +402,28 @@ export function EditableSection({
                     className="mt-1"
                   />
                 </div>
+                
+                <div>
+                  <Label htmlFor="overlayOpacity">Transparență overlay (0-100%)</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      id="overlayOpacity"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={localContent.overlayOpacity !== undefined ? localContent.overlayOpacity : 50}
+                      onChange={e => {
+                        const opacity = parseInt(e.target.value);
+                        setLocalContent({...localContent, overlayOpacity: opacity});
+                      }}
+                      className="flex-1"
+                    />
+                    <span className="min-w-[40px] text-right">
+                      {localContent.overlayOpacity !== undefined ? localContent.overlayOpacity : 50}%
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -456,6 +478,7 @@ export function EditableSection({
                   right: 0,
                   bottom: 0,
                   backgroundColor: localContent.overlayColor || 'rgba(0,0,0,0.5)',
+                  opacity: localContent.overlayOpacity !== undefined ? localContent.overlayOpacity / 100 : 0.5,
                   zIndex: 1
                 }}
               />
