@@ -88,7 +88,8 @@ export default function HomePage() {
         slug: "home",
         pageType: "home",
         content: JSON.stringify({ sections: createDefaultSections() }),
-        isPublished: true
+        isPublished: true,
+        createdBy: null // Important: acest câmp trebuie să fie null pentru a permite crearea paginii
       };
       
       console.log("Creating home page:", pageData);
