@@ -420,21 +420,21 @@ async function initMonasteries() {
         city: monasteryData.city,
         county: monasteryData.county,
         type: monasteryData.type,
-        verification: "verified" as const, // Toate mănăstirile importate sunt automat verificate
-        shortDescription: monasteryData.shortDescription,
-        access: monasteryData.access,
-        patronSaint: monasteryData.patronSaint,
-        patronSaintDate: monasteryData.patronSaintDate,
-        foundedYear: monasteryData.foundedYear,
-        history: monasteryData.history,
-        specialFeatures: monasteryData.specialFeatures,
-        relics: monasteryData.relics,
-        iconDescriptions: monasteryData.iconDescriptions,
-        images: monasteryData.images,
-        coverImage: monasteryData.coverImage,
-        contactEmail: monasteryData.contactEmail,
-        contactPhone: monasteryData.contactPhone,
-        website: monasteryData.website
+        short_description: monasteryData.shortDescription || null,
+        access: monasteryData.access || null,
+        patron_saint: monasteryData.patronSaint || null,
+        patron_saint_date: monasteryData.patronSaintDate || null,
+        founded_year: monasteryData.foundedYear || null,
+        history: monasteryData.history || null,
+        special_features: monasteryData.specialFeatures || null,
+        relics: monasteryData.relics || null,
+        images: monasteryData.images || null,
+        cover_image: monasteryData.coverImage || null,
+        contact_email: monasteryData.contactEmail || null,
+        contact_phone: monasteryData.contactPhone || null,
+        website: monasteryData.website || null,
+        latitude: 45.0 + Math.random() * 3, // Valori între 45 și 48 pentru România
+        longitude: 22.0 + Math.random() * 5 // Valori între 22 și 27 pentru România
       };
       
       // Inserăm mănăstirea în baza de date

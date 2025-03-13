@@ -61,8 +61,10 @@ async function main() {
         available_spots INTEGER NOT NULL,
         verified BOOLEAN,
         featured BOOLEAN,
+        status TEXT NOT NULL DEFAULT 'active',
         organizer_id INTEGER REFERENCES users(id),
-        created_at TIMESTAMP
+        created_at TIMESTAMP,
+        images TEXT[]
       );
     `);
 
@@ -171,6 +173,8 @@ async function main() {
         contact_email TEXT,
         contact_phone TEXT,
         website TEXT,
+        latitude DECIMAL,
+        longitude DECIMAL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
