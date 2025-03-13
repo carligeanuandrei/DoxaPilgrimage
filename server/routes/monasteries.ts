@@ -1,6 +1,6 @@
 import { Express } from 'express';
 import { storage } from '../storage';
-import { monasteries } from '@shared/schema';
+import { monasteries, cmsContent } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db';
 
@@ -9,33 +9,54 @@ export function registerMonasteryRoutes(app: Express) {
   // Rută pentru a crea intrările CMS necesare pentru mănăstiri
   app.get('/api/init-monastery-cms', async (req, res) => {
     try {
+      console.log("Inițializare conținut CMS pentru mănăstiri...");
+      
       // Verificăm dacă intrările CMS pentru mănăstiri există
-      const footerLinkMonasteries = await storage.getCmsContent("footer_link_monasteries");
-      const footerLinkMonasteriesUrl = await storage.getCmsContent("footer_link_monasteries_url");
-      
-      // Dacă nu există, le creăm
-      if (!footerLinkMonasteries) {
-        await storage.createCmsContent({
-          key: "footer_link_monasteries",
-          contentType: "text",
-          value: "Mănăstiri",
-          description: "Textul pentru link-ul către pagina de mănăstiri din footer"
-        });
+      try {
+        const footerLinkMonasteries = await storage.getCmsContent("footer_link_monasteries");
+        console.log("Verificare footer_link_monasteries:", footerLinkMonasteries ? "Există" : "Nu există");
+        
+        // Dacă nu există, îl creăm
+        if (!footerLinkMonasteries) {
+          console.log("Creăm footer_link_monasteries...");
+          const result = await db.insert(cmsContent).values({
+            key: "footer_link_monasteries",
+            contentType: "text",
+            value: "Mănăstiri",
+            description: "Textul pentru link-ul către pagina de mănăstiri din footer"
+          }).returning();
+          console.log("footer_link_monasteries creat:", result);
+        }
+      } catch (e) {
+        console.error("Eroare la verificarea/crearea footer_link_monasteries:", e);
       }
       
-      if (!footerLinkMonasteriesUrl) {
-        await storage.createCmsContent({
-          key: "footer_link_monasteries_url",
-          contentType: "text",
-          value: "/monasteries",
-          description: "URL pentru link-ul către pagina de mănăstiri din footer"
-        });
+      try {
+        const footerLinkMonasteriesUrl = await storage.getCmsContent("footer_link_monasteries_url");
+        console.log("Verificare footer_link_monasteries_url:", footerLinkMonasteriesUrl ? "Există" : "Nu există");
+        
+        // Dacă nu există, îl creăm
+        if (!footerLinkMonasteriesUrl) {
+          console.log("Creăm footer_link_monasteries_url...");
+          const result = await db.insert(cmsContent).values({
+            key: "footer_link_monasteries_url",
+            contentType: "text",
+            value: "/monasteries",
+            description: "URL pentru link-ul către pagina de mănăstiri din footer"
+          }).returning();
+          console.log("footer_link_monasteries_url creat:", result);
+        }
+      } catch (e) {
+        console.error("Eroare la verificarea/crearea footer_link_monasteries_url:", e);
       }
       
-      res.json({ message: "Intrările CMS pentru mănăstiri au fost create cu succes" });
+      res.json({ message: "Procesul de inițializare a conținutului CMS pentru mănăstiri s-a încheiat" });
     } catch (error) {
-      console.error("Eroare la crearea intrărilor CMS pentru mănăstiri:", error);
-      res.status(500).json({ message: "Eroare la crearea intrărilor CMS pentru mănăstiri" });
+      console.error("Eroare la inițializarea conținutului CMS pentru mănăstiri:", error);
+      res.status(500).json({ 
+        message: "Eroare la inițializarea conținutului CMS pentru mănăstiri", 
+        error: String(error) 
+      });
     }
   });
   // GET /api/monasteries - Obține toate mănăstirile
