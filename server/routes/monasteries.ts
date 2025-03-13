@@ -21,9 +21,8 @@ export function registerMonasteryRoutes(app: Express) {
           console.log("Creăm footer_link_monasteries...");
           const result = await db.insert(cmsContent).values({
             key: "footer_link_monasteries",
-            contentType: "text",
-            value: "Mănăstiri",
-            description: "Textul pentru link-ul către pagina de mănăstiri din footer"
+            content_type: "text",
+            value: "Mănăstiri"
           }).returning();
           console.log("footer_link_monasteries creat:", result);
         }
@@ -40,9 +39,8 @@ export function registerMonasteryRoutes(app: Express) {
           console.log("Creăm footer_link_monasteries_url...");
           const result = await db.insert(cmsContent).values({
             key: "footer_link_monasteries_url",
-            contentType: "text",
-            value: "/monasteries",
-            description: "URL pentru link-ul către pagina de mănăstiri din footer"
+            content_type: "text",
+            value: "/monasteries"
           }).returning();
           console.log("footer_link_monasteries_url creat:", result);
         }
