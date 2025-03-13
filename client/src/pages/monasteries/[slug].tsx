@@ -96,11 +96,11 @@ export default function MonasteryDetailsPage() {
           {/* Galerie de imagini */}
           <div className="relative h-[400px] rounded-lg overflow-hidden">
             <img 
-              src={monastery.coverImage || (monastery.images && monastery.images.length > 0 ? monastery.images[0] : '/images/default-monastery.jpg')} 
+              src={monastery.coverImage || (monastery.images && monastery.images.length > 0 ? monastery.images[0] : '/images/default-monastery.svg')} 
               alt={monastery.name}
               className="w-full h-full object-cover"
               onError={(e) => {
-                e.currentTarget.src = '/images/default-monastery.jpg';
+                e.currentTarget.src = '/images/default-monastery.svg';
                 e.currentTarget.onerror = null; // Previne recursia
               }}
             />
@@ -184,7 +184,7 @@ export default function MonasteryDetailsPage() {
                                   alt={icon.name} 
                                   className="w-full h-full object-cover rounded-md"
                                   onError={(e) => {
-                                    e.currentTarget.src = '/images/default-icon.jpg';
+                                    e.currentTarget.src = '/images/default-icon.svg';
                                     e.currentTarget.onerror = null; // Previne recursia
                                   }}
                                 />
@@ -322,7 +322,7 @@ export default function MonasteryDetailsPage() {
                       alt={`${monastery.name} - imagine ${index + 1}`}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
-                        e.currentTarget.src = '/images/default-monastery.jpg';
+                        e.currentTarget.src = '/images/default-monastery.svg';
                         e.currentTarget.onerror = null; // Previne recursia
                       }}
                     />
