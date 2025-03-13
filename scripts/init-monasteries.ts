@@ -412,6 +412,7 @@ async function initMonasteries() {
       }
       
       // Pregătim datele pentru inserare, conform schemei
+      // Am omis câmpul icon_descriptions deoarece nu există în tabela din baza de date
       const monasteryInsertData = {
         name: monasteryData.name,
         slug,
@@ -422,8 +423,8 @@ async function initMonasteries() {
         county: monasteryData.county,
         type: monasteryData.type,
         short_description: monasteryData.shortDescription || null,
-        access: monasteryData.access || null,
-        patron_saint: monasteryData.patronSaint || null,
+        access: monasteryData.access || "Informații de acces indisponibile", // Access este NOT NULL
+        patron_saint: monasteryData.patronSaint || "Adormirea Maicii Domnului", // patron_saint este NOT NULL
         patron_saint_date: monasteryData.patronSaintDate || null,
         founded_year: monasteryData.foundedYear || null,
         history: monasteryData.history || null,
