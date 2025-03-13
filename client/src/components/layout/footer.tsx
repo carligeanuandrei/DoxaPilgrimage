@@ -103,6 +103,16 @@ export default function Footer() {
                   <DirectCmsText contentKey="footer_link_organizers" fallback="Portal Organizatori" />
                 </a>
               </li>
+              <li>
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const href = document.querySelector('[data-cms-key="footer_link_monasteries_url"]')?.textContent || '/monasteries';
+                  window.location.href = href;
+                }} className="text-neutral-400 hover:text-white transition duration-300">
+                  <DirectCmsText contentKey="footer_link_monasteries_url" fallback="/monasteries" className="hidden" />
+                  <DirectCmsText contentKey="footer_link_monasteries" fallback="Mănăstiri din România" />
+                </a>
+              </li>
             </ul>
           </div>
           

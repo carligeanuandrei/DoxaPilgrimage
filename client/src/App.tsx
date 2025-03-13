@@ -25,6 +25,8 @@ import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
 import OrganizerStatsPage from "@/pages/admin/organizer-stats-page";
 import AdminLoginPage from "@/pages/admin/admin-login";
 import EditablePage from "@/pages/EditablePage";
+import MonasteriesPage from "@/pages/monasteries/index";
+import MonasteryDetailsPage from "@/pages/monasteries/[slug]";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -42,6 +44,10 @@ function Router() {
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/pilgrimages" component={PilgrimagesPage} />
       <Route path="/pilgrimages/:id" component={PilgrimageDetailsPage} />
+      <Route path="/monasteries" component={MonasteriesPage} />
+      <Route path="/monasteries/:slug">
+        {(params) => <MonasteryDetailsPage />}
+      </Route>
       <Route path="/orthodox-calendar" component={OrthodoxCalendarPage} />
       <Route path="/profile">
         <ProtectedRoute component={ProfilePage} path="/profile" />
