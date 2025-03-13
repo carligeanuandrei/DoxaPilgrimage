@@ -8,25 +8,63 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { insertUserSchema } from "@shared/schema";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Loader2, AlertCircle, CheckCircle, X, Upload, Search } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import axios from "axios";
+import { apiRequest } from "@/lib/queryClient";
 
-// Registration schema pentru organizatori
+// Schema pentru validarea CUI-ului
+const cuiSchema = z.string()
+  .min(1, "CUI-ul este obligatoriu")
+  .regex(/^(RO)?[0-9]{6,10}$/, "CUI-ul trebuie să conțină între 6 și 10 cifre, opțional prefixat cu RO");
+
+// Registration schema pentru organizatori - îmbunătățit cu validări stricte
 const registerOrganizerSchema = insertUserSchema.extend({
-  password: z.string().min(6, "Parola trebuie să aibă cel puțin 6 caractere"),
+  password: z.string()
+    .min(8, "Parola trebuie să aibă cel puțin 8 caractere")
+    .regex(/[A-Z]/, "Parola trebuie să conțină cel puțin o literă mare")
+    .regex(/[0-9]/, "Parola trebuie să conțină cel puțin o cifră")
+    .regex(/[^A-Za-z0-9]/, "Parola trebuie să conțină cel puțin un caracter special"),
   confirmPassword: z.string(),
+  
+  // Validare strictă pentru datele companiei
   companyName: z.string().min(3, "Numele companiei trebuie să aibă cel puțin 3 caractere"),
-  companyRegistrationNumber: z.string().min(3, "Codul de înregistrare trebuie să aibă cel puțin 3 caractere"),
+  companyRegistrationNumber: cuiSchema,
   companyAddress: z.string().min(5, "Adresa companiei trebuie să aibă cel puțin 5 caractere"),
+  
+  // Câmpuri adiționale și opționale
+  companyCity: z.string().optional(),
+  companyCounty: z.string().optional(),
+  companyLogo: z.string().optional(),
   description: z.string().optional(),
   website: z.string().url("Introduceți un URL valid").optional().or(z.literal('')),
-  agencyLicense: z.string().min(3, "Licența de agenție trebuie să aibă cel puțin 3 caractere"),
+  agencyLicense: z.string().optional(),
+  
+  // Tipuri de pelerinaje oferite
+  pilgrimageTypes: z.array(z.string()).optional(),
+  
+  // Cod verificare email
+  verificationCode: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Parolele nu coincid",
   path: ["confirmPassword"]
 });
+
+// Tipuri de pelerinaje disponibile
+const pilgrimageTypes = [
+  { id: "manastiri", label: "Pelerinaje la mănăstiri" },
+  { id: "icoane", label: "Pelerinaje la icoane făcătoare de minuni" },
+  { id: "moaste", label: "Pelerinaje la moaște de sfinți" },
+  { id: "athos", label: "Pelerinaje la Muntele Athos" },
+  { id: "israel", label: "Pelerinaje în Israel" },
+  { id: "grecia", label: "Pelerinaje în Grecia" },
+  { id: "international", label: "Pelerinaje internaționale" },
+  { id: "grupuri", label: "Pelerinaje pentru grupuri organizate" }
+];
 
 type RegisterOrganizerFormData = z.infer<typeof registerOrganizerSchema>;
 
@@ -35,7 +73,19 @@ export default function RegisterOrganizerPage() {
   const [, setLocation] = useLocation();
   const [agreeTerms, setAgreeTerms] = useState(false);
   const { toast } = useToast();
-
+  
+  // State-uri pentru validarea CUI și manipularea logo-ului
+  const [cuiValidationStatus, setCuiValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
+  const [companyInfoFound, setCompanyInfoFound] = useState(false);
+  const [cuiValidationMessage, setCuiValidationMessage] = useState('');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>('');
+  const [selectedPilgrimageTypes, setSelectedPilgrimageTypes] = useState<string[]>([]);
+  const [verificationStep, setVerificationStep] = useState<'email' | 'code' | 'completed'>('email');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationSent, setVerificationSent] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  
   // Register form pentru organizatori
   const registerForm = useForm<RegisterOrganizerFormData>({
     resolver: zodResolver(registerOrganizerSchema),
@@ -50,12 +100,148 @@ export default function RegisterOrganizerPage() {
       companyName: "",
       companyRegistrationNumber: "",
       companyAddress: "",
+      companyCity: "",
+      companyCounty: "",
       description: "",
       website: "",
       agencyLicense: "",
       role: "operator",
+      pilgrimageTypes: [],
+      companyLogo: "",
+      verificationCode: ""
     }
   });
+  
+  // Funcția de validare a CUI-ului
+  const validateCUI = async () => {
+    const cui = registerForm.getValues("companyRegistrationNumber");
+    
+    if (!cui) {
+      setCuiValidationStatus('invalid');
+      setCuiValidationMessage('CUI-ul este obligatoriu');
+      return;
+    }
+    
+    setCuiValidationStatus('validating');
+    
+    try {
+      const response = await apiRequest('GET', `/api/company/validate?cui=${cui}`);
+      const data = await response.json();
+      
+      if (data.valid) {
+        setCuiValidationStatus('valid');
+        setCuiValidationMessage(data.foundInfo ? 'CUI valid! Informații completate automat.' : 'CUI valid!');
+        setCompanyInfoFound(data.foundInfo);
+        
+        // Dacă au fost găsite informații despre companie, completăm automat formularele
+        if (data.foundInfo && data.company) {
+          registerForm.setValue("companyName", data.company.name);
+          registerForm.setValue("companyAddress", data.company.address);
+          
+          if (data.company.city) {
+            registerForm.setValue("companyCity", data.company.city);
+          }
+          
+          if (data.company.county) {
+            registerForm.setValue("companyCounty", data.company.county);
+          }
+        }
+      } else {
+        setCuiValidationStatus('invalid');
+        setCuiValidationMessage(data.message || 'CUI invalid');
+      }
+    } catch (error) {
+      setCuiValidationStatus('invalid');
+      setCuiValidationMessage('Eroare la validarea CUI-ului. Încercați din nou.');
+      console.error('Error validating CUI:', error);
+    }
+  };
+  
+  // Handler pentru încărcarea logo-ului
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Validăm fișierul (tip, dimensiune)
+    const validTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Tip de fișier neacceptat",
+        description: "Vă rugăm să încărcați o imagine în format JPG, PNG, SVG sau WebP.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (file.size > maxSize) {
+      toast({
+        title: "Fișier prea mare",
+        description: "Dimensiunea maximă permisă este de 2MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Setăm fișierul și generăm previzualizarea
+    setLogoFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      if (result) {
+        setLogoPreview(result);
+        registerForm.setValue("companyLogo", result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  // Funcție pentru a trimite codul de verificare
+  const sendVerificationCode = async () => {
+    const email = registerForm.getValues("email");
+    
+    if (!email) {
+      toast({
+        title: "Email lipsă",
+        description: "Introduceți o adresă de email pentru a primi codul de verificare.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // TODO: Implementa API-ul pentru trimiterea codului de verificare
+    // Deocamdată simulăm trimiterea
+    setVerificationSent(true);
+    setVerificationStep('code');
+    toast({
+      title: "Cod de verificare trimis",
+      description: "Un cod de verificare a fost trimis la adresa de email specificată. Introduceți codul pentru a continua.",
+    });
+    
+    // În mod normal, serverul ar trimite codul prin email, dar pentru demo
+    // folosim un cod fix pentru testare
+    setVerificationCode("123456");
+  };
+  
+  // Funcție pentru a verifica codul introdus
+  const verifyCode = () => {
+    const code = registerForm.getValues("verificationCode");
+    
+    if (code === verificationCode) {
+      setVerificationStep('completed');
+      toast({
+        title: "Email verificat cu succes",
+        description: "Adresa de email a fost verificată cu succes.",
+      });
+    } else {
+      toast({
+        title: "Cod incorect",
+        description: "Codul introdus este incorect. Încercați din nou.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Redirect if already logged in
   useEffect(() => {
@@ -64,7 +250,25 @@ export default function RegisterOrganizerPage() {
     }
   }, [user, setLocation]);
 
+  // Handler pentru selectarea/deselectarea tipurilor de pelerinaje
+  const handlePilgrimageTypeChange = (typeId: string) => {
+    setSelectedPilgrimageTypes(prev => {
+      if (prev.includes(typeId)) {
+        // Dacă tipul este deja selectat, îl eliminăm
+        const newTypes = prev.filter(id => id !== typeId);
+        registerForm.setValue("pilgrimageTypes", newTypes);
+        return newTypes;
+      } else {
+        // Altfel, îl adăugăm
+        const newTypes = [...prev, typeId];
+        registerForm.setValue("pilgrimageTypes", newTypes);
+        return newTypes;
+      }
+    });
+  };
+
   const onRegisterSubmit = (data: RegisterOrganizerFormData) => {
+    // Verificăm dacă termenii au fost acceptați
     if (!agreeTerms) {
       toast({
         title: "Trebuie să acceptați termenii și condițiile",
@@ -72,36 +276,76 @@ export default function RegisterOrganizerPage() {
       });
       return;
     }
-
-    // Delete confirmPassword since it's not in the schema
-    const { confirmPassword, ...registerData } = data;
     
-    // Add additional organizer metadata in the bio field as JSON
+    // Verificăm dacă email-ul a fost verificat (în cazul implementării complete)
+    if (verificationStep !== 'completed') {
+      toast({
+        title: "Email neverificat",
+        description: "Trebuie să verificați adresa de email înainte de a continua.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Verificăm dacă CUI-ul a fost validat
+    if (cuiValidationStatus !== 'valid') {
+      toast({
+        title: "CUI nevalidat",
+        description: "Trebuie să validați CUI-ul companiei înainte de a continua.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Eliminăm câmpurile care nu trebuie trimise la server
+    const { 
+      confirmPassword, 
+      verificationCode,
+      pilgrimageTypes,
+      companyCity,
+      companyCounty,
+      ...registerData 
+    } = data;
+    
+    // Adăugăm metadate suplimentare ale organizatorului în câmpul bio ca JSON
     const organizerMetadata = {
       companyName: data.companyName,
       companyRegistrationNumber: data.companyRegistrationNumber,
       companyAddress: data.companyAddress,
-      description: data.description,
-      website: data.website,
-      agencyLicense: data.agencyLicense
+      companyCity: data.companyCity || '',
+      companyCounty: data.companyCounty || '',
+      description: data.description || '',
+      website: data.website || '',
+      agencyLicense: data.agencyLicense || '',
+      pilgrimageTypes: data.pilgrimageTypes || [],
+      companyLogo: data.companyLogo || ''
     };
     
-    // Create the final registration data
+    // Creăm datele finale pentru înregistrare
     const finalRegisterData = {
       ...registerData,
-      bio: JSON.stringify(organizerMetadata)
+      bio: JSON.stringify(organizerMetadata),
+      verified: false // Organizatorii trebuie verificați de admin
     };
     
+    // Apelăm mutația pentru înregistrare
     registerMutation.mutate(finalRegisterData, {
       onSuccess: () => {
         toast({
           title: "Înregistrare reușită",
           description: "Contul dumneavoastră de organizator a fost creat. Așteptați aprobarea administratorului."
         });
-        // Redirect after successful registration
+        // Redirecționăm după înregistrarea cu succes
         setTimeout(() => {
           setLocation('/organizer/dashboard');
         }, 2000);
+      },
+      onError: (error) => {
+        toast({
+          title: "Eroare la înregistrare",
+          description: error.message || "A apărut o eroare la înregistrare. Vă rugăm să încercați din nou.",
+          variant: "destructive"
+        });
       }
     });
   };
@@ -227,11 +471,45 @@ export default function RegisterOrganizerPage() {
                     
                     <div className="space-y-2">
                       <Label htmlFor="companyRegistrationNumber">CUI / Nr. înregistrare</Label>
-                      <Input 
-                        id="companyRegistrationNumber" 
-                        type="text" 
-                        {...registerForm.register("companyRegistrationNumber")} 
-                      />
+                      <div className="flex space-x-2">
+                        <Input 
+                          id="companyRegistrationNumber" 
+                          type="text" 
+                          placeholder="ex: RO12345678"
+                          className={`flex-grow ${cuiValidationStatus === 'valid' ? 'border-green-500' : cuiValidationStatus === 'invalid' ? 'border-red-500' : ''}`}
+                          {...registerForm.register("companyRegistrationNumber")} 
+                        />
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          className="shrink-0"
+                          onClick={validateCUI}
+                          disabled={cuiValidationStatus === 'validating'}
+                        >
+                          {cuiValidationStatus === 'validating' ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Search className="h-4 w-4" />
+                          )}
+                          <span className="ml-2">Verifică</span>
+                        </Button>
+                      </div>
+                      
+                      {cuiValidationStatus !== 'idle' && (
+                        <div className={`text-sm mt-1 flex items-center ${
+                          cuiValidationStatus === 'valid' ? 'text-green-600' : 
+                          cuiValidationStatus === 'invalid' ? 'text-red-600' : 
+                          'text-gray-600'
+                        }`}>
+                          {cuiValidationStatus === 'valid' ? (
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                          ) : cuiValidationStatus === 'invalid' ? (
+                            <AlertCircle className="h-4 w-4 mr-1" />
+                          ) : null}
+                          {cuiValidationMessage}
+                        </div>
+                      )}
+                      
                       {registerForm.formState.errors.companyRegistrationNumber && (
                         <p className="text-sm text-red-500">{registerForm.formState.errors.companyRegistrationNumber.message}</p>
                       )}
@@ -286,7 +564,177 @@ export default function RegisterOrganizerPage() {
                         <p className="text-sm text-red-500">{registerForm.formState.errors.description.message}</p>
                       )}
                     </div>
+                    
+                    {/* Logo upload section */}
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label htmlFor="companyLogo">Logo companie</Label>
+                      <div className="flex items-center space-x-4">
+                        <div 
+                          className={`w-24 h-24 border rounded-md flex items-center justify-center overflow-hidden ${
+                            logoPreview ? 'border-green-500' : 'border-dashed border-gray-300'
+                          }`}
+                        >
+                          {logoPreview ? (
+                            <img src={logoPreview} alt="Logo preview" className="object-contain w-full h-full" />
+                          ) : (
+                            <div className="text-center p-2">
+                              <Upload className="h-8 w-8 text-gray-400 mx-auto" />
+                              <span className="text-xs text-gray-500 block mt-1">Logo</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="file"
+                            id="logoFileInput"
+                            className="hidden"
+                            accept="image/jpeg,image/png,image/svg+xml,image/webp"
+                            onChange={handleLogoUpload}
+                            ref={logoInputRef}
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="mb-2"
+                            onClick={() => logoInputRef.current?.click()}
+                          >
+                            <Upload className="h-4 w-4 mr-2" />
+                            {logoFile ? 'Schimbă logo' : 'Încarcă logo'}
+                          </Button>
+                          {logoFile && (
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              className="h-8 px-2 text-red-500 hover:text-red-700"
+                              onClick={() => {
+                                setLogoFile(null);
+                                setLogoPreview('');
+                                registerForm.setValue("companyLogo", "");
+                              }}
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Șterge
+                            </Button>
+                          )}
+                          <p className="text-xs text-gray-500 mt-1">
+                            Format: JPG, PNG, SVG, WebP. Dimensiune maximă: 2MB.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                </div>
+                
+                {/* Tipuri de pelerinaje */}
+                <div className="border-b pb-4 mb-4">
+                  <h3 className="text-lg font-medium mb-4">Tipuri de pelerinaje oferite</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {pilgrimageTypes.map(type => (
+                      <div 
+                        key={type.id} 
+                        className={`border rounded-md p-3 cursor-pointer transition-colors ${
+                          selectedPilgrimageTypes.includes(type.id) 
+                            ? 'border-primary bg-primary/5' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => handlePilgrimageTypeChange(type.id)}
+                      >
+                        <div className="flex items-center">
+                          <Checkbox 
+                            id={`pilgrimageType-${type.id}`}
+                            checked={selectedPilgrimageTypes.includes(type.id)}
+                            onCheckedChange={() => handlePilgrimageTypeChange(type.id)}
+                          />
+                          <Label 
+                            htmlFor={`pilgrimageType-${type.id}`}
+                            className="ml-2 cursor-pointer font-medium"
+                          >
+                            {type.label}
+                          </Label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Verificare email */}
+                <div className="border-b pb-4 mb-4">
+                  <h3 className="text-lg font-medium mb-4">Verificare email</h3>
+                  {verificationStep === 'email' ? (
+                    <div className="space-y-3">
+                      <Alert variant={verificationSent ? "success" : "default"}>
+                        <div className="flex items-center">
+                          {verificationSent ? <CheckCircle className="h-4 w-4 mr-2" /> : <AlertCircle className="h-4 w-4 mr-2" />}
+                          <AlertTitle>
+                            {verificationSent 
+                              ? "Cod de verificare trimis!" 
+                              : "Verificarea adresei de email este necesară"}
+                          </AlertTitle>
+                        </div>
+                        <AlertDescription className="mt-2">
+                          {verificationSent
+                            ? "Un cod de verificare a fost trimis la adresa de email specificată."
+                            : "Pentru a finaliza înregistrarea, trebuie să verificați adresa de email."}
+                        </AlertDescription>
+                      </Alert>
+                      
+                      <Button 
+                        type="button" 
+                        className="w-full"
+                        onClick={sendVerificationCode}
+                        disabled={verificationSent}
+                      >
+                        {verificationSent ? "Cod trimis" : "Trimite cod de verificare"}
+                      </Button>
+                    </div>
+                  ) : verificationStep === 'code' ? (
+                    <div className="space-y-3">
+                      <Alert>
+                        <AlertCircle className="h-4 w-4 mr-2" />
+                        <AlertTitle>Introduceți codul de verificare</AlertTitle>
+                        <AlertDescription className="mt-2">
+                          Am trimis un cod de verificare la adresa de email {registerForm.getValues("email")}. 
+                          Introduceți codul primit pentru a continua.
+                        </AlertDescription>
+                      </Alert>
+                      
+                      <div className="flex space-x-2">
+                        <Input 
+                          id="verificationCode" 
+                          type="text" 
+                          placeholder="Cod verificare" 
+                          className="flex-1"
+                          {...registerForm.register("verificationCode")} 
+                        />
+                        <Button 
+                          type="button" 
+                          className="shrink-0" 
+                          onClick={verifyCode}
+                        >
+                          Verifică
+                        </Button>
+                      </div>
+                      
+                      <div className="text-sm text-gray-500">
+                        Nu ați primit codul? <Button 
+                          type="button" 
+                          variant="link" 
+                          className="p-0 h-auto" 
+                          onClick={sendVerificationCode}
+                        >
+                          Retrimite codul
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Alert variant="success">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <AlertTitle>Adresa de email verificată cu succes!</AlertTitle>
+                      <AlertDescription className="mt-2">
+                        Adresa de email {registerForm.getValues("email")} a fost verificată cu succes.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
                 
                 <div className="my-4">
