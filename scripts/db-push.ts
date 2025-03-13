@@ -136,6 +136,83 @@ async function main() {
       );
     `);
 
+    console.log("Creating region_enum type...");
+    await db.execute(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'monastery_region') THEN
+          CREATE TYPE monastery_region AS ENUM ('moldova', 'bucovina', 'muntenia', 'oltenia', 'transilvania', 'maramures', 'banat', 'dobrogea');
+        END IF;
+      END$$;
+    `);
+
+    console.log("Creating monasteries table...");
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS monasteries (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        description TEXT NOT NULL,
+        short_description TEXT,
+        address TEXT NOT NULL,
+        region monastery_region NOT NULL,
+        city TEXT NOT NULL,
+        county TEXT NOT NULL,
+        access TEXT,
+        patron_saint TEXT,
+        patron_saint_date TIMESTAMP,
+        founded_year INTEGER,
+        history TEXT,
+        special_features TEXT,
+        relics TEXT[],
+        type TEXT NOT NULL,
+        images TEXT[],
+        cover_image TEXT,
+        contact_email TEXT,
+        contact_phone TEXT,
+        website TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log("Creating monastery_events table...");
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS monastery_events (
+        id SERIAL PRIMARY KEY,
+        monastery_id INTEGER REFERENCES monasteries(id),
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        event_date TIMESTAMP NOT NULL,
+        is_recurring BOOLEAN NOT NULL,
+        recurrence_pattern TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log("Creating monastery_services table...");
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS monastery_services (
+        id SERIAL PRIMARY KEY,
+        monastery_id INTEGER REFERENCES monasteries(id),
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log("Creating monastery_schedule table...");
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS monastery_schedule (
+        id SERIAL PRIMARY KEY,
+        monastery_id INTEGER REFERENCES monasteries(id),
+        day_of_week TEXT NOT NULL,
+        opening_time TEXT NOT NULL,
+        closing_time TEXT NOT NULL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // Adăugare user admin
     console.log("Adding admin user...");
     await db.execute(`
