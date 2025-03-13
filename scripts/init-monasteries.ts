@@ -411,41 +411,57 @@ async function initMonasteries() {
         continue;
       }
       
-      // Pregătim datele pentru inserare, conform schemei reale a tabelului
-      const monasteryInsertData: any = {
-        name: monasteryData.name,
-        slug,
-        description: monasteryData.description || "Descriere în curs de actualizare",
-        address: monasteryData.address,
-        region: monasteryData.region,
-        city: monasteryData.city,
-        county: monasteryData.county,
-        type: monasteryData.type || "monastery",
-        short_description: monasteryData.shortDescription || null,
-        access: monasteryData.access || null,
-        patron_saint: monasteryData.patronSaint || null,
-        patron_saint_date: monasteryData.patronSaintDate || null,
-        founded_year: monasteryData.foundedYear || null,
-        history: monasteryData.history || null,
-        special_features: monasteryData.specialFeatures || null,
-        relics: monasteryData.relics ? monasteryData.relics : [],
-        images: monasteryData.images ? monasteryData.images : [],
-        cover_image: monasteryData.coverImage || null,
-        contact_email: monasteryData.contactEmail || null,
-        contact_phone: monasteryData.contactPhone || null,
-        website: monasteryData.website || null,
-        latitude: 45.0 + Math.random() * 3, // Valori între 45 și 48 pentru România
-        longitude: 22.0 + Math.random() * 5, // Valori între 22 și 27 pentru România
-        // Adăugăm și noile câmpuri
-        icon_descriptions: '[]', // Pentru moment folosim un array gol în format JSON
-        verification: "verified",
-        administrator_id: null,
-        created_at: new Date(),
-        updated_at: new Date()
-      };
+      // Formăm un SQL manual pentru a controla mai bine formatarea array-urilor
+      const query = `
+        INSERT INTO monasteries (
+          name, slug, description, region, city, county, type,
+          short_description, access, patron_saint, patron_saint_date, 
+          founded_year, history, special_features, relics, images,
+          cover_image, contact_email, contact_phone, website,
+          latitude, longitude, icon_descriptions, verification,
+          administrator_id, created_at, updated_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+          $15::text[], $16::text[], $17, $18, $19, $20, $21, $22, $23, $24,
+          $25, $26, $27
+        )
+      `;
       
-      // Inserăm mănăstirea în baza de date
-      await db.insert(monasteries).values([monasteryInsertData]);
+      // Generăm coordonate aleatorii pentru exemplificare
+      const latitude = 45.0 + Math.random() * 3; // Valori între 45 și 48 pentru România
+      const longitude = 22.0 + Math.random() * 5; // Valori între 22 și 27 pentru România
+      const now = new Date();
+      
+      // Executăm query-ul cu parametrii
+      await db.execute(query, [
+        monasteryData.name,
+        slug,
+        monasteryData.description || "Descriere în curs de actualizare",
+        monasteryData.region,
+        monasteryData.city,
+        monasteryData.county,
+        monasteryData.type || "monastery",
+        monasteryData.shortDescription || null,
+        monasteryData.access || null,
+        monasteryData.patronSaint || null,
+        monasteryData.patronSaintDate || null,
+        monasteryData.foundedYear || null,
+        monasteryData.history || null,
+        monasteryData.specialFeatures || null,
+        monasteryData.relics || [], // Transmis ca array nativ
+        monasteryData.images || [], // Transmis ca array nativ
+        monasteryData.coverImage || null,
+        monasteryData.contactEmail || null,
+        monasteryData.contactPhone || null,
+        monasteryData.website || null,
+        latitude,
+        longitude,
+        '[]', // icon_descriptions ca JSON string
+        true, // Verificat (boolean)
+        null, // administrator_id
+        now, // created_at
+        now  // updated_at
+      ]);
       
       console.log(`Mănăstirea ${monasteryData.name} a fost adăugată cu succes.`);
     } catch (error) {
