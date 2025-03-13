@@ -383,7 +383,7 @@ async function initMonasteries() {
       await db.insert(monasteries).values({
         ...monasteryData,
         slug,
-        verification: "verified" // Toate mănăstirile importate sunt automat verificate
+        verification: "verified" as const // Toate mănăstirile importate sunt automat verificate
       });
       
       console.log(`Mănăstirea ${monasteryData.name} a fost adăugată cu succes.`);
