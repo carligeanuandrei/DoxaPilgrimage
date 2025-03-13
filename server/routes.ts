@@ -7,13 +7,15 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { getCompanyInfoByCUI, validateRomanianCUI } from "./anaf";
+import { registerMonasteryRoutes } from './routes/monasteries';
 import { 
   insertPilgrimageSchema, 
   insertReviewSchema, 
   insertBookingSchema,
   insertMessageSchema,
   insertCmsContentSchema,
-  insertBuilderPageSchema
+  insertBuilderPageSchema,
+  insertMonasterySchema
 } from "@shared/schema";
 import Stripe from "stripe";
 
@@ -2085,6 +2087,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Înregistrăm rutele pentru mănăstiri
+  registerMonasteryRoutes(app);
+  
   const httpServer = createServer(app);
 
   return httpServer;
