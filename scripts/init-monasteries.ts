@@ -3,6 +3,37 @@ import { monasteries, regionEnum } from "../shared/schema";
 import { createId } from "@paralleldrive/cuid2";
 import slugify from "slugify";
 
+// Tipurile de date pentru mănăstiri
+type IconDescription = {
+  name: string;
+  description: string;
+  image: string;
+};
+
+type MonasteryData = {
+  name: string;
+  description: string;
+  shortDescription?: string;
+  address: string;
+  region: "moldova" | "bucovina" | "muntenia" | "oltenia" | "transilvania" | "maramures" | "banat" | "dobrogea";
+  city: string;
+  county: string;
+  access?: string;
+  patronSaint?: string;
+  patronSaintDate?: Date;
+  foundedYear?: number;
+  history?: string;
+  specialFeatures?: string;
+  relics?: string[];
+  type: "monastery" | "hermitage" | "church";
+  iconDescriptions?: IconDescription[];
+  images?: string[];
+  coverImage?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  website?: string;
+};
+
 // Date despre mănăstirile și schiturile din România
 const monasteriesData = [
   // Moldova
@@ -41,7 +72,7 @@ const monasteriesData = [
   },
   {
     name: "Mănăstirea Neamț",
-    description: "Mănăstirea Neamț, cunoscută și ca „Ierusalimul Ortodoxiei Românești", este una dintre cele mai vechi și mai importante mănăstiri din România, cu o tradiție monahală de peste 600 de ani.",
+    description: "Mănăstirea Neamț, cunoscută și ca Ierusalimul Ortodoxiei Românești, este una dintre cele mai vechi și mai importante mănăstiri din România, cu o tradiție monahală de peste 600 de ani.",
     shortDescription: "Cel mai vechi și important centru monahal și cultural din Moldova",
     address: "Comuna Vânători-Neamț",
     region: "moldova",
@@ -77,7 +108,7 @@ const monasteriesData = [
   {
     name: "Mănăstirea Voroneț",
     description: "Mănăstirea Voroneț, cunoscută pentru culoarea unică albastră (albastrul de Voroneț), este una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare, fiind inclusă în Patrimoniul Mondial UNESCO.",
-    shortDescription: "Capodoperă a artei medievale românești, cunoscută pentru „albastrul de Voroneț"",
+    shortDescription: "Capodoperă a artei medievale românești, cunoscută pentru albastrul de Voroneț",
     address: "Str. Voroneț nr. 166, Gura Humorului",
     region: "bucovina",
     city: "Gura Humorului",
@@ -146,7 +177,7 @@ const monasteriesData = [
   // Transilvania
   {
     name: "Mănăstirea Sâmbăta de Sus",
-    description: "Mănăstirea Sâmbăta, cunoscută și ca „Brâncoveanu", este un important centru spiritual ortodox din Transilvania, ctitorie a domnitorului Constantin Brâncoveanu.",
+    description: "Mănăstirea Sâmbăta, cunoscută și ca Brâncoveanu, este un important centru spiritual ortodox din Transilvania, ctitorie a domnitorului Constantin Brâncoveanu.",
     shortDescription: "Vatră de spiritualitate și cultură ortodoxă în Transilvania",
     address: "Comuna Sâmbăta de Sus",
     region: "transilvania",
@@ -364,7 +395,7 @@ function generateUniqueSlug(name: string) {
 async function initMonasteries() {
   console.log("Începem importul mănăstirilor...");
   
-  for (const monasteryData of monasteriesData) {
+  for (const monasteryData of monasteriesData as MonasteryData[]) {
     try {
       // Generăm un slug unic pentru fiecare mănăstire
       const slug = generateUniqueSlug(monasteryData.name);
@@ -379,12 +410,35 @@ async function initMonasteries() {
         continue;
       }
       
-      // Inserăm mănăstirea în baza de date
-      await db.insert(monasteries).values({
-        ...monasteryData,
+      // Pregătim datele pentru inserare, conform schemei
+      const monasteryInsertData = {
+        name: monasteryData.name,
         slug,
-        verification: "verified" as const // Toate mănăstirile importate sunt automat verificate
-      });
+        description: monasteryData.description,
+        address: monasteryData.address,
+        region: monasteryData.region,
+        city: monasteryData.city,
+        county: monasteryData.county,
+        type: monasteryData.type,
+        verification: "verified" as const, // Toate mănăstirile importate sunt automat verificate
+        shortDescription: monasteryData.shortDescription,
+        access: monasteryData.access,
+        patronSaint: monasteryData.patronSaint,
+        patronSaintDate: monasteryData.patronSaintDate,
+        foundedYear: monasteryData.foundedYear,
+        history: monasteryData.history,
+        specialFeatures: monasteryData.specialFeatures,
+        relics: monasteryData.relics,
+        iconDescriptions: monasteryData.iconDescriptions,
+        images: monasteryData.images,
+        coverImage: monasteryData.coverImage,
+        contactEmail: monasteryData.contactEmail,
+        contactPhone: monasteryData.contactPhone,
+        website: monasteryData.website
+      };
+      
+      // Inserăm mănăstirea în baza de date
+      await db.insert(monasteries).values(monasteryInsertData);
       
       console.log(`Mănăstirea ${monasteryData.name} a fost adăugată cu succes.`);
     } catch (error) {
