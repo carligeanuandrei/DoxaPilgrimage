@@ -13,7 +13,7 @@ export function MonasteryCard({ monastery }: MonasteryCardProps) {
     <Card className="overflow-hidden h-full flex flex-col hover:shadow-lg transition-shadow">
       <div className="relative h-48 overflow-hidden">
         <img 
-          src={monastery.coverImage || monastery.images?.[0] || '/placeholder-monastery.jpg'} 
+          src={monastery.coverImage || (monastery.images && monastery.images.length > 0 ? monastery.images[0] : '/images/default-monastery.jpg')} 
           alt={monastery.name}
           className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
         />
@@ -36,7 +36,7 @@ export function MonasteryCard({ monastery }: MonasteryCardProps) {
       
       <CardContent className="p-4 pt-0 flex-grow">
         <p className="text-sm line-clamp-3">
-          {monastery.shortDescription || monastery.description.substring(0, 120) + '...'}
+          {monastery.shortDescription || (monastery.description ? monastery.description.substring(0, 120) + '...' : 'Informații despre această mănăstire în curând...')}
         </p>
       </CardContent>
       

@@ -10,8 +10,8 @@ import { formatRegionName } from "@/lib/format-utils";
 
 export default function MonasteriesPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedType, setSelectedType] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("");
   const { isLoading, data: monasteries = [] } = useQuery<Monastery[]>({
     queryKey: ["/api/monasteries"],
   });
@@ -25,12 +25,12 @@ export default function MonasteriesPage() {
     const matchesSearch =
       searchTerm === "" ||
       monastery.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      monastery.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (monastery.description && monastery.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
       monastery.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
       monastery.county.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesRegion = selectedRegion === "" || monastery.region === selectedRegion;
-    const matchesType = selectedType === "" || monastery.type === selectedType;
+    const matchesRegion = selectedRegion === "all" || monastery.region === selectedRegion;
+    const matchesType = selectedType === "all" || monastery.type === selectedType;
 
     return matchesSearch && matchesRegion && matchesType;
   });
@@ -81,7 +81,7 @@ export default function MonasteriesPage() {
             <SelectValue placeholder="Toate regiunile" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Toate regiunile</SelectItem>
+            <SelectItem value="all">Toate regiunile</SelectItem>
             {regions.map((region) => (
               <SelectItem key={region.value} value={region.value}>
                 {region.label}
@@ -94,7 +94,7 @@ export default function MonasteriesPage() {
             <SelectValue placeholder="Toate tipurile" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Toate tipurile</SelectItem>
+            <SelectItem value="all">Toate tipurile</SelectItem>
             {types.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.label}
