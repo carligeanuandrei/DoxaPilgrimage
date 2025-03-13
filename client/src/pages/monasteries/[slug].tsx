@@ -89,9 +89,13 @@ export default function MonasteryDetailsPage() {
           {/* Galerie de imagini */}
           <div className="relative h-[400px] rounded-lg overflow-hidden">
             <img 
-              src={monastery.coverImage || monastery.images?.[0]} 
+              src={monastery.coverImage || (monastery.images && monastery.images.length > 0 ? monastery.images[0] : '/images/default-monastery.jpg')} 
               alt={monastery.name}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = '/images/default-monastery.jpg';
+                e.currentTarget.onerror = null; // Previne recursia
+              }}
             />
           </div>
 

@@ -16,6 +16,10 @@ export function MonasteryCard({ monastery }: MonasteryCardProps) {
           src={monastery.coverImage || (monastery.images && monastery.images.length > 0 ? monastery.images[0] : '/images/default-monastery.jpg')} 
           alt={monastery.name}
           className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
+          onError={(e) => {
+            e.currentTarget.src = '/images/default-monastery.jpg';
+            e.currentTarget.onerror = null; // Previne recursia
+          }}
         />
         <div className="absolute top-2 right-2">
           <Badge className="bg-primary/80 hover:bg-primary">{formatRegionName(monastery.region)}</Badge>

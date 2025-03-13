@@ -6,6 +6,8 @@
  * @returns Numele formatat al regiunii
  */
 export function formatRegionName(region: string): string {
+  if (!region) return 'Regiune necunoscută';
+  
   const regionMap: Record<string, string> = {
     'moldova': 'Moldova',
     'bucovina': 'Bucovina',
@@ -18,7 +20,7 @@ export function formatRegionName(region: string): string {
     'dobrogea': 'Dobrogea',
   };
   
-  return regionMap[region] || region;
+  return regionMap[region.toLowerCase()] || region;
 }
 
 /**
@@ -48,10 +50,11 @@ export function groupMonasteriesByRegion<T extends { region: string }>(monasteri
   const grouped: Record<string, T[]> = {};
   
   monasteries.forEach(monastery => {
-    if (!grouped[monastery.region]) {
-      grouped[monastery.region] = [];
+    const region = monastery.region || 'nedefinit';
+    if (!grouped[region]) {
+      grouped[region] = [];
     }
-    grouped[monastery.region].push(monastery);
+    grouped[region].push(monastery);
   });
   
   return grouped;
