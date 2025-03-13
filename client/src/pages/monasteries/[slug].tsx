@@ -82,7 +82,10 @@ export default function MonasteryDetailsPage() {
             <h1 className="text-3xl md:text-4xl font-bold mb-2">{monastery.name}</h1>
             <div className="flex items-center text-muted-foreground mb-4">
               <MapPin className="h-4 w-4 mr-1" />
-              <span>{monastery.city}, {monastery.county}</span>
+              <span>
+                {monastery.city ? monastery.city : "Localitate nedisponibilă"}
+                {monastery.county ? `, ${monastery.county}` : ""}
+              </span>
             </div>
           </div>
 
@@ -109,7 +112,11 @@ export default function MonasteryDetailsPage() {
             
             <TabsContent value="description" className="space-y-6">
               <div>
-                <p className="text-lg">{monastery.description}</p>
+                {monastery.description ? (
+                  <p className="text-lg">{monastery.description}</p>
+                ) : (
+                  <p className="text-lg text-muted-foreground">Nu există descriere disponibilă pentru această mănăstire.</p>
+                )}
               </div>
               
               {monastery.specialFeatures && (
@@ -191,8 +198,16 @@ export default function MonasteryDetailsPage() {
             <TabsContent value="contact" className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-2">Adresă și acces</h3>
-                <p className="mb-4">{monastery.address}</p>
-                <p>{monastery.access}</p>
+                {monastery.address ? (
+                  <p className="mb-4">{monastery.address}</p>
+                ) : (
+                  <p className="mb-4 text-muted-foreground">Adresa completă nu este disponibilă.</p>
+                )}
+                {monastery.access ? (
+                  <p>{monastery.access}</p>
+                ) : (
+                  <p className="text-muted-foreground">Informații despre acces nu sunt disponibile.</p>
+                )}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -253,10 +268,12 @@ export default function MonasteryDetailsPage() {
                 </h3>
                 <div className="space-y-2">
                   <div>
-                    <span className="font-medium">Regiune:</span> {formatRegionName(monastery.region)}
+                    <span className="font-medium">Regiune:</span> {monastery.region ? formatRegionName(monastery.region) : "Regiune nedisponibilă"}
                   </div>
                   <div>
-                    <span className="font-medium">Localitate:</span> {monastery.city}, județul {monastery.county}
+                    <span className="font-medium">Localitate:</span> 
+                    {monastery.city ? monastery.city : "Localitate nedisponibilă"}
+                    {monastery.county ? `, județul ${monastery.county}` : ""}
                   </div>
                   <div>
                     <span className="font-medium">Tip așezământ:</span> {formattedType}
@@ -296,6 +313,10 @@ export default function MonasteryDetailsPage() {
                       src={image} 
                       alt={`${monastery.name} - imagine ${index + 1}`}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        e.currentTarget.src = '/images/default-monastery.jpg';
+                        e.currentTarget.onerror = null; // Previne recursia
+                      }}
                     />
                   </div>
                 ))}
