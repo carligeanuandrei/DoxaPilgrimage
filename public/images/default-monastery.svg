@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f0f5fa"/>
+  <text x="400" y="100" font-family="Arial" font-size="24" text-anchor="middle" fill="#333">Imagine Default Mănăstire</text>
+  
+  <!-- Turla mare -->
+  <path d="M400,140 L400,90 C400,80 410,80 410,90 L410,140" fill="#d4a76a" stroke="#333" stroke-width="2"/>
+  <circle cx="405" cy="80" r="10" fill="gold" stroke="#333" stroke-width="1"/>
+  
+  <!-- Conturul bisericii -->
+  <path d="M300,200 L500,200 L500,400 L300,400 Z" fill="#f5deb3" stroke="#333" stroke-width="3"/>
+  <path d="M350,200 L350,150 L450,150 L450,200" fill="#f5deb3" stroke="#333" stroke-width="2"/>
+  <path d="M400,150 L400,100" fill="#f5deb3" stroke="#333" stroke-width="2"/>
+  
+  <!-- Detalii biserică -->
+  <rect x="390" y="350" width="20" height="50" fill="#8b4513" stroke="#333" stroke-width="1"/> <!-- ușa -->
+  <rect x="330" y="250" width="30" height="40" fill="#add8e6" stroke="#333" stroke-width="1"/> <!-- fereastră stânga -->
+  <rect x="440" y="250" width="30" height="40" fill="#add8e6" stroke="#333" stroke-width="1"/> <!-- fereastră dreapta -->
+  
+  <!-- Cruce deasupra turlei -->
+  <path d="M405,60 L405,40 M395,50 L415,50" stroke="gold" stroke-width="3"/>
+  
+  <!-- Peisaj -->
+  <path d="M0,400 L800,400" stroke="#333" stroke-width="1"/> <!-- linie orizont -->
+  <path d="M0,400 C 100,380 200,420 300,400 C 400,380 500,420 600,400 C 700,380 800,420 800,400" fill="#7cfc00" stroke="#333" stroke-width="1"/> <!-- dealuri -->
+  
+  <!-- Text -->
+  <text x="400" y="500" font-family="Arial" font-size="16" text-anchor="middle" fill="#333">Imaginea nu este disponibilă</text>
+</svg>

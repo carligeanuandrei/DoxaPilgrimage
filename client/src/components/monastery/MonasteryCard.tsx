@@ -13,7 +13,7 @@ export function MonasteryCard({ monastery }: MonasteryCardProps) {
   const imageUrl = monastery.coverImage || 
                   (monastery.images && monastery.images.length > 0 ? 
                     monastery.images[0] : 
-                    '/images/default-monastery.jpg');
+                    '/images/default-monastery.svg');
   
   return (
     <Card className="overflow-hidden h-full flex flex-col hover:shadow-lg transition-shadow">
@@ -23,7 +23,7 @@ export function MonasteryCard({ monastery }: MonasteryCardProps) {
           alt={monastery.name}
           className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
           onError={(e) => {
-            e.currentTarget.src = '/images/default-monastery.jpg';
+            e.currentTarget.src = '/images/default-monastery.svg';
             e.currentTarget.onerror = null; // Previne recursia
           }}
         />
