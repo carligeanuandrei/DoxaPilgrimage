@@ -438,7 +438,7 @@ async function initMonasteries() {
       };
       
       // Inserăm mănăstirea în baza de date
-      await db.insert(monasteries).values(monasteryInsertData);
+      await db.insert(monasteries).values([monasteryInsertData]);
       
       console.log(`Mănăstirea ${monasteryData.name} a fost adăugată cu succes.`);
     } catch (error) {
