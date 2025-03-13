@@ -428,8 +428,8 @@ async function initMonasteries() {
         founded_year: monasteryData.foundedYear || null,
         history: monasteryData.history || null,
         special_features: monasteryData.specialFeatures || null,
-        relics: Array.isArray(monasteryData.relics) ? monasteryData.relics : null,
-        images: Array.isArray(monasteryData.images) ? monasteryData.images : null,
+        relics: monasteryData.relics ? monasteryData.relics : [],
+        images: monasteryData.images ? monasteryData.images : [],
         cover_image: monasteryData.coverImage || null,
         contact_email: monasteryData.contactEmail || null,
         contact_phone: monasteryData.contactPhone || null,
@@ -438,7 +438,7 @@ async function initMonasteries() {
         longitude: 22.0 + Math.random() * 5, // Valori între 22 și 27 pentru România
         // Adăugăm și noile câmpuri
         icon_descriptions: '[]', // Pentru moment folosim un array gol în format JSON
-        verification: true,
+        verification: "verified",
         administrator_id: null,
         created_at: new Date(),
         updated_at: new Date()
