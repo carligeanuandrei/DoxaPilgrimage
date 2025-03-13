@@ -1162,12 +1162,12 @@ export class DatabaseStorage implements IStorage {
         // Returnează un singur element după cheie
         console.log(`[DEBUG] Fetching CMS content for key "${key}"`);
         
-        // Selectăm explicit fiecare coloană pentru a evita eroarea cu coloana description care lipsește
+        // Selectăm explicit fiecare coloană folosind numele corecte
         const content = await db.select({
           id: cmsContent.id,
           key: cmsContent.key,
           value: cmsContent.value,
-          contentType: cmsContent.contentType,
+          content_type: cmsContent.content_type,
           createdAt: cmsContent.createdAt,
           updatedAt: cmsContent.updatedAt
         }).from(cmsContent).where(eq(cmsContent.key, key));
@@ -1175,11 +1175,10 @@ export class DatabaseStorage implements IStorage {
         console.log(`[DEBUG] Found ${content.length} CMS items for key "${key}"`);
         
         if (content.length > 0) {
-          // Adăugăm manual proprietatea description care lipsește
+          // Mapăm la formatul așteptat în restul aplicației
           const result = {
             ...content[0],
-            description: undefined, // Adăugam manual acest câmp care nu există încă în BD
-            contentType: content[0].contentType
+            contentType: content[0].content_type // Adăugăm alias camelCase pentru compatibilitate
           };
           
           console.log(`[DEBUG] Returning content for "${key}":`, {
@@ -1198,19 +1197,19 @@ export class DatabaseStorage implements IStorage {
           id: cmsContent.id,
           key: cmsContent.key,
           value: cmsContent.value,
-          contentType: cmsContent.contentType,
+          content_type: cmsContent.content_type,
           createdAt: cmsContent.createdAt,
           updatedAt: cmsContent.updatedAt
         }).from(cmsContent);
         
-        // Adăugăm manual description pentru compatibilitate
-        const resultsWithDescription = results.map(item => ({
+        // Adăugăm alias contentType pentru compatibilitate cu codul existent
+        const mappedResults = results.map(item => ({
           ...item,
-          description: undefined
+          contentType: item.content_type
         }));
         
         console.log(`[DEBUG] Found ${results.length} total CMS items`);
-        return resultsWithDescription;
+        return mappedResults;
       }
     } catch (error) {
       console.error(`[ERROR] Error fetching CMS content for key=${key}:`, error);
@@ -1256,7 +1255,6 @@ export class DatabaseStorage implements IStorage {
       key: content.key,
       value: content.value,
       content_type: contentTypeValue, // Folosim formatul corect pentru baza de date (snake_case)
-      description: content.description || null,
       created_at: new Date(), // Folosim snake_case pentru timestamp-uri
       updated_at: new Date()
     };
@@ -1273,22 +1271,29 @@ export class DatabaseStorage implements IStorage {
       
       // Executăm SQL direct pentru a evita probleme de mapare a numelor de câmpuri
       const result = await db.execute(`
-        INSERT INTO cms_content (key, value, content_type, description, created_at, updated_at) 
-        VALUES ($1, $2, $3, $4, $5, $6) 
-        RETURNING id, key, value, content_type as "contentType", description, created_at as "createdAt", updated_at as "updatedAt"
+        INSERT INTO cms_content (key, value, content_type, created_at, updated_at) 
+        VALUES ($1, $2, $3, $4, $5) 
+        RETURNING id, key, value, content_type, created_at, updated_at
       `, [
         insertData.key, 
         insertData.value, 
-        insertData.content_type, 
-        insertData.description,
+        insertData.content_type,
         insertData.created_at,
         insertData.updated_at
       ]);
       
       if (result && result.rows && result.rows.length > 0) {
-        const createdItem = result.rows[0];
+        // Creem un obiect cu formatarea corectă pentru clientul aplicației
+        const createdItem = {
+          id: result.rows[0].id,
+          key: result.rows[0].key,
+          value: result.rows[0].value,
+          contentType: result.rows[0].content_type, // Adăugăm alias camelCase pentru compatibilitate
+          createdAt: result.rows[0].created_at,
+          updatedAt: result.rows[0].updated_at
+        };
         console.log('CMS item created successfully:', createdItem);
-        return createdItem;
+        return createdItem as CmsContent;
       }
       
       throw new Error('Failed to create CMS content, no rows returned');
@@ -1338,7 +1343,7 @@ export class DatabaseStorage implements IStorage {
         UPDATE cms_content 
         SET ${updateFields.join(', ')}
         WHERE key = $${paramCounter}
-        RETURNING id, key, value, content_type as "contentType", description, created_at as "createdAt", updated_at as "updatedAt"
+        RETURNING id, key, value, content_type, created_at, updated_at
       `;
       
       // Adăugăm cheia ca ultimul parametru pentru WHERE
@@ -1349,9 +1354,17 @@ export class DatabaseStorage implements IStorage {
       const result = await db.execute(updateQuery, updateValues);
       
       if (result && result.rows && result.rows.length > 0) {
-        const updatedItem = result.rows[0];
+        // Mapăm la formatul așteptat în restul aplicației
+        const updatedItem = {
+          id: result.rows[0].id,
+          key: result.rows[0].key,
+          value: result.rows[0].value,
+          contentType: result.rows[0].content_type, // Adăugăm alias camelCase pentru compatibilitate
+          createdAt: result.rows[0].created_at,
+          updatedAt: result.rows[0].updated_at,
+        };
         console.log('CMS item updated successfully:', updatedItem);
-        return updatedItem;
+        return updatedItem as CmsContent;
       }
       
       console.log('No CMS item found with key:', key);
