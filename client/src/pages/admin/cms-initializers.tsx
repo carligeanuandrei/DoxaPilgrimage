@@ -357,6 +357,10 @@ export const FooterLinksInitializer: React.FC<{refetch: () => Promise<any>}> = (
     // Link 5 - Blog
     { key: 'footer_legal_link5_text', contentType: 'text', value: 'Blog' },
     { key: 'footer_legal_link5_url', contentType: 'text', value: '/blog' },
+    
+    // Link pentru mănăstiri în footer
+    { key: 'footer_link_monasteries', contentType: 'text', value: 'Mănăstiri' },
+    { key: 'footer_link_monasteries_url', contentType: 'text', value: '/manastiri' },
   ];
   
   return (
