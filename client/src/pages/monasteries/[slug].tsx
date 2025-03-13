@@ -75,9 +75,13 @@ export default function MonasteryDetailsPage() {
         <div className="lg:col-span-2 space-y-8">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <Badge>{formatRegionName(monastery.region)}</Badge>
+              {monastery.region && (
+                <Badge>{formatRegionName(monastery.region)}</Badge>
+              )}
               <Badge variant="outline">{formattedType}</Badge>
-              <Badge variant="secondary">{monastery.county}</Badge>
+              {monastery.county && (
+                <Badge variant="secondary">{monastery.county}</Badge>
+              )}
             </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-2">{monastery.name}</h1>
             <div className="flex items-center text-muted-foreground mb-4">
@@ -179,6 +183,10 @@ export default function MonasteryDetailsPage() {
                                   src={icon.image} 
                                   alt={icon.name} 
                                   className="w-full h-full object-cover rounded-md"
+                                  onError={(e) => {
+                                    e.currentTarget.src = '/images/default-icon.jpg';
+                                    e.currentTarget.onerror = null; // Previne recursia
+                                  }}
                                 />
                               </div>
                             )}
@@ -249,7 +257,7 @@ export default function MonasteryDetailsPage() {
                 </h3>
                 <div className="space-y-2">
                   <div>
-                    <span className="font-medium">Hram:</span> {monastery.patronSaint}
+                    <span className="font-medium">Hram:</span> {monastery.patronSaint || "Informație nedisponibilă"}
                   </div>
                   {monastery.patronSaintDate && (
                     <div>
