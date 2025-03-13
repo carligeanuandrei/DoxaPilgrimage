@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, json, decimal, foreignKey, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, json, decimal, foreignKey, pgEnum, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -264,6 +264,139 @@ export const productReviewsRelations = relations(productReviews, ({ one }) => ({
   user: one(users, { relationName: "userProductReviews", fields: [productReviews.userId], references: [users.id] }),
 }));
 
+// Definim regiunile pentru Mănăstiri
+export const regionEnum = pgEnum('monastery_region', [
+  'moldova', 'bucovina', 'maramures', 'transilvania', 'banat', 
+  'crisana', 'oltenia', 'muntenia', 'dobrogea'
+]);
+
+// Schema pentru Mănăstiri și Schituri
+export const monasteries = pgTable("monasteries", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description").notNull(),
+  shortDescription: text("short_description"),
+  address: text("address").notNull(),
+  region: regionEnum("region").notNull(),
+  city: text("city").notNull(),
+  county: text("county").notNull(),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  access: text("access").notNull(), // Cum se ajunge
+  patronSaint: text("patron_saint").notNull(), // Hramul
+  patronSaintDate: timestamp("patron_saint_date"), // Data hramului
+  foundedYear: integer("founded_year"), // Anul înființării
+  history: text("history"), // Istoric
+  specialFeatures: text("special_features"), // Particularități
+  relics: json("relics").$type<string[]>(), // Moaște și odoare
+  iconDescriptions: json("icon_descriptions").$type<{name: string, description: string, image: string}[]>(), // Icoane făcătoare de minuni
+  images: json("images").$type<string[]>(), // Imagini pentru slider
+  coverImage: text("cover_image"), // Imagine principală
+  type: text("type", { enum: ["monastery", "hermitage", "church"] }).notNull().default("monastery"), // Tip (mănăstire, schit, biserica)
+  verification: text("verification", { enum: ["pending", "verified", "rejected"] }).notNull().default("pending"),
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  website: text("website"),
+  administratorId: integer("administrator_id").references(() => users.id, { onDelete: 'set null' }), // Admin din mănăstire
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Eventi speciale la mănăstiri
+export const monasteryEvents = pgTable("monastery_events", {
+  id: serial("id").primaryKey(),
+  monasteryId: integer("monastery_id").notNull().references(() => monasteries.id, { onDelete: 'cascade' }),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  image: text("image"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+// Servicii oferite de mănăstiri
+export const monasteryServices = pgTable("monastery_services", {
+  id: serial("id").primaryKey(),
+  monasteryId: integer("monastery_id").notNull().references(() => monasteries.id, { onDelete: 'cascade' }),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  price: doublePrecision("price"),
+  available: boolean("available").notNull().default(true),
+  type: text("type", { enum: ["accommodation", "meals", "tours", "workshop", "other"] }).notNull(),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+// Program liturgic la mănăstiri
+export const monasterySchedule = pgTable("monastery_schedule", {
+  id: serial("id").primaryKey(),
+  monasteryId: integer("monastery_id").notNull().references(() => monasteries.id, { onDelete: 'cascade' }),
+  dayOfWeek: text("day_of_week", { enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "holiday"] }).notNull(),
+  startTime: text("start_time").notNull(),
+  endTime: text("end_time").notNull(),
+  serviceType: text("service_type").notNull(), // Ex: Liturghie, Vecernie, etc.
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+// Relații pentru mănăstiri
+export const monasteriesRelations = relations(monasteries, ({ one, many }) => ({
+  administrator: one(users, { fields: [monasteries.administratorId], references: [users.id] }),
+  events: many(monasteryEvents),
+  services: many(monasteryServices),
+  schedules: many(monasterySchedule)
+}));
+
+export const monasteryEventsRelations = relations(monasteryEvents, ({ one }) => ({
+  monastery: one(monasteries, { fields: [monasteryEvents.monasteryId], references: [monasteries.id] }),
+}));
+
+export const monasteryServicesRelations = relations(monasteryServices, ({ one }) => ({
+  monastery: one(monasteries, { fields: [monasteryServices.monasteryId], references: [monasteries.id] }),
+}));
+
+export const monasteryScheduleRelations = relations(monasterySchedule, ({ one }) => ({
+  monastery: one(monasteries, { fields: [monasterySchedule.monasteryId], references: [monasteries.id] }),
+}));
+
+// Insert schema pentru mănăstiri
+export const insertMonasterySchema = createInsertSchema(monasteries, {
+  iconDescriptions: z.array(z.object({
+    name: z.string(),
+    description: z.string(),
+    image: z.string()
+  })).optional(),
+  images: z.array(z.string()).optional(),
+  relics: z.array(z.string()).optional(),
+  patronSaintDate: z.union([z.string(), z.date()]).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  verification: true
+});
+
+// Insert schema pentru evenimente la mănăstiri
+export const insertMonasteryEventSchema = createInsertSchema(monasteryEvents, {
+  startDate: z.union([z.string(), z.date()]),
+  endDate: z.union([z.string(), z.date()])
+}).omit({
+  id: true,
+  createdAt: true
+});
+
+// Insert schema pentru servicii la mănăstiri
+export const insertMonasteryServiceSchema = createInsertSchema(monasteryServices).omit({
+  id: true,
+  createdAt: true
+});
+
+// Insert schema pentru program liturgic
+export const insertMonasteryScheduleSchema = createInsertSchema(monasterySchedule).omit({
+  id: true,
+  createdAt: true
+});
+
 // Insert schemas pentru noile tabele
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
@@ -295,6 +428,16 @@ export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertProductReview = z.infer<typeof insertProductReviewSchema>;
 export type ProductReview = typeof productReviews.$inferSelect;
+
+// Tipuri pentru mănăstiri
+export type InsertMonastery = z.infer<typeof insertMonasterySchema>;
+export type Monastery = typeof monasteries.$inferSelect;
+export type InsertMonasteryEvent = z.infer<typeof insertMonasteryEventSchema>;
+export type MonasteryEvent = typeof monasteryEvents.$inferSelect;
+export type InsertMonasteryService = z.infer<typeof insertMonasteryServiceSchema>;
+export type MonasteryService = typeof monasteryServices.$inferSelect;
+export type InsertMonasterySchedule = z.infer<typeof insertMonasteryScheduleSchema>;
+export type MonasterySchedule = typeof monasterySchedule.$inferSelect;
 
 // CMS Content schema
 export const cmsContent = pgTable("cms_content", {
