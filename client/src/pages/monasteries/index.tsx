@@ -7,33 +7,55 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
 import { formatRegionName } from "@/lib/format-utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MonasteriesPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("");
-  const { isLoading, data: monasteries = [] } = useQuery<Monastery[]>({
+  const [selectedRegion, setSelectedRegion] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("all");
+  const { toast } = useToast();
+  
+  const { isLoading, data: monasteries = [], error } = useQuery<Monastery[]>({
     queryKey: ["/api/monasteries"],
   });
-
+  
   useEffect(() => {
     document.title = "Mănăstiri și Schituri | Doxa";
-  }, []);
+    
+    // Afișăm un mesaj de eroare dacă interogarea eșuează
+    if (error) {
+      toast({
+        title: "Eroare la încărcarea mănăstirilor",
+        description: "Nu am putut încărca datele. Vă rugăm încercați din nou mai târziu.",
+        variant: "destructive"
+      });
+      console.error("Eroare la încărcarea mănăstirilor:", error);
+    }
+  }, [error, toast]);
 
   // Filtrăm mănăstirile în funcție de termenii de căutare
   const filteredMonasteries = monasteries.filter((monastery) => {
+    // Verificăm dacă monastery este valid și are toate câmpurile necesare
+    if (!monastery) return false;
+    
     const matchesSearch =
       searchTerm === "" ||
-      monastery.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      monastery.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (monastery.description && monastery.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      monastery.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      monastery.county.toLowerCase().includes(searchTerm.toLowerCase());
+      monastery.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      monastery.county?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRegion = selectedRegion === "all" || monastery.region === selectedRegion;
     const matchesType = selectedType === "all" || monastery.type === selectedType;
 
     return matchesSearch && matchesRegion && matchesType;
   });
+
+  console.log("Mănăstiri încărcate:", monasteries.length);
+  console.log("Mănăstiri filtrate:", filteredMonasteries.length);
+  if (filteredMonasteries.length > 0) {
+    console.log("Prima mănăstire:", filteredMonasteries[0]);
+  }
 
   // Lista tuturor regiunilor disponibile
   const regions = [
@@ -104,20 +126,11 @@ export default function MonasteriesPage() {
         </Select>
       </div>
 
-      <Tabs defaultValue="region" className="w-full">
+      <Tabs defaultValue="all" className="w-full">
         <TabsList className="mb-6 mx-auto">
-          <TabsTrigger value="region">Regiuni</TabsTrigger>
           <TabsTrigger value="all">Toate</TabsTrigger>
+          <TabsTrigger value="region">Regiuni</TabsTrigger>
         </TabsList>
-        <TabsContent value="region">
-          {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : (
-            <MonasteriesList monasteries={filteredMonasteries} groupByRegion={true} />
-          )}
-        </TabsContent>
         <TabsContent value="all">
           {isLoading ? (
             <div className="flex justify-center items-center py-12">
@@ -125,6 +138,15 @@ export default function MonasteriesPage() {
             </div>
           ) : (
             <MonasteriesList monasteries={filteredMonasteries} groupByRegion={false} />
+          )}
+        </TabsContent>
+        <TabsContent value="region">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <MonasteriesList monasteries={filteredMonasteries} groupByRegion={true} />
           )}
         </TabsContent>
       </Tabs>
