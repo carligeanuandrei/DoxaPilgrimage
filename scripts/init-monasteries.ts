@@ -411,32 +411,37 @@ async function initMonasteries() {
         continue;
       }
       
-      // Pregătim datele pentru inserare, conform schemei
-      // Am omis câmpul icon_descriptions deoarece nu există în tabela din baza de date
-      const monasteryInsertData = {
+      // Pregătim datele pentru inserare, conform schemei reale a tabelului
+      const monasteryInsertData: any = {
         name: monasteryData.name,
         slug,
-        description: monasteryData.description,
+        description: monasteryData.description || "Descriere în curs de actualizare",
         address: monasteryData.address,
         region: monasteryData.region,
         city: monasteryData.city,
         county: monasteryData.county,
-        type: monasteryData.type,
+        type: monasteryData.type || "monastery",
         short_description: monasteryData.shortDescription || null,
-        access: monasteryData.access || "Informații de acces indisponibile", // Access este NOT NULL
-        patron_saint: monasteryData.patronSaint || "Adormirea Maicii Domnului", // patron_saint este NOT NULL
+        access: monasteryData.access || null,
+        patron_saint: monasteryData.patronSaint || null,
         patron_saint_date: monasteryData.patronSaintDate || null,
         founded_year: monasteryData.foundedYear || null,
         history: monasteryData.history || null,
         special_features: monasteryData.specialFeatures || null,
-        relics: monasteryData.relics || null,
-        images: monasteryData.images || null,
+        relics: Array.isArray(monasteryData.relics) ? monasteryData.relics : null,
+        images: Array.isArray(monasteryData.images) ? monasteryData.images : null,
         cover_image: monasteryData.coverImage || null,
         contact_email: monasteryData.contactEmail || null,
         contact_phone: monasteryData.contactPhone || null,
         website: monasteryData.website || null,
         latitude: 45.0 + Math.random() * 3, // Valori între 45 și 48 pentru România
-        longitude: 22.0 + Math.random() * 5 // Valori între 22 și 27 pentru România
+        longitude: 22.0 + Math.random() * 5, // Valori între 22 și 27 pentru România
+        // Adăugăm și noile câmpuri
+        icon_descriptions: '[]', // Pentru moment folosim un array gol în format JSON
+        verification: true,
+        administrator_id: null,
+        created_at: new Date(),
+        updated_at: new Date()
       };
       
       // Inserăm mănăstirea în baza de date
