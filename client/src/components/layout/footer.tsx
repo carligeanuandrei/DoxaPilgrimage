@@ -110,7 +110,7 @@ export default function Footer() {
                   window.location.href = href;
                 }} className="text-neutral-400 hover:text-white transition duration-300">
                   <DirectCmsText contentKey="footer_link_monasteries_url" fallback="/monasteries" className="hidden" />
-                  <DirectCmsText contentKey="footer_link_monasteries" fallback="Mănăstiri din România" />
+                  <span>Mănăstiri din România</span>
                 </a>
               </li>
             </ul>

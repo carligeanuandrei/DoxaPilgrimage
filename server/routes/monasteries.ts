@@ -6,6 +6,38 @@ import { db } from '../db';
 
 // Handler pentru rutele legate de mănăstiri
 export function registerMonasteryRoutes(app: Express) {
+  // Rută pentru a crea intrările CMS necesare pentru mănăstiri
+  app.get('/api/init-monastery-cms', async (req, res) => {
+    try {
+      // Verificăm dacă intrările CMS pentru mănăstiri există
+      const footerLinkMonasteries = await storage.getCmsContent("footer_link_monasteries");
+      const footerLinkMonasteriesUrl = await storage.getCmsContent("footer_link_monasteries_url");
+      
+      // Dacă nu există, le creăm
+      if (!footerLinkMonasteries) {
+        await storage.createCmsContent({
+          key: "footer_link_monasteries",
+          contentType: "text",
+          value: "Mănăstiri",
+          description: "Textul pentru link-ul către pagina de mănăstiri din footer"
+        });
+      }
+      
+      if (!footerLinkMonasteriesUrl) {
+        await storage.createCmsContent({
+          key: "footer_link_monasteries_url",
+          contentType: "text",
+          value: "/monasteries",
+          description: "URL pentru link-ul către pagina de mănăstiri din footer"
+        });
+      }
+      
+      res.json({ message: "Intrările CMS pentru mănăstiri au fost create cu succes" });
+    } catch (error) {
+      console.error("Eroare la crearea intrărilor CMS pentru mănăstiri:", error);
+      res.status(500).json({ message: "Eroare la crearea intrărilor CMS pentru mănăstiri" });
+    }
+  });
   // GET /api/monasteries - Obține toate mănăstirile
   app.get('/api/monasteries', async (req, res) => {
     try {
