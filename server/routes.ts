@@ -6,6 +6,7 @@ import { z } from "zod";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { getCompanyInfoByCUI, validateRomanianCUI } from "./anaf";
 import { 
   insertPilgrimageSchema, 
   insertReviewSchema, 
@@ -275,6 +276,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     res.status(403).json({ message: "Acces interzis" });
   };
+
+  // API pentru validarea CUI al companiei
+  app.get("/api/company/validate", async (req, res) => {
+    try {
+      const { cui } = req.query;
+      
+      if (!cui || typeof cui !== 'string') {
+        return res.status(400).json({ 
+          error: "CUI lipsă sau invalid", 
+          valid: false 
+        });
+      }
+      
+      // Validăm CUI-ul folosind algoritmul ANAF
+      const isValid = validateRomanianCUI(cui);
+      
+      if (!isValid) {
+        return res.json({ 
+          valid: false, 
+          message: "CUI-ul introdus nu este valid conform algoritmului ANAF"
+        });
+      }
+      
+      // Returnăm informații despre companie
+      const companyInfo = await getCompanyInfoByCUI(cui);
+      
+      if (!companyInfo) {
+        return res.json({ 
+          valid: true, 
+          message: "CUI valid, dar nu s-au găsit informații despre companie",
+          foundInfo: false
+        });
+      }
+      
+      res.json({
+        valid: true,
+        foundInfo: true,
+        company: companyInfo
+      });
+    } catch (error) {
+      console.error("Error validating company:", error);
+      res.status(500).json({ 
+        error: "Eroare la validarea companiei", 
+        valid: false 
+      });
+    }
+  });
 
   // Pilgrimages
   app.get("/api/pilgrimages", async (req, res) => {
