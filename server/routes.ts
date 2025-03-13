@@ -8,6 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import { getCompanyInfoByCUI, validateRomanianCUI } from "./anaf";
 import { registerMonasteryRoutes } from './routes/monasteries';
+import { registerMonasteryRegionsRoutes } from './routes/monastery-regions';
 import { 
   insertPilgrimageSchema, 
   insertReviewSchema, 
@@ -2089,6 +2090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Înregistrăm rutele pentru mănăstiri
   registerMonasteryRoutes(app);
+  registerMonasteryRegionsRoutes(app);
   
   const httpServer = createServer(app);
 
