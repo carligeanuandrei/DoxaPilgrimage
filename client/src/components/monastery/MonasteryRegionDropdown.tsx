@@ -79,7 +79,8 @@ export function MonasteryRegionDropdown({
     // Dacă mănăstirile din această regiune nu au fost încărcate încă, le încărcăm
     if (!regionMonasteries[regionKey]) {
       try {
-        const response = await fetch(`/api/monasteries/by-region?country=${countryName}&region=${regionName}`);
+        // Utilizăm doar parametrul region, deoarece în backend avem doar mănăstiri din România
+        const response = await fetch(`/api/monasteries/by-region?region=${regionName}`);
         if (!response.ok) {
           throw new Error('Eroare la încărcarea mănăstirilor');
         }

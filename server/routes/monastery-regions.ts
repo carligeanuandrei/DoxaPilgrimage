@@ -68,17 +68,8 @@ export function registerMonasteryRegionsRoutes(app: Express) {
       
       // Grupează mănăstirile pe regiuni
       for (const monastery of allMonasteries) {
-        const country = monastery.country || "România";
-        
-        // Verifică dacă țara există în mapare, dacă nu, o adaugă
-        if (!countriesMap.has(country)) {
-          countriesMap.set(country, {
-            name: country === "România" ? "Romania" : country,
-            nameRo: country,
-            regions: [],
-            count: 0
-          });
-        }
+        // În această implementare, folosim doar România ca țară
+        const country = "România";
         
         const countryGroup = countriesMap.get(country)!;
         countryGroup.count++;
@@ -88,31 +79,20 @@ export function registerMonasteryRegionsRoutes(app: Express) {
         if (region) {
           // Găsește regiunea în lista regiunilor țării
           let regionGroup = countryGroup.regions.find(r => {
-            if (country === "România") {
-              const regionInfo = romanianRegions.find(rr => rr.code === region);
-              return regionInfo && r.nameRo === regionInfo.nameRo;
-            }
-            return r.name.toLowerCase() === region.toLowerCase();
+            const regionInfo = romanianRegions.find(rr => rr.code === region);
+            return regionInfo && r.nameRo === regionInfo.nameRo;
           });
           
           // Dacă regiunea nu există, o adaugă
           if (!regionGroup) {
-            if (country === "România") {
-              const regionInfo = romanianRegions.find(r => r.code === region) || 
-                { name: region, nameRo: region };
-              
-              regionGroup = {
-                name: regionInfo.name,
-                nameRo: regionInfo.nameRo,
-                count: 0
-              };
-            } else {
-              regionGroup = {
-                name: region,
-                nameRo: region,
-                count: 0
-              };
-            }
+            const regionInfo = romanianRegions.find(r => r.code === region) || 
+              { name: region, nameRo: region };
+            
+            regionGroup = {
+              name: regionInfo.name,
+              nameRo: regionInfo.nameRo,
+              count: 0
+            };
             
             countryGroup.regions.push(regionGroup);
           }
@@ -140,11 +120,11 @@ export function registerMonasteryRegionsRoutes(app: Express) {
   /**
    * GET /api/monasteries/by-region
    * Returnează toate mănăstirile dintr-o regiune specifică
-   * Query params: country, region
+   * Query params: region
    */
   app.get("/api/monasteries/by-region", async (req: Request, res: Response) => {
     try {
-      const { country, region } = req.query;
+      const { region } = req.query;
       
       if (!region) {
         return res.status(400).json({ error: "Parametrul 'region' este obligatoriu" });
@@ -152,27 +132,22 @@ export function registerMonasteryRegionsRoutes(app: Express) {
       
       // Map region name to region code for Romanian regions
       let regionCode = region;
-      if (country === "Romania" || country === "România") {
-        const romanianRegions = {
-          "Moldova": "moldova",
-          "Bucovina": "bucovina",
-          "Muntenia": "muntenia",
-          "Oltenia": "oltenia",
-          "Transilvania": "transilvania",
-          "Maramureș": "maramures",
-          "Banat": "banat",
-          "Dobrogea": "dobrogea"
-        };
-        
-        regionCode = romanianRegions[region as string] || region;
-      }
+      const romanianRegions = {
+        "Moldova": "moldova",
+        "Bucovina": "bucovina",
+        "Muntenia": "muntenia",
+        "Oltenia": "oltenia",
+        "Transilvania": "transilvania",
+        "Maramureș": "maramures",
+        "Banat": "banat",
+        "Dobrogea": "dobrogea"
+      };
+      
+      regionCode = romanianRegions[region as string] || region;
       
       // Caută mănăstirile din regiunea specificată
       const monasteryList = await db.query.monasteries.findMany({
-        where: (monasteries, { eq, and }) => and(
-          country ? eq(monasteries.country || "România", country as string) : undefined,
-          eq(monasteries.region, regionCode as string)
-        ),
+        where: (monasteries, { eq }) => eq(monasteries.region, regionCode as string),
         orderBy: [desc(monasteries.name)],
         columns: {
           id: true,
@@ -181,7 +156,6 @@ export function registerMonasteryRegionsRoutes(app: Express) {
           region: true,
           city: true,
           county: true,
-          country: true,
           type: true
         }
       });
