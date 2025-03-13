@@ -2089,8 +2089,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Înregistrăm rutele pentru mănăstiri
-  registerMonasteryRoutes(app);
+  // IMPORTANT: Înregistrăm mai întâi rutele pentru regiuni,
+  // pentru a evita conflictele cu rutele parametrizate
   registerMonasteryRegionsRoutes(app);
+  registerMonasteryRoutes(app);
   
   const httpServer = createServer(app);
 
