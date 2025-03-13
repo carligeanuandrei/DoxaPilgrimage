@@ -26,7 +26,8 @@ type MonasteryData = {
   specialFeatures?: string;
   relics?: string[];
   type: "monastery" | "hermitage" | "church";
-  iconDescriptions?: IconDescription[];
+  // Câmpul iconDescriptions nu există încă în baza de date, așa că îl comentăm temporar
+  // iconDescriptions?: IconDescription[];
   images?: string[];
   coverImage?: string;
   contactEmail?: string;

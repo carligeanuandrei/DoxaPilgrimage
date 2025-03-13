@@ -48,8 +48,8 @@ export const pilgrimages = pgTable("pilgrimages", {
   organizerId: integer("organizer_id").notNull(),
   featured: boolean("featured").default(false),
   verified: boolean("verified").default(false),
-  // Coloana status nu există în baza de date
-  // status: text("status", { enum: ["draft", "published", "unpublished", "cancelled"] }).notNull().default("draft"),
+  // Adăugăm coloana status pentru a indica starea pelerinajului
+  status: text("status", { enum: ["draft", "published", "unpublished", "cancelled"] }).notNull().default("draft"),
   // Opțiuni de promovare - acum sunt active
   promoted: boolean("promoted").default(false),
   promotionLevel: text("promotion_level", { enum: ["none", "basic", "premium", "exclusive"] }).notNull().default("none"),
