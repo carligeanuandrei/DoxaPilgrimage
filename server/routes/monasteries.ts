@@ -1,7 +1,7 @@
 import { Express } from 'express';
 import { storage } from '../storage';
 import { monasteries } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { db } from '../db';
 
 // Handler pentru rutele legate de mănăstiri
@@ -41,19 +41,31 @@ export function registerMonasteryRoutes(app: Express) {
   // GET /api/monasteries - Obține toate mănăstirile
   app.get('/api/monasteries', async (req, res) => {
     try {
-      // Aplicăm filtre dacă sunt specificate
-      const filters: any = {};
+      console.log('Applying filters for monasteries:', req.query);
       
-      if (req.query.region) filters.region = req.query.region as string;
-      if (req.query.type) filters.type = req.query.type as string;
-      if (req.query.verification) filters.verification = req.query.verification as string;
+      // Construim condițiile pentru filtrare
+      const conditions = [];
       
-      console.log('Applying filters for monasteries:', filters);
+      if (req.query.region) {
+        conditions.push(eq(monasteries.region, req.query.region as string));
+      }
+      
+      if (req.query.type) {
+        conditions.push(eq(monasteries.type, req.query.type as string));
+      }
+      
+      if (req.query.verification) {
+        conditions.push(eq(monasteries.verification, req.query.verification as string));
+      }
       
       // Obținem mănăstirile din baza de date
-      const monasteriesList = await db.query.monasteries.findMany({
-        where: filters
-      });
+      let monasteriesList;
+      
+      if (conditions.length > 0) {
+        monasteriesList = await db.select().from(monasteries).where(and(...conditions));
+      } else {
+        monasteriesList = await db.select().from(monasteries);
+      }
       
       // Formatăm datele pentru a ne asigura că sunt complete
       const formattedMonasteries = monasteriesList.map(monastery => {
