@@ -1,7 +1,7 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
 import { monasteries, cmsContent, insertMonasterySchema } from '@shared/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { isAdmin } from '../auth';
 import { z } from 'zod';
@@ -302,7 +302,14 @@ export function registerMonasteryRoutes(app: Express) {
         if (dataToUpdate.images && typeof dataToUpdate.images === 'string') {
           try {
             // Încercăm să parsăm string-ul ca JSON pentru a obține array-ul
-            dataToUpdate.images = JSON.parse(dataToUpdate.images);
+            const parsedImages = JSON.parse(dataToUpdate.images);
+            // Verificăm dacă rezultatul este array
+            if (Array.isArray(parsedImages)) {
+              dataToUpdate.images = parsedImages;
+            } else {
+              console.error('Rezultatul parsării nu este array:', parsedImages);
+              dataToUpdate.images = [];
+            }
           } catch (error) {
             // În caz de eroare la parsare, folosim un array gol
             console.error('Eroare la parsarea array-ului de imagini:', error);
@@ -311,16 +318,43 @@ export function registerMonasteryRoutes(app: Express) {
         } else if (!dataToUpdate.images) {
           // Dacă images este null/undefined, îl setăm la array gol
           dataToUpdate.images = [];
+        } else if (Array.isArray(dataToUpdate.images)) {
+          // Deja este array, dar ne asigurăm că toate elementele sunt string-uri
+          dataToUpdate.images = dataToUpdate.images.map(img => String(img));
         }
+        
+        // Verifică și afișează tipul de date pentru debugging
+        console.log('Tipul final al array-ului de imagini:', typeof dataToUpdate.images);
+        console.log('Este array?', Array.isArray(dataToUpdate.images));
+        console.log('Conținut array imagini:', dataToUpdate.images);
       }
       
       // Actualizăm mănăstirea în baza de date
-      await db.update(monasteries)
-        .set({
-          ...dataToUpdate,
-          updatedAt: new Date()
-        })
-        .where(eq(monasteries.id, monasteryId));
+      // Tratament special pentru câmpul images - folosind SQL direct pentru a evita probleme de formatare
+      if ('images' in dataToUpdate && Array.isArray(dataToUpdate.images)) {
+        // Ștergem temporar câmpul images din dataToUpdate pentru a evita probleme de tip
+        const { images, ...restData } = dataToUpdate;
+        
+        // Facem update separat pentru toate celelalte câmpuri
+        await db.update(monasteries)
+          .set({
+            ...restData,
+            updatedAt: new Date()
+          })
+          .where(eq(monasteries.id, monasteryId));
+        
+        // Apoi facem update direct pentru images folosind SQL raw
+        const imagesJson = JSON.stringify(images);
+        await db.execute(sql`UPDATE monasteries SET images = ${imagesJson}::jsonb WHERE id = ${monasteryId}`);
+      } else {
+        // Dacă nu avem images, facem update normal
+        await db.update(monasteries)
+          .set({
+            ...dataToUpdate,
+            updatedAt: new Date()
+          })
+          .where(eq(monasteries.id, monasteryId));
+      }
       
       // Obținem mănăstirea actualizată
       const updatedMonastery = await db.query.monasteries.findFirst({
