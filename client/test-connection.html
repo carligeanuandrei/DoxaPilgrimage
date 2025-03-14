@@ -1,86 +1,3 @@
-
-<!DOCTYPE html>
-<html lang="ro">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Conexiune DOXA</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-    .status {
-      padding: 1rem;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-    }
-    .success {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .error {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <h1>Test Conexiune DOXA</h1>
-  
-  <div class="status" id="server-status">Verificare conexiune la server...</div>
-  
-  <h2>Test Server API</h2>
-  <button onclick="testServerAPI()">Verifică API Server</button>
-  <div class="status" id="api-result">Apasă butonul pentru a testa API-ul</div>
-  
-  <script>
-    // Verifică conexiunea la server
-    fetch('/api/server-status')
-      .then(response => response.json())
-      .then(data => {
-        console.log("Server status:", data);
-        const statusElement = document.getElementById('server-status');
-        statusElement.innerHTML = `<strong>Conexiune reușită!</strong> Server activ pe portul ${data.port}`;
-        statusElement.className = 'status success';
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        const statusElement = document.getElementById('server-status');
-        statusElement.innerHTML = `<strong>Eroare de conexiune:</strong> ${error.message}`;
-        statusElement.className = 'status error';
-      });
-    
-    // Funcție pentru testarea API-ului
-    function testServerAPI() {
-      const resultElement = document.getElementById('api-result');
-      resultElement.innerHTML = 'Se trimite cerere...';
-      resultElement.className = 'status';
-      
-      fetch('/api/server-status')
-        .then(response => response.json())
-        .then(data => {
-          resultElement.innerHTML = `<strong>Răspuns primit:</strong> <pre>${JSON.stringify(data, null, 2)}</pre>`;
-          resultElement.className = 'status success';
-        })
-        .catch(error => {
-          resultElement.innerHTML = `<strong>Eroare:</strong> ${error.message}`;
-          resultElement.className = 'status error';
-        });
-    }
-  </script>
-</body>
-</html>
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -97,189 +14,167 @@
     .container {
       max-width: 800px;
       margin: 0 auto;
-      background-color: white;
+      background: white;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     h1 {
       color: #3b5998;
       text-align: center;
     }
-    .test-section {
+    .test-card {
       margin-bottom: 20px;
+      border: 1px solid #ddd;
       padding: 15px;
-      border: 1px solid #e0e0e0;
       border-radius: 4px;
     }
-    .test-section h2 {
+    .test-card h2 {
       margin-top: 0;
-      font-size: 18px;
-    }
-    .status {
-      padding: 8px;
-      border-radius: 4px;
-      margin-top: 10px;
-    }
-    .success {
-      background-color: #e6ffed;
-      border: 1px solid #34d058;
-    }
-    .failure {
-      background-color: #ffeef0;
-      border: 1px solid #d73a49;
-    }
-    .pending {
-      background-color: #f6f8fa;
-      border: 1px solid #d1d5da;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     button {
-      background-color: #3b5998;
+      background: #3b5998;
       color: white;
       border: none;
-      padding: 8px 16px;
+      padding: 10px 15px;
       border-radius: 4px;
       cursor: pointer;
     }
-    code {
-      display: block;
-      background-color: #f6f8fa;
-      padding: 8px;
+    button:hover {
+      background: #2d4373;
+    }
+    .status {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+    }
+    .pending {
+      background: #f8f9fa;
+      border: 1px dashed #ccc;
+    }
+    .success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .failure {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    pre {
+      background: #f8f9fa;
+      padding: 10px;
       border-radius: 4px;
       overflow-x: auto;
-      white-space: pre-wrap;
-      margin-top: 10px;
     }
-    .back-link {
-      display: block;
-      text-align: center;
+    .url-display {
+      font-weight: bold;
+      color: #3b5998;
+      word-break: break-all;
+    }
+    .links {
       margin-top: 20px;
+      text-align: center;
+    }
+    .links a {
+      display: inline-block;
+      margin: 0 10px;
+      color: #3b5998;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Test Conexiune DOXA</h1>
-    
-    <div class="test-section">
-      <h2>1. Verificare Server API</h2>
-      <button id="testApi">Testează API</button>
-      <div id="apiStatus" class="status pending">În așteptare...</div>
-      <code id="apiResponse"></code>
+
+    <div class="test-card">
+      <h2>
+        Test Server API
+        <button id="testApi">Rulează Testul</button>
+      </h2>
+      <div id="apiStatus" class="status pending">Apăsați butonul pentru a testa conexiunea API</div>
+      <pre id="apiResponse"></pre>
     </div>
-    
-    <div class="test-section">
-      <h2>2. Verificare Vite Dev Server</h2>
-      <button id="testVite">Testează Vite Server</button>
-      <div id="viteStatus" class="status pending">În așteptare...</div>
-      <code id="viteResponse"></code>
+
+    <div class="test-card">
+      <h2>
+        Test Încărcare React App
+        <button id="testReact">Rulează Testul</button>
+      </h2>
+      <div id="reactStatus" class="status pending">Apăsați butonul pentru a testa încărcarea aplicației React</div>
     </div>
-    
-    <div class="test-section">
-      <h2>3. Informații Browser</h2>
-      <code id="browserInfo"></code>
+
+    <div class="test-card">
+      <h2>
+        Teste Webview
+      </h2>
+      <div>
+        <p>URL curent: <span id="currentUrl" class="url-display"></span></p>
+        <p>Porturi disponibile:</p>
+        <ul>
+          <li>5000 - Server principal: <a href="http://localhost:5000" target="_blank">Deschide</a></li>
+          <li>5001 - Port alternativ: <a href="http://localhost:5001" target="_blank">Deschide</a></li>
+        </ul>
+      </div>
     </div>
-    
-    <div class="test-section">
-      <h2>4. Încărcare React App</h2>
-      <button id="testReact">Verifică React App</button>
-      <div id="reactStatus" class="status pending">În așteptare...</div>
+
+    <div class="links">
+      <a href="/">Pagina Principală</a>
+      <a href="/api/server-status" target="_blank">Verificare Server API</a>
     </div>
-    
-    <a href="/" class="back-link">Înapoi la pagina principală</a>
   </div>
 
   <script>
-    // Browser info
-    document.getElementById('browserInfo').textContent = `
-User Agent: ${navigator.userAgent}
-Window Size: ${window.innerWidth}x${window.innerHeight}
-Cookies Enabled: ${navigator.cookieEnabled}
-Referrer: ${document.referrer || 'N/A'}
-Hostname: ${window.location.hostname}
-Protocol: ${window.location.protocol}
-    `;
-    
-    // API Test
+    // Afișare URL curent
+    document.getElementById('currentUrl').textContent = window.location.href;
+
+    // Test API
     document.getElementById('testApi').addEventListener('click', async () => {
       const apiStatusEl = document.getElementById('apiStatus');
       const apiResponseEl = document.getElementById('apiResponse');
-      
+
       apiStatusEl.className = 'status pending';
-      apiStatusEl.textContent = 'Testare în curs...';
-      
+      apiStatusEl.textContent = 'Se testează conexiunea la API...';
+
       try {
         const response = await fetch('/api/server-status');
         const data = await response.json();
-        
+
+        apiStatusEl.className = 'status success';
+        apiStatusEl.textContent = 'Conexiune API reușită!';
         apiResponseEl.textContent = JSON.stringify(data, null, 2);
-        
-        if (response.ok && data.status === 'ok') {
-          apiStatusEl.className = 'status success';
-          apiStatusEl.textContent = 'Succes! API-ul funcționează corect.';
-        } else {
-          apiStatusEl.className = 'status failure';
-          apiStatusEl.textContent = `Eroare: Răspuns neașteptat (${response.status})`;
-        }
       } catch (error) {
         apiStatusEl.className = 'status failure';
-        apiStatusEl.textContent = `Eroare: ${error.message}`;
-        apiResponseEl.textContent = error.stack;
+        apiStatusEl.textContent = `Eroare la conectarea la API: ${error.message}`;
+        apiResponseEl.textContent = '';
       }
     });
-    
-    // Vite Test
-    document.getElementById('testVite').addEventListener('click', async () => {
-      const viteStatusEl = document.getElementById('viteStatus');
-      const viteResponseEl = document.getElementById('viteResponse');
-      
-      viteStatusEl.className = 'status pending';
-      viteStatusEl.textContent = 'Testare în curs...';
-      
-      try {
-        // Attempting to fetch a Vite-specific endpoint
-        const response = await fetch('/@vite/client');
-        const text = await response.text();
-        
-        viteResponseEl.textContent = text.length > 500 
-          ? text.substring(0, 500) + '...' 
-          : text;
-        
-        if (response.ok) {
-          viteStatusEl.className = 'status success';
-          viteStatusEl.textContent = 'Succes! Vite Dev Server funcționează.';
-        } else {
-          viteStatusEl.className = 'status failure';
-          viteStatusEl.textContent = `Eroare: Răspuns neașteptat (${response.status})`;
-        }
-      } catch (error) {
-        viteStatusEl.className = 'status failure';
-        viteStatusEl.textContent = `Eroare: ${error.message}`;
-        viteResponseEl.textContent = error.stack;
-      }
-    });
-    
-    // React Test
+
+    // Test React App Loading
     document.getElementById('testReact').addEventListener('click', () => {
       const reactStatusEl = document.getElementById('reactStatus');
-      
+
       reactStatusEl.className = 'status pending';
-      reactStatusEl.textContent = 'Verificare în curs...';
-      
+      reactStatusEl.textContent = 'Se testează încărcarea aplicației React...';
+
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none';
       iframe.src = '/';
-      
+
       let timeout = setTimeout(() => {
         reactStatusEl.className = 'status failure';
         reactStatusEl.textContent = 'Timeout: React App nu s-a încărcat în 5 secunde';
         document.body.removeChild(iframe);
       }, 5000);
-      
+
       iframe.onload = () => {
         try {
           const rootEl = iframe.contentDocument.getElementById('root');
-          
+
           if (rootEl && rootEl.children.length > 0) {
             reactStatusEl.className = 'status success';
             reactStatusEl.textContent = 'Succes! React App s-a încărcat.';
@@ -291,14 +186,14 @@ Protocol: ${window.location.protocol}
           reactStatusEl.className = 'status failure';
           reactStatusEl.textContent = `Eroare: ${error.message}`;
         }
-        
+
         clearTimeout(timeout);
         document.body.removeChild(iframe);
       };
-      
+
       document.body.appendChild(iframe);
     });
-    
+
     // Auto-run API test on page load
     window.addEventListener('load', () => {
       document.getElementById('testApi').click();
