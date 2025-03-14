@@ -1,439 +1,505 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/use-auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, CheckCircle2, Save, PlusCircle, RefreshCcw } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { AlertCircle, Check, Save, AlertTriangle, Code } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import ReactMarkdown from 'react-markdown';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Badge } from '@/components/ui/badge';
 
+/**
+ * Pagină de administrare pentru editarea CSS-ului personalizat
+ * Permite administratorilor să definească CSS global și pentru mobile
+ */
 export default function CustomCssEditor() {
-  const { user, isLoading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('global');
-  const [customCssValue, setCustomCssValue] = useState('');
-  const [mobileCssValue, setMobileCssValue] = useState('');
-  const [rawPreview, setRawPreview] = useState(false);
-  const [activePreview, setActivePreview] = useState(false);
+  const [globalCSS, setGlobalCSS] = useState('');
+  const [mobileCSS, setMobileCSS] = useState('');
+  const [isSavingGlobal, setIsSavingGlobal] = useState(false);
+  const [isSavingMobile, setIsSavingMobile] = useState(false);
+  const [globalCssError, setGlobalCssError] = useState('');
+  const [mobileCssError, setMobileCssError] = useState('');
+  const [previewTab, setPreviewTab] = useState('global');
   const { toast } = useToast();
 
-  // Fetch CSS from CMS 
-  const { data: globalCssData, isLoading: isGlobalCssLoading, isError: isGlobalCssError, refetch: refetchGlobalCss } = useQuery({
-    queryKey: ['/api/cms/custom_css_global'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/cms/custom_css_global');
-      return response.data;
-    },
-    retry: 1,
-    // We handle error case separately so we don't need to throw
-    throwOnError: false
-  });
-
-  // Fetch Mobile CSS from CMS
-  const { data: mobileCssData, isLoading: isMobileCssLoading, isError: isMobileCssError, refetch: refetchMobileCss } = useQuery({
-    queryKey: ['/api/cms/custom_css_mobile'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/cms/custom_css_mobile');
-      return response.data;
-    },
-    retry: 1,
-    throwOnError: false
-  });
-
-  // Update CSS mutation
-  const updateGlobalCssMutation = useMutation({
-    mutationFn: async (cssData: { value: string }) => {
-      const response = await apiRequest('PUT', `/api/cms/custom_css_global`, cssData);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cms/custom_css_global'] });
-      toast({
-        title: "CSS Global actualizat cu succes",
-        description: "Modificările au fost salvate și aplicate.",
-      });
-      setTimeout(() => {
-        applyCSS(customCssValue, 'global-custom-css');
-      }, 500);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Eroare la actualizarea CSS",
-        description: `A apărut o eroare la salvarea CSS-ului: ${error.message}`,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Update Mobile CSS mutation
-  const updateMobileCssMutation = useMutation({
-    mutationFn: async (cssData: { value: string }) => {
-      const response = await apiRequest('PUT', `/api/cms/custom_css_mobile`, cssData);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cms/custom_css_mobile'] });
-      toast({
-        title: "CSS Mobile actualizat cu succes",
-        description: "Modificările pentru dispozitive mobile au fost salvate și aplicate.",
-      });
-      setTimeout(() => {
-        applyCSS(mobileCssValue, 'mobile-custom-css');
-      }, 500);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Eroare la actualizarea CSS mobile",
-        description: `A apărut o eroare la salvarea CSS-ului pentru mobile: ${error.message}`,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Create CSS if not exists
-  const createGlobalCssMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest('POST', `/api/cms`, {
-        key: 'custom_css_global',
-        value: '/* CSS global personalizat */\n\n/* Exemplu: */\n/*\nbody {\n  --primary-color: #3b82f6;\n}\n*/\n',
-        contentType: 'css'
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cms/custom_css_global'] });
-      toast({
-        title: "CSS Global inițializat",
-        description: "Structura CSS a fost creată. Puteți începe personalizarea.",
-      });
-      refetchGlobalCss();
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Eroare la crearea CSS",
-        description: `Nu s-a putut crea structura CSS: ${error.message}`,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Create Mobile CSS if not exists
-  const createMobileCssMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest('POST', `/api/cms`, {
-        key: 'custom_css_mobile',
-        value: '/* CSS pentru dispozitive mobile */\n\n/* Aceste stiluri se aplică doar pentru ecrane mici */\n/* Exemplu: */\n/*\n@media (max-width: 768px) {\n  .hero-section h1 {\n    font-size: 1.8rem;\n  }\n}\n*/\n',
-        contentType: 'css'
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cms/custom_css_mobile'] });
-      toast({
-        title: "CSS Mobile inițializat",
-        description: "Structura CSS pentru dispozitive mobile a fost creată.",
-      });
-      refetchMobileCss();
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Eroare la crearea CSS mobile",
-        description: `Nu s-a putut crea structura CSS mobile: ${error.message}`,
-        variant: "destructive",
-      });
-    }
-  });
-
+  // Încărcarea CSS-ului existent
   useEffect(() => {
-    if (globalCssData) {
-      setCustomCssValue(globalCssData.value || '');
-      if (!activePreview) {
-        applyCSS(globalCssData.value, 'global-custom-css');
+    const loadGlobalCss = async () => {
+      try {
+        const response = await fetch('/api/cms/custom_css_global');
+        if (response.ok) {
+          const content = await response.json();
+          if (content && content.value) {
+            setGlobalCSS(content.value);
+          }
+        }
+      } catch (error) {
+        console.error('Eroare la încărcarea CSS-ului global', error);
       }
-    }
-  }, [globalCssData]);
+    };
 
-  useEffect(() => {
-    if (mobileCssData) {
-      setMobileCssValue(mobileCssData.value || '');
-      if (!activePreview) {
-        applyCSS(mobileCssData.value, 'mobile-custom-css');
+    const loadMobileCss = async () => {
+      try {
+        const response = await fetch('/api/cms/custom_css_mobile');
+        if (response.ok) {
+          const content = await response.json();
+          if (content && content.value) {
+            setMobileCSS(content.value);
+          }
+        }
+      } catch (error) {
+        console.error('Eroare la încărcarea CSS-ului pentru mobile', error);
       }
-    }
-  }, [mobileCssData]);
+    };
 
-  // Funcție pentru a aplica CSS-ul într-un element style
-  const applyCSS = (css: string, id: string) => {
-    // Eliminăm elementul style anterior dacă există
-    const existingStyle = document.getElementById(id);
-    if (existingStyle) {
-      existingStyle.remove();
+    loadGlobalCss();
+    loadMobileCss();
+  }, []);
+
+  // Salvarea CSS-ului global
+  const saveGlobalCSS = async () => {
+    if (!validateCSS(globalCSS)) {
+      setGlobalCssError('CSS-ul conține erori de sintaxă. Verificați codul.');
+      return;
     }
 
-    // Creăm un nou element style și îl adăugăm la head
-    if (css && css.trim() !== '') {
-      const styleElement = document.createElement('style');
-      styleElement.id = id;
-      styleElement.textContent = css;
-      document.head.appendChild(styleElement);
+    setIsSavingGlobal(true);
+    try {
+      const response = await fetch('/api/cms/custom_css_global', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ css: globalCSS }),
+      });
+
+      if (response.ok) {
+        const content = await response.json();
+        if (content.success) {
+          toast({
+            title: 'CSS global salvat cu succes',
+            description: 'Modificările au fost aplicate',
+            variant: 'default',
+          });
+          setGlobalCssError('');
+        }
+      } else {
+        toast({
+          title: 'Eroare la salvarea CSS-ului global',
+          description: 'Verificați conexiunea și încercați din nou',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Eroare la salvarea CSS-ului global', error);
+      toast({
+        title: 'Eroare la salvarea CSS-ului global',
+        description: 'A apărut o eroare neașteptată',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingGlobal(false);
     }
   };
 
-  // Aplică CSS-ul pentru previzualizare
-  const handlePreview = () => {
-    setActivePreview(true);
-    if (activeTab === 'global') {
-      applyCSS(customCssValue, 'global-custom-css');
-    } else {
-      applyCSS(mobileCssValue, 'mobile-custom-css');
+  // Salvarea CSS-ului pentru mobile
+  const saveMobileCSS = async () => {
+    if (!validateCSS(mobileCSS)) {
+      setMobileCssError('CSS-ul conține erori de sintaxă. Verificați codul.');
+      return;
     }
-    
+
+    setIsSavingMobile(true);
+    try {
+      const response = await fetch('/api/cms/custom_css_mobile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ css: mobileCSS }),
+      });
+
+      if (response.ok) {
+        const content = await response.json();
+        if (content.success) {
+          toast({
+            title: 'CSS pentru mobile salvat cu succes',
+            description: 'Modificările au fost aplicate',
+            variant: 'default',
+          });
+          setMobileCssError('');
+        }
+      } else {
+        toast({
+          title: 'Eroare la salvarea CSS-ului pentru mobile',
+          description: 'Verificați conexiunea și încercați din nou',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Eroare la salvarea CSS-ului pentru mobile', error);
+      toast({
+        title: 'Eroare la salvarea CSS-ului pentru mobile',
+        description: 'A apărut o eroare neașteptată',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingMobile(false);
+    }
+  };
+
+  // Resetarea CSS-ului global
+  const resetGlobalCSS = () => {
+    setGlobalCSS('');
+    setGlobalCssError('');
     toast({
-      title: "Previzualizare activată",
-      description: "CSS-ul a fost aplicat pentru previzualizare. Salvați pentru a păstra modificările.",
+      title: 'CSS global resetat',
+      description: 'Modificările nu au fost salvate. Apăsați Salvează pentru a aplica.',
+      variant: 'default',
     });
   };
 
-  // Salvare CSS
-  const handleSave = () => {
-    setActivePreview(false);
-    if (activeTab === 'global') {
-      updateGlobalCssMutation.mutate({ value: customCssValue });
-    } else {
-      updateMobileCssMutation.mutate({ value: mobileCssValue });
-    }
+  // Resetarea CSS-ului pentru mobile
+  const resetMobileCSS = () => {
+    setMobileCSS('');
+    setMobileCssError('');
+    toast({
+      title: 'CSS pentru mobile resetat',
+      description: 'Modificările nu au fost salvate. Apăsați Salvează pentru a aplica.',
+      variant: 'default',
+    });
   };
 
-  const handleCreate = () => {
-    if (activeTab === 'global') {
-      createGlobalCssMutation.mutate();
-    } else {
-      createMobileCssMutation.mutate();
+  // Validarea CSS-ului
+  const validateCSS = (css: string): boolean => {
+    try {
+      // Verificăm dacă CSS-ul este valid
+      const styleEl = document.createElement('style');
+      styleEl.textContent = css;
+      document.head.appendChild(styleEl);
+      document.head.removeChild(styleEl);
+      return true;
+    } catch (error) {
+      console.error('CSS invalid', error);
+      return false;
     }
   };
-
-  // Verifică dacă utilizatorul este admin
-  if (authLoading) {
-    return (
-      <div className="container py-10">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Skeleton className="h-8 w-1/2" />
-            </CardTitle>
-            <CardDescription>
-              <Skeleton className="h-4 w-3/4" />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-[400px] w-full" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Verifică dacă utilizatorul este admin
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="container py-10">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Acces restricționat</AlertTitle>
-          <AlertDescription>
-            Doar administratorii au acces la editorul de CSS personalizat.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   return (
-    <div className="container py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>Editor CSS Personalizat</CardTitle>
-          <CardDescription>
-            Personalizați aspectul aplicației prin adăugarea de CSS. Modificările sunt aplicate imediat ce salvați.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="global" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="global">CSS Global</TabsTrigger>
-              <TabsTrigger value="mobile">CSS Mobile</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="global" className="space-y-4">
-              {isGlobalCssLoading ? (
-                <Skeleton className="h-[400px] w-full" />
-              ) : isGlobalCssError || !globalCssData ? (
-                <div className="space-y-4">
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>CSS global negăsit</AlertTitle>
-                    <AlertDescription>
-                      Fișierul CSS global nu a fost configurat încă. Apăsați butonul de mai jos pentru a-l inițializa.
-                    </AlertDescription>
-                  </Alert>
-                  <Button onClick={handleCreate} disabled={createGlobalCssMutation.isPending}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Inițializare CSS Global
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex justify-between mb-2">
-                    <Label htmlFor="globalCss">CSS Global</Label>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={handlePreview}
-                        disabled={updateGlobalCssMutation.isPending}
-                      >
-                        <RefreshCcw className="mr-2 h-4 w-4" />
-                        Previzualizare
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        onClick={handleSave}
-                        disabled={updateGlobalCssMutation.isPending}
-                      >
-                        <Save className="mr-2 h-4 w-4" />
-                        Salvează
-                      </Button>
-                    </div>
-                  </div>
-                  <Textarea
-                    id="globalCss"
-                    value={customCssValue}
-                    onChange={(e) => setCustomCssValue(e.target.value)}
-                    placeholder="/* Adăugați CSS global personalizat aici */"
-                    className="font-mono h-[400px] resize-none"
-                    spellCheck="false"
-                  />
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="mobile" className="space-y-4">
-              {isMobileCssLoading ? (
-                <Skeleton className="h-[400px] w-full" />
-              ) : isMobileCssError || !mobileCssData ? (
-                <div className="space-y-4">
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>CSS mobile negăsit</AlertTitle>
-                    <AlertDescription>
-                      Fișierul CSS pentru dispozitive mobile nu a fost configurat încă. Apăsați butonul de mai jos pentru a-l inițializa.
-                    </AlertDescription>
-                  </Alert>
-                  <Button onClick={handleCreate} disabled={createMobileCssMutation.isPending}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Inițializare CSS Mobile
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex justify-between mb-2">
-                    <Label htmlFor="mobileCss">CSS pentru Mobile</Label>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={handlePreview}
-                        disabled={updateMobileCssMutation.isPending}
-                      >
-                        <RefreshCcw className="mr-2 h-4 w-4" />
-                        Previzualizare
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        onClick={handleSave}
-                        disabled={updateMobileCssMutation.isPending}
-                      >
-                        <Save className="mr-2 h-4 w-4" />
-                        Salvează
-                      </Button>
-                    </div>
-                  </div>
-                  <Textarea
-                    id="mobileCss"
-                    value={mobileCssValue}
-                    onChange={(e) => setMobileCssValue(e.target.value)}
-                    placeholder="/* Adăugați CSS pentru dispozitive mobile aici */"
-                    className="font-mono h-[400px] resize-none"
-                    spellCheck="false"
-                  />
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Sfat</AlertTitle>
-                    <AlertDescription>
-                      Pentru CSS mobil, încapsulați codul în @media queries pentru a viza anumite dimensiuni de ecran.
-                      <code className="block mt-2 p-2 bg-slate-100 rounded text-xs">
-                        @media (max-width: 768px) {'{'}<br />
-                        &nbsp;&nbsp;/* Stilurile tale pentru ecrane mobile */<br />
-                        {'}'}
-                      </code>
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+    <div className="container mx-auto py-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Editor CSS Personalizat</h1>
+        <p className="text-gray-500">
+          Modificați aspectul aplicației prin adăugarea de stiluri CSS personalizate. Aveți posibilitatea să definiți stiluri
+          globale și pentru dispozitive mobile.
+        </p>
+      </div>
 
-          <div className="mt-8">
-            <h3 className="text-lg font-medium mb-2">Exemple și Ajutor</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <Card className="p-4">
-                <h4 className="font-medium mb-2">Culori și Fonturi Personalizate</h4>
-                <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto">
+      <Tabs defaultValue="global" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="global">CSS Global</TabsTrigger>
+          <TabsTrigger value="mobile">CSS Mobile</TabsTrigger>
+          <TabsTrigger value="preview">Previzualizare</TabsTrigger>
+          <TabsTrigger value="help">Ajutor</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="global">
+          <Card>
+            <CardHeader>
+              <CardTitle>CSS Global</CardTitle>
+              <CardDescription>
+                Stilurile definite aici se vor aplica pe toate dispozitivele. Folosiți cu moderație pentru a evita conflictele cu stilurile existente.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {globalCssError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Eroare de validare</AlertTitle>
+                  <AlertDescription>{globalCssError}</AlertDescription>
+                </Alert>
+              )}
+              <Textarea
+                value={globalCSS}
+                onChange={(e) => setGlobalCSS(e.target.value)}
+                placeholder="/* Adăugați CSS global aici */
+body {
+  /* Exemplu: */
+  --custom-color: #3b5998;
+}
+
+.header {
+  /* Exemplu: */
+  background-color: var(--custom-color);
+}"
+                className="min-h-[400px] font-mono"
+              />
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button variant="destructive" onClick={resetGlobalCSS}>
+                Resetează
+              </Button>
+              <Button onClick={saveGlobalCSS} disabled={isSavingGlobal}>
+                {isSavingGlobal ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Se salvează...
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvează
+                  </span>
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="mobile">
+          <Card>
+            <CardHeader>
+              <CardTitle>CSS pentru Mobile</CardTitle>
+              <CardDescription>
+                Aceste stiluri se vor aplica doar pe dispozitive mobile (sub 768px lățime). Sunt încapsulate automat într-un media query.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {mobileCssError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Eroare de validare</AlertTitle>
+                  <AlertDescription>{mobileCssError}</AlertDescription>
+                </Alert>
+              )}
+              <Textarea
+                value={mobileCSS}
+                onChange={(e) => setMobileCSS(e.target.value)}
+                placeholder="/* Adăugați CSS pentru mobile aici */
+/* Acest cod va fi inclus automat într-un media query: @media (max-width: 768px) */
+
+body {
+  /* Exemplu: */
+  font-size: 14px;
+}
+
+.header {
+  /* Exemplu: */
+  padding: 0.5rem;
+}"
+                className="min-h-[400px] font-mono"
+              />
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button variant="destructive" onClick={resetMobileCSS}>
+                Resetează
+              </Button>
+              <Button onClick={saveMobileCSS} disabled={isSavingMobile}>
+                {isSavingMobile ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Se salvează...
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvează
+                  </span>
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="preview">
+          <Card>
+            <CardHeader>
+              <CardTitle>Previzualizare CSS</CardTitle>
+              <CardDescription>
+                Previzualizați codul CSS înainte de a-l aplica pe site.
+              </CardDescription>
+              <div className="flex mt-2">
+                <Button variant="outline" onClick={() => setPreviewTab('global')} className={previewTab === 'global' ? 'bg-primary/10' : ''}>
+                  Global
+                </Button>
+                <Button variant="outline" onClick={() => setPreviewTab('mobile')} className={`ml-2 ${previewTab === 'mobile' ? 'bg-primary/10' : ''}`}>
+                  Mobile
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md overflow-hidden">
+                <SyntaxHighlighter 
+                  language="css" 
+                  style={tomorrow}
+                  customStyle={{ 
+                    borderRadius: '0.375rem', 
+                    fontSize: '0.875rem', 
+                    padding: '1rem', 
+                    backgroundColor: '#1e293b' 
+                  }}
+                >
+                  {previewTab === 'global' 
+                    ? globalCSS || '/* Nu există CSS global definit */' 
+                    : mobileCSS 
+                      ? `@media (max-width: 768px) {\n${mobileCSS}\n}`
+                      : '/* Nu există CSS pentru mobile definit */'}
+                </SyntaxHighlighter>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="help">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ghid de utilizare a editorului CSS</CardTitle>
+              <CardDescription>
+                Sfaturi și exemple pentru utilizarea eficientă a editorului CSS personalizat.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Recomandări generale</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Utilizați selectori specifici pentru a evita conflictele cu stilurile existente.</li>
+                    <li>Testați schimbările pe mai multe dispozitive înainte de implementarea finală.</li>
+                    <li>Folosiți variabile CSS (custom properties) pentru a menține consistența culorilor și spațierii.</li>
+                    <li>Evitați utilizarea excesivă a regulii !important, deoarece poate cauza probleme dificil de remediat.</li>
+                  </ul>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Exemple utile</h3>
+                  
+                  <div className="bg-secondary/20 p-4 rounded-md mb-4">
+                    <h4 className="font-medium mb-2 flex items-center">
+                      <Badge variant="outline" className="mr-2">Global</Badge>
+                      Modificarea culorilor principale
+                    </h4>
+                    <SyntaxHighlighter 
+                      language="css" 
+                      style={tomorrow}
+                      customStyle={{ 
+                        borderRadius: '0.375rem', 
+                        fontSize: '0.875rem', 
+                        backgroundColor: '#1e293b' 
+                      }}
+                    >
 {`:root {
-  --primary-color: #3b82f6;  /* Albastru */
-  --secondary-color: #10b981; /* Verde */
+  --primary: #3b5998;
+  --primary-foreground: #ffffff;
 }
 
-.hero-section h1 {
-  color: var(--primary-color);
-  font-weight: 700;
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}`}
+                    </SyntaxHighlighter>
+                  </div>
+
+                  <div className="bg-secondary/20 p-4 rounded-md mb-4">
+                    <h4 className="font-medium mb-2 flex items-center">
+                      <Badge variant="outline" className="mr-2">Mobile</Badge>
+                      Adaptarea fonturilor pentru dispozitive mobile
+                    </h4>
+                    <SyntaxHighlighter 
+                      language="css" 
+                      style={tomorrow}
+                      customStyle={{ 
+                        borderRadius: '0.375rem', 
+                        fontSize: '0.875rem', 
+                        backgroundColor: '#1e293b' 
+                      }}
+                    >
+{`body {
+  font-size: 14px;
 }
 
-.section-title {
+h1 {
+  font-size: 1.8rem;
+}
+
+h2 {
   font-size: 1.5rem;
-  border-bottom: 2px solid var(--secondary-color);
 }`}
-                </pre>
-              </Card>
-              
-              <Card className="p-4">
-                <h4 className="font-medium mb-2">Stiluri pentru Mobile</h4>
-                <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto">
-{`@media (max-width: 768px) {
-  .hero-section h1 {
-    font-size: 1.8rem;
-  }
-  
-  .header-nav {
-    padding: 0.5rem;
-  }
-  
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
+                    </SyntaxHighlighter>
+                  </div>
+
+                  <div className="bg-secondary/20 p-4 rounded-md">
+                    <h4 className="font-medium mb-2 flex items-center">
+                      <Badge variant="outline" className="mr-2">Global</Badge>
+                      Personalizarea formularelor
+                    </h4>
+                    <SyntaxHighlighter 
+                      language="css" 
+                      style={tomorrow}
+                      customStyle={{ 
+                        borderRadius: '0.375rem', 
+                        fontSize: '0.875rem',  
+                        backgroundColor: '#1e293b' 
+                      }}
+                    >
+{`.form-input {
+  border: 2px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.form-input:focus {
+  border-color: var(--primary, #3b5998);
+  box-shadow: 0 0 0 3px rgba(59, 89, 152, 0.2);
+  outline: none;
 }`}
-                </pre>
-              </Card>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                    </SyntaxHighlighter>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Depanare probleme comune</h3>
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium">Stilurile nu se aplică</p>
+                        <p className="text-sm text-gray-500">Verificați specificitatea selectorilor. Selectori mai specifici au prioritate mai mare. Adăugați clase sau ID-uri pentru a crește specificitatea.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium">Stilurile pentru mobile nu funcționează</p>
+                        <p className="text-sm text-gray-500">Asigurați-vă că media query-ul este corect. Stilurile pentru mobile sunt incluse automat într-un media query pentru dispozitive sub 768px lățime.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Code className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium">Erori de sintaxă</p>
+                        <p className="text-sm text-gray-500">Verificați pentru paranteze lipsă, punct și virgulă lipsă sau alte erori de sintaxă. Folosiți un validator CSS online pentru a verifica codul.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
