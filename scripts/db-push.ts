@@ -217,6 +217,114 @@ async function main() {
       );
     `);
 
+    console.log("Creating recipe_type_enum type...");
+    await db.execute(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'recipe_type') THEN
+          CREATE TYPE recipe_type AS ENUM (
+            'de_post', 
+            'cu_dezlegare_la_ulei', 
+            'cu_dezlegare_la_vin', 
+            'cu_dezlegare_la_peste', 
+            'cu_dezlegare_completa', 
+            'manastireasca'
+          );
+        END IF;
+      END$$;
+    `);
+
+    console.log("Creating recipe_category_enum type...");
+    await db.execute(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'recipe_category') THEN
+          CREATE TYPE recipe_category AS ENUM (
+            'supe_si_ciorbe',
+            'aperitive',
+            'feluri_principale',
+            'garnituri',
+            'salate',
+            'deserturi',
+            'conserve',
+            'bauturi',
+            'paine_si_panificatie'
+          );
+        END IF;
+      END$$;
+    `);
+
+    console.log("Creating recipe_difficulty_enum type...");
+    await db.execute(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'recipe_difficulty') THEN
+          CREATE TYPE recipe_difficulty AS ENUM (
+            'incepator',
+            'mediu',
+            'avansat'
+          );
+        END IF;
+      END$$;
+    `);
+
+    console.log("Creating recipe_time_enum type...");
+    await db.execute(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'recipe_time') THEN
+          CREATE TYPE recipe_time AS ENUM (
+            'sub_30_minute',
+            '30_60_minute',
+            'peste_60_minute'
+          );
+        END IF;
+      END$$;
+    `);
+
+    console.log("Creating fasting_recipes table...");
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS fasting_recipes (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        description TEXT NOT NULL,
+        recipe_type recipe_type NOT NULL DEFAULT 'de_post',
+        category recipe_category NOT NULL,
+        difficulty recipe_difficulty NOT NULL DEFAULT 'mediu',
+        preparation_time recipe_time NOT NULL DEFAULT '30_60_minute',
+        ingredients TEXT[] NOT NULL,
+        steps TEXT[] NOT NULL,
+        image_url TEXT,
+        calories INTEGER,
+        servings INTEGER NOT NULL DEFAULT 4,
+        preparation_minutes INTEGER NOT NULL,
+        cooking_minutes INTEGER NOT NULL,
+        is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+        is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+        source TEXT,
+        created_by INTEGER REFERENCES users(id),
+        monastery_id INTEGER REFERENCES monasteries(id),
+        occasion_tags TEXT[],
+        feast_day TEXT,
+        recommended_for_days TEXT[],
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log("Creating recipe_comments table...");
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS recipe_comments (
+        id SERIAL PRIMARY KEY,
+        recipe_id INTEGER NOT NULL REFERENCES fasting_recipes(id),
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        content TEXT NOT NULL,
+        rating INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // Adăugare user admin
     console.log("Adding admin user...");
     await db.execute(`

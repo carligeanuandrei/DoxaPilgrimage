@@ -479,6 +479,12 @@ async function initFastingRecipes() {
     for (const recipe of demoRecipes) {
       const slug = generateSlug(recipe.title);
       try {
+        // Serializăm array-urile ca JSON și apoi le convertim în array PostgreSQL
+        const ingredientsJson = JSON.stringify(recipe.ingredients);
+        const stepsJson = JSON.stringify(recipe.steps);
+        const occasionTagsJson = recipe.occasionTags ? JSON.stringify(recipe.occasionTags) : null;
+        const recommendedDaysJson = recipe.recommendedForDays ? JSON.stringify(recipe.recommendedForDays) : null;
+        
         await db.execute(
           sql`INSERT INTO fasting_recipes (
             title, slug, description, recipe_type, category, difficulty, 
@@ -489,14 +495,14 @@ async function initFastingRecipes() {
           ) VALUES (
             ${recipe.title}, ${slug}, ${recipe.description}, ${recipe.recipeType}, 
             ${recipe.category}, ${recipe.difficulty}, ${recipe.preparationTime || '30_60_minute'}, 
-            ${sql.array(recipe.ingredients)}, ${sql.array(recipe.steps)}, 
+            ${ingredientsJson}::text[], ${stepsJson}::text[], 
             ${recipe.imageUrl || null}, ${recipe.calories || null}, 
             ${recipe.servings}, ${recipe.preparationMinutes}, ${recipe.cookingMinutes}, 
             ${recipe.isFeatured || false}, ${recipe.source || null}, 
             ${1}, ${recipe.monasteryId || null}, 
-            ${recipe.occasionTags ? sql.array(recipe.occasionTags) : null}, 
+            ${occasionTagsJson}::text[], 
             ${recipe.feastDay || null}, 
-            ${recipe.recommendedForDays ? sql.array(recipe.recommendedForDays) : null}
+            ${recommendedDaysJson}::text[]
           )`
         );
         console.log(`✅ Rețeta "${recipe.title}" a fost adăugată cu succes.`);
