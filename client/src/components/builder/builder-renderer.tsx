@@ -5,15 +5,24 @@ import { CmsText, CmsHtml, CmsImage } from '@/components/shared/cms-display';
 
 // Definim toate tipurile necesare pentru componenta
 type BuilderComponentProperties = {
+  // Proprietăți pentru stilizare CSS
   className?: string;
+  id?: string;
+  
+  // Proprietăți pentru conținut
   isHtml?: boolean;
   imageClassName?: string;
   alt?: string;
   height?: string | number;
+  
+  // Proprietăți pentru butoane
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   url?: string;
+  
+  // Proprietăți pentru conținut CMS
   contentType?: 'text' | 'html' | 'image';
+  type?: 'text' | 'html' | 'image';  // Pentru compatibilitate
 };
 
 type BuilderComponent = {
