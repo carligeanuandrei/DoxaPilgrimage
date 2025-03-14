@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
 import { formatRegionName } from "@/lib/format-utils";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function MonasteriesPage() {
   const [searchTerm, setSearchTerm] = useState("");
