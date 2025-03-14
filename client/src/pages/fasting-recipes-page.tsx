@@ -193,7 +193,7 @@ const RecipeCard = ({ recipe }: { recipe: FastingRecipe }) => {
           />
         ) : (
           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <p className="text-gray-500">Fără imagine</p>
+            <span className="text-gray-500">Fără imagine</span>
           </div>
         )}
         {recipe.isFeatured && (
@@ -347,7 +347,9 @@ const RecipeOfTheDay = () => {
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center" style={{ minHeight: '200px' }}>
-              <Utensils className="h-16 w-16 text-gray-400" />
+              <span className="flex items-center justify-center">
+                <Utensils className="h-16 w-16 text-gray-400" />
+              </span>
             </div>
           )}
         </div>
@@ -461,7 +463,9 @@ const AutocompleteSearch = ({ value, onChange, recipes, isLoading }) => {
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
-                    <Utensils className="h-5 w-5 text-gray-400" />
+                    <span className="flex items-center justify-center">
+                      <Utensils className="h-5 w-5 text-gray-400" />
+                    </span>
                   </div>
                 )}
                 <div>
