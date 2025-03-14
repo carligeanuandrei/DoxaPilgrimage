@@ -212,10 +212,10 @@ export default function MonasteriesPage() {
       monastery.county.toLowerCase().includes(searchQuery.toLowerCase());
 
     // Filtrare după regiune
-    const matchesRegion = regionFilter === "" || monastery.region === regionFilter;
+    const matchesRegion = regionFilter === "all" || monastery.region === regionFilter;
 
     // Filtrare după tip
-    const matchesType = typeFilter === "" || monastery.type === typeFilter;
+    const matchesType = typeFilter === "all" || monastery.type === typeFilter;
 
     return matchesSearchQuery && matchesRegion && matchesType;
   }) || [];
@@ -364,7 +364,7 @@ export default function MonasteriesPage() {
                     <SelectValue placeholder="Toate regiunile" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Toate regiunile</SelectItem>
+                    <SelectItem value="all">Toate regiunile</SelectItem>
                     <SelectItem value="moldova">Moldova</SelectItem>
                     <SelectItem value="bucovina">Bucovina</SelectItem>
                     <SelectItem value="muntenia">Muntenia</SelectItem>
@@ -383,7 +383,7 @@ export default function MonasteriesPage() {
                     <SelectValue placeholder="Toate tipurile" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Toate tipurile</SelectItem>
+                    <SelectItem value="all">Toate tipurile</SelectItem>
                     <SelectItem value="monastery">Mănăstiri</SelectItem>
                     <SelectItem value="hermitage">Schituri</SelectItem>
                     <SelectItem value="church">Biserici</SelectItem>
