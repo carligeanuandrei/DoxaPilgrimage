@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RefreshCw, Smartphone, Monitor } from 'lucide-react';
 
 interface SpacingControlsProps {
   content: Record<string, any>;
@@ -12,6 +13,7 @@ interface SpacingControlsProps {
 export function SpacingControls({ content, onChange }: SpacingControlsProps) {
   // Stare pentru a stoca valorile detectate
   const [defaultValues, setDefaultValues] = useState({
+    // Desktop
     paddingTop: '',
     paddingBottom: '',
     paddingLeft: '',
@@ -19,7 +21,16 @@ export function SpacingControls({ content, onChange }: SpacingControlsProps) {
     marginTop: '',
     marginBottom: '',
     marginLeft: '',
-    marginRight: ''
+    marginRight: '',
+    // Mobile
+    mobilePaddingTop: '',
+    mobilePaddingBottom: '',
+    mobilePaddingLeft: '',
+    mobilePaddingRight: '',
+    mobileMarginTop: '',
+    mobileMarginBottom: '',
+    mobileMarginLeft: '',
+    mobileMarginRight: ''
   });
 
   // Extragem valorile numerice din proprietățile CSS (ex: '20px' -> 20)
@@ -150,6 +161,75 @@ export function SpacingControls({ content, onChange }: SpacingControlsProps) {
         values.marginRight = `${spacingMap[value]}px`;
       }
     }
+
+    // Mobile-specific classes (sm:px-4, md:py-6)
+    const smPxMatch = classes.find(c => /^sm:px-\d+$/.test(c));
+    if (smPxMatch) {
+      const value = smPxMatch.replace('sm:px-', '');
+      if (spacingMap[value]) {
+        values.mobilePaddingLeft = `${spacingMap[value]}px`;
+        values.mobilePaddingRight = `${spacingMap[value]}px`;
+      }
+    }
+
+    const smPyMatch = classes.find(c => /^sm:py-\d+$/.test(c));
+    if (smPyMatch) {
+      const value = smPyMatch.replace('sm:py-', '');
+      if (spacingMap[value]) {
+        values.mobilePaddingTop = `${spacingMap[value]}px`;
+        values.mobilePaddingBottom = `${spacingMap[value]}px`;
+      }
+    }
+
+    const smPtMatch = classes.find(c => /^sm:pt-\d+$/.test(c));
+    if (smPtMatch) {
+      const value = smPtMatch.replace('sm:pt-', '');
+      if (spacingMap[value]) {
+        values.mobilePaddingTop = `${spacingMap[value]}px`;
+      }
+    }
+
+    const smPbMatch = classes.find(c => /^sm:pb-\d+$/.test(c));
+    if (smPbMatch) {
+      const value = smPbMatch.replace('sm:pb-', '');
+      if (spacingMap[value]) {
+        values.mobilePaddingBottom = `${spacingMap[value]}px`;
+      }
+    }
+
+    const smPlMatch = classes.find(c => /^sm:pl-\d+$/.test(c));
+    if (smPlMatch) {
+      const value = smPlMatch.replace('sm:pl-', '');
+      if (spacingMap[value]) {
+        values.mobilePaddingLeft = `${spacingMap[value]}px`;
+      }
+    }
+
+    const smPrMatch = classes.find(c => /^sm:pr-\d+$/.test(c));
+    if (smPrMatch) {
+      const value = smPrMatch.replace('sm:pr-', '');
+      if (spacingMap[value]) {
+        values.mobilePaddingRight = `${spacingMap[value]}px`;
+      }
+    }
+
+    const smMxMatch = classes.find(c => /^sm:mx-\d+$/.test(c));
+    if (smMxMatch) {
+      const value = smMxMatch.replace('sm:mx-', '');
+      if (spacingMap[value]) {
+        values.mobileMarginLeft = `${spacingMap[value]}px`;
+        values.mobileMarginRight = `${spacingMap[value]}px`;
+      }
+    }
+
+    const smMyMatch = classes.find(c => /^sm:my-\d+$/.test(c));
+    if (smMyMatch) {
+      const value = smMyMatch.replace('sm:my-', '');
+      if (spacingMap[value]) {
+        values.mobileMarginTop = `${spacingMap[value]}px`;
+        values.mobileMarginBottom = `${spacingMap[value]}px`;
+      }
+    }
     
     return values;
   };
@@ -158,6 +238,7 @@ export function SpacingControls({ content, onChange }: SpacingControlsProps) {
   const detectExistingValues = () => {
     // Valori din proprietățile CSS explicit definite
     const explicitValues = {
+      // Desktop
       paddingTop: content.paddingTop,
       paddingBottom: content.paddingBottom,
       paddingLeft: content.paddingLeft,
@@ -165,7 +246,16 @@ export function SpacingControls({ content, onChange }: SpacingControlsProps) {
       marginTop: content.marginTop,
       marginBottom: content.marginBottom,
       marginLeft: content.marginLeft,
-      marginRight: content.marginRight
+      marginRight: content.marginRight,
+      // Mobile
+      mobilePaddingTop: content.mobilePaddingTop,
+      mobilePaddingBottom: content.mobilePaddingBottom,
+      mobilePaddingLeft: content.mobilePaddingLeft,
+      mobilePaddingRight: content.mobilePaddingRight,
+      mobileMarginTop: content.mobileMarginTop,
+      mobileMarginBottom: content.mobileMarginBottom,
+      mobileMarginLeft: content.mobileMarginLeft,
+      mobileMarginRight: content.mobileMarginRight
     };
     
     // Valori din clasele Tailwind
@@ -207,123 +297,260 @@ export function SpacingControls({ content, onChange }: SpacingControlsProps) {
           <RefreshCw size={14} className="mr-1" /> Detectează
         </Button>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label htmlFor="paddingTop">Padding Sus (px)</Label>
-          <Input
-            id="paddingTop"
-            type="number"
-            placeholder={`${extractNumericValue(defaultValues.paddingTop) || '0'}`}
-            value={extractNumericValue(content.paddingTop)}
-            onChange={e => onChange({
-              ...content, 
-              paddingTop: e.target.value ? `${e.target.value}px` : undefined
-            })}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label htmlFor="paddingBottom">Padding Jos (px)</Label>
-          <Input
-            id="paddingBottom"
-            type="number"
-            placeholder={`${extractNumericValue(defaultValues.paddingBottom) || '0'}`}
-            value={extractNumericValue(content.paddingBottom)}
-            onChange={e => onChange({
-              ...content, 
-              paddingBottom: e.target.value ? `${e.target.value}px` : undefined
-            })}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label htmlFor="paddingLeft">Padding Stânga (px)</Label>
-          <Input
-            id="paddingLeft"
-            type="number"
-            placeholder={`${extractNumericValue(defaultValues.paddingLeft) || '0'}`}
-            value={extractNumericValue(content.paddingLeft)}
-            onChange={e => onChange({
-              ...content, 
-              paddingLeft: e.target.value ? `${e.target.value}px` : undefined
-            })}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label htmlFor="paddingRight">Padding Dreapta (px)</Label>
-          <Input
-            id="paddingRight"
-            type="number"
-            placeholder={`${extractNumericValue(defaultValues.paddingRight) || '0'}`}
-            value={extractNumericValue(content.paddingRight)}
-            onChange={e => onChange({
-              ...content, 
-              paddingRight: e.target.value ? `${e.target.value}px` : undefined
-            })}
-            className="mt-1"
-          />
-        </div>
-      </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div>
-          <Label htmlFor="marginTop">Margin Sus (px)</Label>
-          <Input
-            id="marginTop"
-            type="number"
-            placeholder={`${extractNumericValue(defaultValues.marginTop) || '0'}`}
-            value={extractNumericValue(content.marginTop)}
-            onChange={e => onChange({
-              ...content, 
-              marginTop: e.target.value ? `${e.target.value}px` : undefined
-            })}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label htmlFor="marginBottom">Margin Jos (px)</Label>
-          <Input
-            id="marginBottom"
-            type="number"
-            placeholder={`${extractNumericValue(defaultValues.marginBottom) || '0'}`}
-            value={extractNumericValue(content.marginBottom)}
-            onChange={e => onChange({
-              ...content, 
-              marginBottom: e.target.value ? `${e.target.value}px` : undefined
-            })}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label htmlFor="marginLeft">Margin Stânga (px)</Label>
-          <Input
-            id="marginLeft"
-            type="number"
-            placeholder={`${extractNumericValue(defaultValues.marginLeft) || '0'}`}
-            value={extractNumericValue(content.marginLeft)}
-            onChange={e => onChange({
-              ...content, 
-              marginLeft: e.target.value ? `${e.target.value}px` : undefined
-            })}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label htmlFor="marginRight">Margin Dreapta (px)</Label>
-          <Input
-            id="marginRight"
-            type="number"
-            placeholder={`${extractNumericValue(defaultValues.marginRight) || '0'}`}
-            value={extractNumericValue(content.marginRight)}
-            onChange={e => onChange({
-              ...content, 
-              marginRight: e.target.value ? `${e.target.value}px` : undefined
-            })}
-            className="mt-1"
-          />
-        </div>
-      </div>
+      <Tabs defaultValue="desktop" className="w-full">
+        <TabsList className="grid grid-cols-2 mb-4">
+          <TabsTrigger value="desktop" className="flex items-center justify-center">
+            <Monitor size={16} className="mr-2" /> Desktop
+          </TabsTrigger>
+          <TabsTrigger value="mobile" className="flex items-center justify-center">
+            <Smartphone size={16} className="mr-2" /> Mobil
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="desktop">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="paddingTop">Padding Sus (px)</Label>
+              <Input
+                id="paddingTop"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.paddingTop) || '0'}`}
+                value={extractNumericValue(content.paddingTop)}
+                onChange={e => onChange({
+                  ...content, 
+                  paddingTop: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="paddingBottom">Padding Jos (px)</Label>
+              <Input
+                id="paddingBottom"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.paddingBottom) || '0'}`}
+                value={extractNumericValue(content.paddingBottom)}
+                onChange={e => onChange({
+                  ...content, 
+                  paddingBottom: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="paddingLeft">Padding Stânga (px)</Label>
+              <Input
+                id="paddingLeft"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.paddingLeft) || '0'}`}
+                value={extractNumericValue(content.paddingLeft)}
+                onChange={e => onChange({
+                  ...content, 
+                  paddingLeft: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="paddingRight">Padding Dreapta (px)</Label>
+              <Input
+                id="paddingRight"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.paddingRight) || '0'}`}
+                value={extractNumericValue(content.paddingRight)}
+                onChange={e => onChange({
+                  ...content, 
+                  paddingRight: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div>
+              <Label htmlFor="marginTop">Margin Sus (px)</Label>
+              <Input
+                id="marginTop"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.marginTop) || '0'}`}
+                value={extractNumericValue(content.marginTop)}
+                onChange={e => onChange({
+                  ...content, 
+                  marginTop: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="marginBottom">Margin Jos (px)</Label>
+              <Input
+                id="marginBottom"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.marginBottom) || '0'}`}
+                value={extractNumericValue(content.marginBottom)}
+                onChange={e => onChange({
+                  ...content, 
+                  marginBottom: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="marginLeft">Margin Stânga (px)</Label>
+              <Input
+                id="marginLeft"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.marginLeft) || '0'}`}
+                value={extractNumericValue(content.marginLeft)}
+                onChange={e => onChange({
+                  ...content, 
+                  marginLeft: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="marginRight">Margin Dreapta (px)</Label>
+              <Input
+                id="marginRight"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.marginRight) || '0'}`}
+                value={extractNumericValue(content.marginRight)}
+                onChange={e => onChange({
+                  ...content, 
+                  marginRight: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="mobile">
+          <div className="p-2 bg-gray-50 rounded-lg mb-3">
+            <p className="text-xs text-gray-500">Aceste setări se vor aplica doar pe dispozitive mobile. Dacă nu sunt setate, se vor folosi valorile pentru desktop.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="mobilePaddingTop">Padding Sus (px)</Label>
+              <Input
+                id="mobilePaddingTop"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.mobilePaddingTop) || extractNumericValue(defaultValues.paddingTop) || '0'}`}
+                value={extractNumericValue(content.mobilePaddingTop)}
+                onChange={e => onChange({
+                  ...content, 
+                  mobilePaddingTop: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="mobilePaddingBottom">Padding Jos (px)</Label>
+              <Input
+                id="mobilePaddingBottom"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.mobilePaddingBottom) || extractNumericValue(defaultValues.paddingBottom) || '0'}`}
+                value={extractNumericValue(content.mobilePaddingBottom)}
+                onChange={e => onChange({
+                  ...content, 
+                  mobilePaddingBottom: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="mobilePaddingLeft">Padding Stânga (px)</Label>
+              <Input
+                id="mobilePaddingLeft"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.mobilePaddingLeft) || extractNumericValue(defaultValues.paddingLeft) || '0'}`}
+                value={extractNumericValue(content.mobilePaddingLeft)}
+                onChange={e => onChange({
+                  ...content, 
+                  mobilePaddingLeft: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="mobilePaddingRight">Padding Dreapta (px)</Label>
+              <Input
+                id="mobilePaddingRight"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.mobilePaddingRight) || extractNumericValue(defaultValues.paddingRight) || '0'}`}
+                value={extractNumericValue(content.mobilePaddingRight)}
+                onChange={e => onChange({
+                  ...content, 
+                  mobilePaddingRight: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div>
+              <Label htmlFor="mobileMarginTop">Margin Sus (px)</Label>
+              <Input
+                id="mobileMarginTop"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.mobileMarginTop) || extractNumericValue(defaultValues.marginTop) || '0'}`}
+                value={extractNumericValue(content.mobileMarginTop)}
+                onChange={e => onChange({
+                  ...content, 
+                  mobileMarginTop: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="mobileMarginBottom">Margin Jos (px)</Label>
+              <Input
+                id="mobileMarginBottom"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.mobileMarginBottom) || extractNumericValue(defaultValues.marginBottom) || '0'}`}
+                value={extractNumericValue(content.mobileMarginBottom)}
+                onChange={e => onChange({
+                  ...content, 
+                  mobileMarginBottom: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="mobileMarginLeft">Margin Stânga (px)</Label>
+              <Input
+                id="mobileMarginLeft"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.mobileMarginLeft) || extractNumericValue(defaultValues.marginLeft) || '0'}`}
+                value={extractNumericValue(content.mobileMarginLeft)}
+                onChange={e => onChange({
+                  ...content, 
+                  mobileMarginLeft: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="mobileMarginRight">Margin Dreapta (px)</Label>
+              <Input
+                id="mobileMarginRight"
+                type="number"
+                placeholder={`${extractNumericValue(defaultValues.mobileMarginRight) || extractNumericValue(defaultValues.marginRight) || '0'}`}
+                value={extractNumericValue(content.mobileMarginRight)}
+                onChange={e => onChange({
+                  ...content, 
+                  mobileMarginRight: e.target.value ? `${e.target.value}px` : undefined
+                })}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

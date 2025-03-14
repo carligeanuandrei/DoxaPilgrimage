@@ -164,6 +164,41 @@ export function EditableSection({
     ...content.styles
   };
   
+  // Adăugăm clasele CSS pentru spațieri mobile
+  const generateMobileSpacingClasses = () => {
+    const classes: string[] = [];
+    
+    // Padding mobile
+    if (localContent.mobilePaddingTop) {
+      classes.push(`sm:pt-[${localContent.mobilePaddingTop}]`);
+    }
+    if (localContent.mobilePaddingBottom) {
+      classes.push(`sm:pb-[${localContent.mobilePaddingBottom}]`);
+    }
+    if (localContent.mobilePaddingLeft) {
+      classes.push(`sm:pl-[${localContent.mobilePaddingLeft}]`);
+    }
+    if (localContent.mobilePaddingRight) {
+      classes.push(`sm:pr-[${localContent.mobilePaddingRight}]`);
+    }
+    
+    // Margin mobile
+    if (localContent.mobileMarginTop) {
+      classes.push(`sm:mt-[${localContent.mobileMarginTop}]`);
+    }
+    if (localContent.mobileMarginBottom) {
+      classes.push(`sm:mb-[${localContent.mobileMarginBottom}]`);
+    }
+    if (localContent.mobileMarginLeft) {
+      classes.push(`sm:ml-[${localContent.mobileMarginLeft}]`);
+    }
+    if (localContent.mobileMarginRight) {
+      classes.push(`sm:mr-[${localContent.mobileMarginRight}]`);
+    }
+    
+    return classes.join(' ');
+  };
+  
   // Generate actual section content based on type
   const renderSectionContent = () => {
     switch (type) {
