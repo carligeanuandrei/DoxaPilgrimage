@@ -14,6 +14,7 @@ import { registerUploadRoutes } from './routes/upload';
 import { registerFastingRecipesRoutes } from './routes/fasting-recipes';
 import { registerPilgrimageAssistantRoutes } from './routes/pilgrimage-assistant';
 import { registerPilgrimageMapRoutes } from './routes/pilgrimage-map';
+import { registerDoxaAIRoutes } from './routes/doxa-ai';
 import { 
   insertPilgrimageSchema, 
   insertReviewSchema, 
@@ -99,6 +100,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Înregistrăm rutele pentru harta interactivă
   await registerPilgrimageMapRoutes(app);
+  
+  // Înregistrăm rutele pentru DOXA AI
+  await registerDoxaAIRoutes(app);
   
   // Endpoint pentru verificarea stării serverului și pentru depanare
   app.get("/api/server-status", (req, res) => {
