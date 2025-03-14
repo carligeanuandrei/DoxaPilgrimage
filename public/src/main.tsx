@@ -105,7 +105,7 @@ function DoxaApp() {
 try {
   const container = document.getElementById("root");
   if (container) {
-    render(h(DoxaApp, null), container);
+    render(DoxaApp(), container);
     console.log("Aplicația Preact a fost inițializată cu succes");
   } else {
     console.error("Elementul root nu a fost găsit");

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Pelerinaje Ortodoxe - DOXA</title>
+  <link rel="stylesheet" href="/src/index.css">
+  <style>
+    .filters-container {
+      background-color: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .filter-group {
+      margin-bottom: 1rem;
+    }
+    
+    .filter-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .filter-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .pilgrimage-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      margin: 2rem 0;
+    }
+    
+    @media (max-width: 768px) {
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .pilgrimage-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="loading-container">
+      <div class="loading-box">
+        <h1>DOXA</h1>
+        <p>Platformă de Pelerinaje Ortodoxe</p>
+        <div class="spinner"></div>
+        <p>Se încarcă lista de pelerinaje...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Stare pentru pagina de pelerinaje
+    const pageState = {
+      loading: true,
+      pilgrimages: [],
+      filteredPilgrimages: [],
+      filters: {
+        location: '',
+        month: '',
+        minPrice: '',
+        maxPrice: '',
+        transportation: '',
+        guide: '',
+        duration: ''
+      }
+    };
+    
+    // Funcție helper pentru crearea elementelor DOM
+    function createElement(tag, props, ...children) {
+      const element = document.createElement(tag);
+      
+      if (props) {
+        Object.entries(props).forEach(([key, value]) => {
+          if (key === 'className') {
+            element.className = value;
+          } else if (key === 'style' && typeof value === 'object') {
+            Object.assign(element.style, value);
+          } else if (key.startsWith('on') && typeof value === 'function') {
+            const eventName = key.substring(2).toLowerCase();
+            element.addEventListener(eventName, value);
+          } else {
+            element.setAttribute(key, value);
+          }
+        });
+      }
+      
+      children.flat().forEach(child => {
+        if (child === null || child === undefined) return;
+        
+        const node = 
+          typeof child === 'string' || typeof child === 'number'
+            ? document.createTextNode(child.toString())
+            : child;
+            
+        element.appendChild(node);
+      });
+      
+      return element;
+    }
+    
+    // Componente pentru pagina de pelerinaje
+    function createNavbar() {
+      return createElement('nav', { className: 'navbar' },
+        createElement('div', { className: 'container navbar-content' },
+          createElement('a', { href: '/', className: 'navbar-brand' },
+            'DOXA'
+          ),
+          createElement('div', { className: 'navbar-links' },
+            createElement('a', { href: '/pilgrimages', className: 'active' }, 'Pelerinaje'),
+            createElement('a', { href: '/monasteries' }, 'Mănăstiri'),
+            createElement('a', { href: '/calendar' }, 'Calendar Ortodox'),
+            createElement('a', { href: '/fasting-recipes' }, 'Rețete de Post'),
+            createElement('a', { href: '/doxa-ai' }, 'DOXA AI')
+          ),
+          createElement('div', { className: 'navbar-auth' },
+            createElement('a', { href: '/auth', className: 'btn btn-outline' }, 'Autentificare'),
+            createElement('a', { href: '/auth?mode=register', className: 'btn btn-primary' }, 'Înregistrare')
+          )
+        )
+      );
+    }
+    
+    function createPageHeader() {
+      return createElement('section', { className: 'container', style: { padding: '2rem 0' } },
+        createElement('h1', { style: { marginBottom: '1rem', color: 'var(--primary-color)' } }, 'Pelerinaje Ortodoxe'),
+        createElement('p', null, 'Descoperă pelerinaje organizate la cele mai importante locuri sfinte din lume. Filtrează rezultatele pentru a găsi pelerinajul perfect pentru nevoile tale spirituale.')
+      );
+    }
+    
+    function createFilters() {
+      const months = ['Toate lunile', 'Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+      const transportOptions = ['Toate tipurile', 'Autocar', 'Avion', 'Mixt'];
+      const guideOptions = ['Toți ghizii', 'Preot', 'Ghid specializat', 'Fără ghid'];
+      const durationOptions = ['Toate duratele', '1-3 zile', '4-7 zile', '8-14 zile', 'Peste 14 zile'];
+
+      return createElement('div', { className: 'filters-container' },
+        createElement('h2', { style: { marginBottom: '1rem' } }, 'Filtrează pelerinajele'),
+        createElement('div', { className: 'filters-grid' },
+          // Filtru locație
+          createElement('div', { className: 'filter-group' },
+            createElement('label', { htmlFor: 'location-filter' }, 'Locație'),
+            createElement('input', { 
+              type: 'text', 
+              id: 'location-filter', 
+              placeholder: 'Ex: Israel, Grecia, România', 
+              value: pageState.filters.location,
+              onInput: (e) => {
+                pageState.filters.location = e.target.value;
+                applyFilters();
+              }
+            })
+          ),
+          
+          // Filtru lună
+          createElement('div', { className: 'filter-group' },
+            createElement('label', { htmlFor: 'month-filter' }, 'Luna'),
+            createElement('select', { 
+              id: 'month-filter',
+              onChange: (e) => {
+                pageState.filters.month = e.target.value;
+                applyFilters();
+              }
+            }, ...months.map((month, index) => 
+              createElement('option', { value: index === 0 ? '' : month }, month)
+            ))
+          ),
+          
+          // Filtru preț minim
+          createElement('div', { className: 'filter-group' },
+            createElement('label', { htmlFor: 'min-price-filter' }, 'Preț minim (lei)'),
+            createElement('input', { 
+              type: 'number', 
+              id: 'min-price-filter', 
+              placeholder: 'Ex: 1000', 
+              value: pageState.filters.minPrice,
+              onInput: (e) => {
+                pageState.filters.minPrice = e.target.value;
+                applyFilters();
+              }
+            })
+          ),
+          
+          // Filtru preț maxim
+          createElement('div', { className: 'filter-group' },
+            createElement('label', { htmlFor: 'max-price-filter' }, 'Preț maxim (lei)'),
+            createElement('input', { 
+              type: 'number', 
+              id: 'max-price-filter', 
+              placeholder: 'Ex: 5000', 
+              value: pageState.filters.maxPrice,
+              onInput: (e) => {
+                pageState.filters.maxPrice = e.target.value;
+                applyFilters();
+              }
+            })
+          ),
+          
+          // Filtru transport
+          createElement('div', { className: 'filter-group' },
+            createElement('label', { htmlFor: 'transportation-filter' }, 'Transport'),
+            createElement('select', { 
+              id: 'transportation-filter',
+              onChange: (e) => {
+                pageState.filters.transportation = e.target.value;
+                applyFilters();
+              }
+            }, ...transportOptions.map((option, index) => 
+              createElement('option', { value: index === 0 ? '' : option }, option)
+            ))
+          ),
+          
+          // Filtru ghid
+          createElement('div', { className: 'filter-group' },
+            createElement('label', { htmlFor: 'guide-filter' }, 'Însoțitor'),
+            createElement('select', { 
+              id: 'guide-filter',
+              onChange: (e) => {
+                pageState.filters.guide = e.target.value;
+                applyFilters();
+              }
+            }, ...guideOptions.map((option, index) => 
+              createElement('option', { value: index === 0 ? '' : option }, option)
+            ))
+          ),
+          
+          // Filtru durată
+          createElement('div', { className: 'filter-group' },
+            createElement('label', { htmlFor: 'duration-filter' }, 'Durată'),
+            createElement('select', { 
+              id: 'duration-filter',
+              onChange: (e) => {
+                pageState.filters.duration = e.target.value;
+                applyFilters();
+              }
+            }, ...durationOptions.map((option, index) => 
+              createElement('option', { value: index === 0 ? '' : option }, option)
+            ))
+          )
+        ),
+        
+        // Butoane filtru
+        createElement('div', { className: 'filter-buttons' },
+          createElement('button', { 
+            className: 'btn btn-primary',
+            onClick: applyFilters
+          }, 'Aplică filtrele'),
+          
+          createElement('button', { 
+            className: 'btn btn-outline',
+            onClick: resetFilters
+          }, 'Resetează filtrele')
+        )
+      );
+    }
+    
+    function createPilgrimagesList() {
+      if (pageState.loading) {
+        return createElement('div', { className: 'container', style: { textAlign: 'center', padding: '3rem 0' } },
+          createElement('div', { className: 'spinner', style: { margin: '0 auto' } }),
+          createElement('p', null, 'Se încarcă pelerinajele...')
+        );
+      }
+      
+      const pilgrimages = pageState.filteredPilgrimages.length > 0 ? pageState.filteredPilgrimages : pageState.pilgrimages;
+      
+      if (pilgrimages.length === 0) {
+        return createElement('div', { className: 'container empty-state' },
+          createElement('h3', null, 'Nu am găsit pelerinaje'),
+          createElement('p', null, 'Nu există pelerinaje care să corespundă criteriilor selectate. Încercați să modificați filtrele sau să reveniți mai târziu.')
+        );
+      }
+      
+      const pilgrimageCards = pilgrimages.map(pilgrimage => {
+        const startDate = new Date(pilgrimage.startDate).toLocaleDateString('ro-RO');
+        const endDate = new Date(pilgrimage.endDate).toLocaleDateString('ro-RO');
+        
+        return createElement('div', { className: 'pilgrimage-card' },
+          createElement('div', { className: 'pilgrimage-image' },
+            createElement('img', { src: pilgrimage.coverImage || '/images/default-pilgrimage.jpg', alt: pilgrimage.title })
+          ),
+          createElement('div', { className: 'pilgrimage-content' },
+            createElement('h3', { className: 'pilgrimage-title' }, pilgrimage.title),
+            createElement('div', { className: 'pilgrimage-meta' },
+              createElement('span', null, `${startDate} - ${endDate}`),
+              createElement('span', null, pilgrimage.location)
+            ),
+            createElement('p', { className: 'pilgrimage-description' }, pilgrimage.description.substring(0, 150) + '...'),
+            createElement('div', { className: 'pilgrimage-footer' },
+              createElement('span', { className: 'pilgrimage-price' }, `${pilgrimage.price} lei`),
+              createElement('a', { href: `/pilgrimages/${pilgrimage.id}`, className: 'btn btn-primary' }, 'Detalii')
+            )
+          )
+        );
+      });
+      
+      return createElement('div', { className: 'container', style: { padding: '2rem 0' } },
+        createElement('div', { className: 'pilgrimage-list' }, ...pilgrimageCards)
+      );
+    }
+    
+    function createFooter() {
+      return createElement('footer', { className: 'footer' },
+        createElement('div', { className: 'container' },
+          createElement('div', { className: 'footer-grid' },
+            // Coloana brand
+            createElement('div', { className: 'footer-brand' },
+              createElement('a', { href: '/' }, 'DOXA'),
+              createElement('p', null, 'Platformă dedicată călătoriilor spirituale și tradițiilor ortodoxe, oferind acces la pelerinaje, mănăstiri și resurse spirituale.'),
+              createElement('div', { className: 'footer-social' },
+                createElement('a', { href: '#', 'aria-label': 'Facebook' }, '📱'),
+                createElement('a', { href: '#', 'aria-label': 'Instagram' }, '📷'),
+                createElement('a', { href: '#', 'aria-label': 'YouTube' }, '📺')
+              )
+            ),
+            
+            // Coloana pelerinaje
+            createElement('div', { className: 'footer-links' },
+              createElement('h3', null, 'Pelerinaje'),
+              createElement('ul', null,
+                createElement('li', null, createElement('a', { href: '/pilgrimages' }, 'Toate pelerinajele')),
+                createElement('li', null, createElement('a', { href: '/pilgrimages?featured=true' }, 'Pelerinaje promovate')),
+                createElement('li', null, createElement('a', { href: '/pilgrimages?upcoming=true' }, 'Pelerinaje viitoare')),
+                createElement('li', null, createElement('a', { href: '/organizer/register' }, 'Devino organizator'))
+              )
+            ),
+            
+            // Coloana mănăstiri
+            createElement('div', { className: 'footer-links' },
+              createElement('h3', null, 'Mănăstiri'),
+              createElement('ul', null,
+                createElement('li', null, createElement('a', { href: '/monasteries' }, 'Toate mănăstirile')),
+                createElement('li', null, createElement('a', { href: '/monasteries?region=moldova' }, 'Mănăstiri din Moldova')),
+                createElement('li', null, createElement('a', { href: '/monasteries?region=muntenia' }, 'Mănăstiri din Muntenia')),
+                createElement('li', null, createElement('a', { href: '/monasteries?region=transilvania' }, 'Mănăstiri din Transilvania'))
+              )
+            ),
+            
+            // Coloana resurse
+            createElement('div', { className: 'footer-links' },
+              createElement('h3', null, 'Resurse'),
+              createElement('ul', null,
+                createElement('li', null, createElement('a', { href: '/calendar' }, 'Calendar ortodox')),
+                createElement('li', null, createElement('a', { href: '/fasting-recipes' }, 'Rețete de post')),
+                createElement('li', null, createElement('a', { href: '/doxa-ai' }, 'Asistent DOXA AI')),
+                createElement('li', null, createElement('a', { href: '/about' }, 'Despre noi'))
+              )
+            )
+          ),
+          
+          createElement('div', { className: 'footer-bottom' },
+            createElement('p', null, '© 2025 DOXA. Toate drepturile rezervate.'),
+            createElement('p', null,
+              createElement('a', { href: '/terms' }, 'Termeni și condiții'),
+              ' | ',
+              createElement('a', { href: '/privacy' }, 'Politica de confidențialitate'),
+              ' | ',
+              createElement('a', { href: '/cookies' }, 'Politica de cookies')
+            )
+          )
+        )
+      );
+    }
+    
+    // Funcție pentru a construi pagina de pelerinaje
+    function createPilgrimagesPage() {
+      return createElement('div', { className: 'app-container' },
+        createNavbar(),
+        createPageHeader(),
+        createFilters(),
+        createPilgrimagesList(),
+        createFooter()
+      );
+    }
+    
+    // Funcție pentru aplicarea filtrelor
+    function applyFilters() {
+      const { location, month, minPrice, maxPrice, transportation, guide, duration } = pageState.filters;
+      
+      pageState.filteredPilgrimages = pageState.pilgrimages.filter(pilgrimage => {
+        // Filtrare după locație
+        if (location && !pilgrimage.location.toLowerCase().includes(location.toLowerCase())) {
+          return false;
+        }
+        
+        // Filtrare după lună
+        if (month) {
+          const pilgrimageMonth = new Date(pilgrimage.startDate).toLocaleString('ro-RO', { month: 'long' });
+          if (pilgrimageMonth !== month) {
+            return false;
+          }
+        }
+        
+        // Filtrare după preț minim
+        if (minPrice && pilgrimage.price < parseInt(minPrice)) {
+          return false;
+        }
+        
+        // Filtrare după preț maxim
+        if (maxPrice && pilgrimage.price > parseInt(maxPrice)) {
+          return false;
+        }
+        
+        // Filtrare după transport
+        if (transportation && pilgrimage.transportation !== transportation) {
+          return false;
+        }
+        
+        // Filtrare după ghid
+        if (guide && pilgrimage.guideType !== guide) {
+          return false;
+        }
+        
+        // Filtrare după durată
+        if (duration) {
+          const days = (new Date(pilgrimage.endDate) - new Date(pilgrimage.startDate)) / (1000 * 60 * 60 * 24);
+          
+          if (duration === '1-3 zile' && (days < 1 || days > 3)) {
+            return false;
+          } else if (duration === '4-7 zile' && (days < 4 || days > 7)) {
+            return false;
+          } else if (duration === '8-14 zile' && (days < 8 || days > 14)) {
+            return false;
+          } else if (duration === 'Peste 14 zile' && days <= 14) {
+            return false;
+          }
+        }
+        
+        return true;
+      });
+      
+      renderPage();
+    }
+    
+    // Funcție pentru resetarea filtrelor
+    function resetFilters() {
+      pageState.filters = {
+        location: '',
+        month: '',
+        minPrice: '',
+        maxPrice: '',
+        transportation: '',
+        guide: '',
+        duration: ''
+      };
+      
+      // Resetăm și valorile câmpurilor din formular
+      document.getElementById('location-filter').value = '';
+      document.getElementById('month-filter').selectedIndex = 0;
+      document.getElementById('min-price-filter').value = '';
+      document.getElementById('max-price-filter').value = '';
+      document.getElementById('transportation-filter').selectedIndex = 0;
+      document.getElementById('guide-filter').selectedIndex = 0;
+      document.getElementById('duration-filter').selectedIndex = 0;
+      
+      pageState.filteredPilgrimages = [];
+      renderPage();
+    }
+    
+    // Funcție pentru încărcarea pelerinajelor
+    function loadPilgrimages() {
+      pageState.loading = true;
+      renderPage();
+      
+      fetch('/api/pilgrimages')
+        .then(response => response.json())
+        .then(data => {
+          pageState.pilgrimages = Array.isArray(data) ? data : [];
+          pageState.loading = false;
+          renderPage();
+        })
+        .catch(error => {
+          console.error('Eroare la încărcarea pelerinajelor:', error);
+          pageState.pilgrimages = [];
+          pageState.loading = false;
+          renderPage();
+        });
+    }
+    
+    // Funcție pentru randarea paginii
+    function renderPage() {
+      const container = document.getElementById('root');
+      if (container) {
+        container.innerHTML = '';
+        container.appendChild(createPilgrimagesPage());
+      }
+    }
+    
+    // Inițializare pagină
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        // Încărcăm pelerinajele
+        loadPilgrimages();
+      } catch (error) {
+        console.error('Eroare la inițializarea paginii de pelerinaje:', error);
+        
+        const rootElement = document.getElementById("root");
+        if (rootElement) {
+          rootElement.innerHTML = `
+            <div class="card" style="max-width: 800px; margin: 50px auto;">
+              <h2 style="color: #e74c3c;">Eroare la inițializarea paginii</h2>
+              <p>A apărut o eroare la încărcarea paginii de pelerinaje. Detalii în consola browser-ului.</p>
+              <p>Eroare: ${error.message}</p>
+              <div style="margin-top: 20px;">
+                <button onclick="location.reload()" class="btn">Reîncarcă pagina</button>
+              </div>
+            </div>
+          `;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
