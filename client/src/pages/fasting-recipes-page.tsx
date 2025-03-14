@@ -6,7 +6,7 @@ import {
   BookOpen, Coffee, Flame, Award, Calendar, Info, X,
   Archive
 } from 'lucide-react';
-import { FastingRecipe } from '../../shared/schema';
+import { type FastingRecipe } from '../../shared/schema.ts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
