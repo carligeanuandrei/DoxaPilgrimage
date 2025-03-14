@@ -101,8 +101,8 @@ export default function MonasteriesPage() {
   const [monasteryToDelete, setMonasteryToDelete] = useState<number | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [regionFilter, setRegionFilter] = useState<string>("");
-  const [typeFilter, setTypeFilter] = useState<string>("");
+  const [regionFilter, setRegionFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
 
   // Interogare pentru a obține mănăstirile
   const { data: monasteries, isLoading, error, refetch } = useQuery({
@@ -300,8 +300,8 @@ export default function MonasteriesPage() {
   // Funcție pentru a reseta filtrele
   const resetFilters = () => {
     setSearchQuery("");
-    setRegionFilter("");
-    setTypeFilter("");
+    setRegionFilter("all");
+    setTypeFilter("all");
   };
 
   return (
