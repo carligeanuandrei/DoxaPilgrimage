@@ -1,9 +1,25 @@
-import { Express, Request, Response } from 'express';
+import { Express, Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
-import { monasteries, cmsContent } from '@shared/schema';
-import { eq, and } from 'drizzle-orm';
+import { monasteries, cmsContent, insertMonasterySchema } from '@shared/schema';
+import { eq, and, desc } from 'drizzle-orm';
 import { db } from '../db';
 import { isAdmin } from '../auth';
+import { z } from 'zod';
+
+/**
+ * Middleware pentru a verifica dacă utilizatorul este administrator
+ */
+function checkAdminAccess(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Autentificare necesară' });
+  }
+  
+  if (!isAdmin(req)) {
+    return res.status(403).json({ message: 'Acces interzis - necesită drepturi de administrator' });
+  }
+  
+  next();
+}
 
 // Handler pentru rutele legate de mănăstiri
 export function registerMonasteryRoutes(app: Express) {
@@ -144,6 +160,167 @@ export function registerMonasteryRoutes(app: Express) {
       console.error('Error fetching monastery details:', error);
       res.status(500).json({ 
         message: 'Eroare la preluarea detaliilor mănăstirii', 
+        error: String(error) 
+      });
+    }
+  });
+  
+  /**
+   * Endpoint-uri pentru administrarea mănăstirilor (ADMIN ONLY)
+   */
+  
+  // GET /api/admin/monasteries - Obține toate mănăstirile pentru panoul de administrare
+  app.get('/api/admin/monasteries', checkAdminAccess, async (req, res) => {
+    try {
+      const allMonasteries = await db.select().from(monasteries).orderBy(desc(monasteries.createdAt));
+      
+      // Formatăm datele pentru a ne asigura că sunt complete
+      const formattedMonasteries = allMonasteries.map(monastery => {
+        return {
+          ...monastery,
+          // Convertim explicit câmpurile de date pentru a ne asigura că sunt formatate corect
+          patronSaintDate: monastery.patronSaintDate instanceof Date 
+            ? monastery.patronSaintDate 
+            : monastery.patronSaintDate ? new Date(monastery.patronSaintDate) : null,
+          // Asigurăm că valorile pentru arrays sunt definite
+          images: monastery.images || [],
+          relics: monastery.relics || [],
+          iconDescriptions: monastery.iconDescriptions || []
+        };
+      });
+      
+      res.json(formattedMonasteries);
+    } catch (error) {
+      console.error('Error fetching monasteries for admin:', error);
+      res.status(500).json({ 
+        message: 'Eroare la preluarea mănăstirilor pentru administrare', 
+        error: String(error) 
+      });
+    }
+  });
+  
+  // GET /api/admin/monasteries/:id - Obține detalii despre o mănăstire pentru editare
+  app.get('/api/admin/monasteries/:id', checkAdminAccess, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const monasteryId = parseInt(id, 10);
+      
+      if (isNaN(monasteryId)) {
+        return res.status(400).json({ message: 'ID mănăstire invalid' });
+      }
+      
+      const monastery = await db.query.monasteries.findFirst({
+        where: eq(monasteries.id, monasteryId)
+      });
+      
+      if (!monastery) {
+        return res.status(404).json({ message: 'Mănăstirea nu a fost găsită' });
+      }
+      
+      // Formatăm datele pentru a ne asigura că sunt complete
+      const formattedMonastery = {
+        ...monastery,
+        // Convertim explicit câmpurile de date pentru a ne asigura că sunt formatate corect
+        patronSaintDate: monastery.patronSaintDate instanceof Date 
+          ? monastery.patronSaintDate 
+          : monastery.patronSaintDate ? new Date(monastery.patronSaintDate) : null,
+        // Asigurăm că valorile pentru arrays sunt definite
+        images: monastery.images || [],
+        relics: monastery.relics || [],
+        iconDescriptions: monastery.iconDescriptions || []
+      };
+      
+      res.json(formattedMonastery);
+    } catch (error) {
+      console.error('Error fetching monastery details for edit:', error);
+      res.status(500).json({ 
+        message: 'Eroare la preluarea detaliilor mănăstirii pentru editare', 
+        error: String(error) 
+      });
+    }
+  });
+  
+  // PUT /api/admin/monasteries/:id - Actualizează informațiile unei mănăstiri
+  app.put('/api/admin/monasteries/:id', checkAdminAccess, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const monasteryId = parseInt(id, 10);
+      
+      if (isNaN(monasteryId)) {
+        return res.status(400).json({ message: 'ID mănăstire invalid' });
+      }
+      
+      // Validăm datele primite
+      const updateSchema = insertMonasterySchema.partial();
+      const validationResult = updateSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: 'Datele trimise nu sunt valide', 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      // Verificăm dacă mănăstirea există
+      const existingMonastery = await db.query.monasteries.findFirst({
+        where: eq(monasteries.id, monasteryId)
+      });
+      
+      if (!existingMonastery) {
+        return res.status(404).json({ message: 'Mănăstirea nu a fost găsită' });
+      }
+      
+      // Actualizăm mănăstirea în baza de date
+      await db.update(monasteries)
+        .set({
+          ...validationResult.data,
+          updatedAt: new Date()
+        })
+        .where(eq(monasteries.id, monasteryId));
+      
+      // Obținem mănăstirea actualizată
+      const updatedMonastery = await db.query.monasteries.findFirst({
+        where: eq(monasteries.id, monasteryId)
+      });
+      
+      res.json(updatedMonastery);
+    } catch (error) {
+      console.error('Error updating monastery:', error);
+      res.status(500).json({ 
+        message: 'Eroare la actualizarea mănăstirii', 
+        error: String(error) 
+      });
+    }
+  });
+  
+  // DELETE /api/admin/monasteries/:id - Șterge o mănăstire
+  app.delete('/api/admin/monasteries/:id', checkAdminAccess, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const monasteryId = parseInt(id, 10);
+      
+      if (isNaN(monasteryId)) {
+        return res.status(400).json({ message: 'ID mănăstire invalid' });
+      }
+      
+      // Verificăm dacă mănăstirea există
+      const existingMonastery = await db.query.monasteries.findFirst({
+        where: eq(monasteries.id, monasteryId)
+      });
+      
+      if (!existingMonastery) {
+        return res.status(404).json({ message: 'Mănăstirea nu a fost găsită' });
+      }
+      
+      // Ștergem mănăstirea din baza de date
+      await db.delete(monasteries)
+        .where(eq(monasteries.id, monasteryId));
+      
+      res.json({ message: 'Mănăstirea a fost ștearsă cu succes' });
+    } catch (error) {
+      console.error('Error deleting monastery:', error);
+      res.status(500).json({ 
+        message: 'Eroare la ștergerea mănăstirii', 
         error: String(error) 
       });
     }

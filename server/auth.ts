@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
@@ -15,6 +15,15 @@ declare global {
 }
 
 const scryptAsync = promisify(scrypt);
+
+/**
+ * Verifică dacă un utilizator are rol de administrator
+ * @param req Request-ul Express care conține informații despre utilizatorul autentificat
+ * @returns true dacă utilizatorul are rol de admin, false în caz contrar
+ */
+export function isAdmin(req: Request): boolean {
+  return req.user?.role === 'admin';
+}
 
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
