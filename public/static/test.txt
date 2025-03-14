@@ -1,0 +1,2 @@
+Acesta este un fișier de test pentru DOXA.
+Dacă vedeți acest mesaj, serverul servește corect fișierele statice.

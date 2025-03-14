@@ -3,137 +3,444 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verificare Frontend DOXA</title>
+  <title>DOXA - Pagină de Diagnosticare</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
       max-width: 800px;
       margin: 0 auto;
-      padding: 20px;
-      line-height: 1.6;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      color: #3b5998;
+    }
+    .section {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eaeaea;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .status-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
     }
     .success {
-      color: green;
-      font-weight: bold;
+      background-color: #4CAF50;
+    }
+    .warning {
+      background-color: #FF9800;
     }
     .error {
-      color: red;
-      font-weight: bold;
+      background-color: #F44336;
     }
-    .info {
-      color: blue;
-    }
-    h1 {
-      color: #333;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
+    .pending {
+      background-color: #9E9E9E;
     }
     pre {
-      background-color: #f0f0f0;
-      padding: 10px;
+      background-color: #f5f5f5;
+      padding: 1rem;
       border-radius: 4px;
       overflow-x: auto;
     }
     button {
-      padding: 8px 16px;
-      background-color: #4a90e2;
+      background-color: #3b5998;
       color: white;
       border: none;
+      padding: 0.5rem 1rem;
       border-radius: 4px;
       cursor: pointer;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
     }
     button:hover {
-      background-color: #357ac5;
+      background-color: #2d4373;
     }
-    #results {
-      margin-top: 20px;
+    input, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .chat-container {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 1rem;
+      height: 300px;
+      overflow-y: auto;
+    }
+    .chat-message {
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+    }
+    .chat-user {
+      background-color: #e9f0fe;
+      text-align: right;
+    }
+    .chat-ai {
+      background-color: #f1f1f1;
+    }
+    .tab-buttons {
+      display: flex;
+      margin-bottom: 1rem;
+    }
+    .tab-button {
+      padding: 0.5rem 1rem;
+      background-color: #f1f1f1;
+      border: none;
+      cursor: pointer;
+    }
+    .tab-button.active {
+      background-color: #3b5998;
+      color: white;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
     }
   </style>
 </head>
 <body>
-  <h1>Verificare Frontend DOXA</h1>
-  <p>Această pagină verifică starea și configurația frontend-ului pentru aplicația DOXA.</p>
-  
-  <button id="checkServer">Verifică Server</button>
-  <button id="checkApiStatus">Verifică API Status</button>
-  <button id="checkApiOpenAI">Verifică OpenAI API</button>
-  
-  <div id="results"></div>
+  <div class="container">
+    <h1>DOXA - Platformă de Diagnosticare</h1>
+    <p>Această pagină permite diagnosticarea și testarea diferitelor componente ale platformei DOXA.</p>
+
+    <div class="section">
+      <h2>Starea Serverului</h2>
+      <div class="status">
+        <div id="server-status-icon" class="status-icon pending"></div>
+        <span id="server-status-text">Se verifică starea serverului...</span>
+      </div>
+      <pre id="server-status-details"></pre>
+      <button onclick="checkServerStatus()">Reîncarcă starea serverului</button>
+    </div>
+
+    <div class="section">
+      <h2>API OpenAI</h2>
+      <div class="status">
+        <div id="openai-status-icon" class="status-icon pending"></div>
+        <span id="openai-status-text">Se verifică API-ul OpenAI...</span>
+      </div>
+      <pre id="openai-status-details"></pre>
+      <button onclick="checkOpenAIStatus()">Reîncarcă starea OpenAI</button>
+    </div>
+
+    <div class="section">
+      <h2>Testare API</h2>
+      <div class="tab-buttons">
+        <button class="tab-button active" onclick="openTab(event, 'doxaai-tab')">DOXA AI</button>
+        <button class="tab-button" onclick="openTab(event, 'pilgrimage-assistant-tab')">Asistent Pelerinaje</button>
+      </div>
+
+      <div id="doxaai-tab" class="tab-content active">
+        <h3>DOXA AI Chat</h3>
+        <div>
+          <input type="text" id="doxaai-prompt" placeholder="Introduceți întrebarea pentru DOXA AI...">
+          <button onclick="sendToDoxaAI()">Trimite</button>
+        </div>
+        <div class="chat-container" id="doxaai-chat">
+          <div class="chat-message chat-ai">Bună ziua! Sunt DOXA AI, asistentul dumneavoastră pentru informații despre pelerinaje și tradiții ortodoxe. Cu ce vă pot ajuta astăzi?</div>
+        </div>
+      </div>
+
+      <div id="pilgrimage-assistant-tab" class="tab-content">
+        <h3>Asistent Pelerinaje</h3>
+        <div>
+          <input type="text" id="pilgrimage-prompt" placeholder="Introduceți întrebarea pentru Asistentul de Pelerinaje...">
+          <button onclick="sendToPilgrimageAssistant()">Trimite</button>
+        </div>
+        <div class="chat-container" id="pilgrimage-chat">
+          <div class="chat-message chat-ai">Bună ziua! Sunt Asistentul de Pelerinaje. Vă pot ajuta să găsiți pelerinaje potrivite nevoilor dumneavoastră sau să vă ofer informații despre mănăstiri și destinații ortodoxe. Cu ce vă pot asista?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Acces fișiere statice</h2>
+      <div class="status">
+        <div id="static-status-icon" class="status-icon pending"></div>
+        <span id="static-status-text">Se verifică accesul la fișierele statice...</span>
+      </div>
+      <pre id="static-status-details"></pre>
+      <button onclick="checkStaticFiles()">Verifică fișierele statice</button>
+    </div>
+
+    <div class="section">
+      <h2>Detalii Sistem</h2>
+      <pre id="environment-details">Se încarcă detaliile de sistem...</pre>
+    </div>
+  </div>
 
   <script>
-    document.getElementById('checkServer').addEventListener('click', async () => {
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '<p>Verificare server în curs...</p>';
-      
+    // Verifică starea serverului
+    async function checkServerStatus() {
+      const statusIcon = document.getElementById('server-status-icon');
+      const statusText = document.getElementById('server-status-text');
+      const statusDetails = document.getElementById('server-status-details');
+
+      statusIcon.className = 'status-icon pending';
+      statusText.textContent = 'Se verifică starea serverului...';
+
       try {
         const response = await fetch('/api/server-status');
         const data = await response.json();
-        
-        resultsDiv.innerHTML = `
-          <h3 class="success">Server funcțional!</h3>
-          <pre>${JSON.stringify(data, null, 2)}</pre>
-        `;
+
+        if (response.ok) {
+          statusIcon.className = 'status-icon success';
+          statusText.textContent = 'Serverul funcționează corect';
+          statusDetails.textContent = JSON.stringify(data, null, 2);
+        } else {
+          statusIcon.className = 'status-icon error';
+          statusText.textContent = 'Eroare la verificarea serverului';
+          statusDetails.textContent = JSON.stringify(data, null, 2);
+        }
       } catch (error) {
-        resultsDiv.innerHTML = `
-          <h3 class="error">Eroare la verificarea serverului</h3>
-          <p>${error.message}</p>
-        `;
+        statusIcon.className = 'status-icon error';
+        statusText.textContent = 'Eroare de conexiune la server';
+        statusDetails.textContent = error.message;
       }
-    });
-    
-    document.getElementById('checkApiStatus').addEventListener('click', async () => {
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '<p>Verificare API în curs...</p>';
-      
-      try {
-        // Testăm un endpoint simplu
-        const response = await fetch('/api/server-status');
-        const data = await response.json();
-        
-        // Verificăm și fișierele statice
-        const staticResponse = await fetch('/static/test.txt')
-          .then(res => res.ok ? 'OK' : 'Nu s-a găsit')
-          .catch(err => 'Eroare: ' + err.message);
-        
-        resultsDiv.innerHTML = `
-          <h3 class="success">API funcțional!</h3>
-          <p>Status API: ${data.status}</p>
-          <p>Status fișiere statice: ${staticResponse}</p>
-          <p>Timestamp: ${data.timestamp}</p>
-          <p class="info">Verificați consolă pentru mai multe detalii.</p>
-        `;
-        console.log('Detalii API:', data);
-      } catch (error) {
-        resultsDiv.innerHTML = `
-          <h3 class="error">Eroare la verificarea API</h3>
-          <p>${error.message}</p>
-        `;
-      }
-    });
-    
-    document.getElementById('checkApiOpenAI').addEventListener('click', async () => {
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '<p>Verificare OpenAI API în curs...</p>';
-      
+    }
+
+    // Verifică starea API-ului OpenAI
+    async function checkOpenAIStatus() {
+      const statusIcon = document.getElementById('openai-status-icon');
+      const statusText = document.getElementById('openai-status-text');
+      const statusDetails = document.getElementById('openai-status-details');
+
+      statusIcon.className = 'status-icon pending';
+      statusText.textContent = 'Se verifică API-ul OpenAI...';
+
       try {
         const response = await fetch('/api/openai-status');
         const data = await response.json();
-        
-        const statusClass = data.available ? 'success' : 'error';
-        
-        resultsDiv.innerHTML = `
-          <h3 class="${statusClass}">Status OpenAI API</h3>
-          <p>Disponibil: ${data.available ? 'Da' : 'Nu'}</p>
-          <p>Configurat corect: ${data.configured ? 'Da' : 'Nu'}</p>
-          <p>Mesaj: ${data.message}</p>
-        `;
+
+        if (response.ok && data.available) {
+          statusIcon.className = 'status-icon success';
+          statusText.textContent = 'API-ul OpenAI este configurat și funcțional';
+          statusDetails.textContent = JSON.stringify(data, null, 2);
+        } else if (response.ok) {
+          statusIcon.className = 'status-icon warning';
+          statusText.textContent = 'API-ul OpenAI este configurat dar nu este disponibil';
+          statusDetails.textContent = JSON.stringify(data, null, 2);
+        } else {
+          statusIcon.className = 'status-icon error';
+          statusText.textContent = 'Eroare la verificarea API-ului OpenAI';
+          statusDetails.textContent = JSON.stringify(data, null, 2);
+        }
       } catch (error) {
-        resultsDiv.innerHTML = `
-          <h3 class="error">Eroare la verificarea OpenAI API</h3>
-          <p>${error.message}</p>
-        `;
+        statusIcon.className = 'status-icon error';
+        statusText.textContent = 'Eroare de conexiune la verificarea OpenAI';
+        statusDetails.textContent = error.message;
+      }
+    }
+
+    // Verifică accesul la fișierele statice
+    async function checkStaticFiles() {
+      const statusIcon = document.getElementById('static-status-icon');
+      const statusText = document.getElementById('static-status-text');
+      const statusDetails = document.getElementById('static-status-details');
+
+      statusIcon.className = 'status-icon pending';
+      statusText.textContent = 'Se verifică accesul la fișierele statice...';
+
+      try {
+        const response = await fetch('/static/test.txt');
+        const text = await response.text();
+
+        if (response.ok) {
+          statusIcon.className = 'status-icon success';
+          statusText.textContent = 'Fișierele statice sunt accesibile';
+          statusDetails.textContent = text;
+        } else {
+          statusIcon.className = 'status-icon error';
+          statusText.textContent = 'Eroare la accesarea fișierelor statice';
+          statusDetails.textContent = `Status: ${response.status} ${response.statusText}`;
+        }
+      } catch (error) {
+        statusIcon.className = 'status-icon error';
+        statusText.textContent = 'Eroare de conexiune la fișierele statice';
+        statusDetails.textContent = error.message;
+      }
+    }
+
+    // Trimite un mesaj către DOXA AI
+    async function sendToDoxaAI() {
+      const prompt = document.getElementById('doxaai-prompt').value;
+      if (!prompt.trim()) return;
+
+      const chatContainer = document.getElementById('doxaai-chat');
+      
+      // Adaugă mesajul utilizatorului
+      const userMessage = document.createElement('div');
+      userMessage.className = 'chat-message chat-user';
+      userMessage.textContent = prompt;
+      chatContainer.appendChild(userMessage);
+      
+      // Adaugă un mesaj de loading
+      const loadingMessage = document.createElement('div');
+      loadingMessage.className = 'chat-message chat-ai';
+      loadingMessage.textContent = 'Se procesează răspunsul...';
+      chatContainer.appendChild(loadingMessage);
+      
+      // Curăță inputul
+      document.getElementById('doxaai-prompt').value = '';
+      
+      // Scroll la ultimul mesaj
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const response = await fetch('/api/doxa-ai/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: prompt })
+        });
+
+        const data = await response.json();
+        
+        // Înlocuiește mesajul de loading cu răspunsul
+        loadingMessage.textContent = data.response || 'Nu am putut genera un răspuns.';
+      } catch (error) {
+        // Înlocuiește mesajul de loading cu eroarea
+        loadingMessage.textContent = `Eroare: ${error.message}`;
+      }
+      
+      // Scroll la ultimul mesaj
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Trimite un mesaj către Asistentul de Pelerinaje
+    async function sendToPilgrimageAssistant() {
+      const prompt = document.getElementById('pilgrimage-prompt').value;
+      if (!prompt.trim()) return;
+
+      const chatContainer = document.getElementById('pilgrimage-chat');
+      
+      // Adaugă mesajul utilizatorului
+      const userMessage = document.createElement('div');
+      userMessage.className = 'chat-message chat-user';
+      userMessage.textContent = prompt;
+      chatContainer.appendChild(userMessage);
+      
+      // Adaugă un mesaj de loading
+      const loadingMessage = document.createElement('div');
+      loadingMessage.className = 'chat-message chat-ai';
+      loadingMessage.textContent = 'Se procesează răspunsul...';
+      chatContainer.appendChild(loadingMessage);
+      
+      // Curăță inputul
+      document.getElementById('pilgrimage-prompt').value = '';
+      
+      // Scroll la ultimul mesaj
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const response = await fetch('/api/pilgrimage-assistant/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: prompt })
+        });
+
+        const data = await response.json();
+        
+        // Înlocuiește mesajul de loading cu răspunsul
+        loadingMessage.textContent = data.response || 'Nu am putut genera un răspuns.';
+      } catch (error) {
+        // Înlocuiește mesajul de loading cu eroarea
+        loadingMessage.textContent = `Eroare: ${error.message}`;
+      }
+      
+      // Scroll la ultimul mesaj
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Funcția pentru schimbarea taburilor
+    function openTab(evt, tabId) {
+      // Ascunde toate tab-urile
+      const tabContents = document.getElementsByClassName('tab-content');
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].className = tabContents[i].className.replace(' active', '');
+      }
+
+      // Dezactivează toate butoanele
+      const tabButtons = document.getElementsByClassName('tab-button');
+      for (let i = 0; i < tabButtons.length; i++) {
+        tabButtons[i].className = tabButtons[i].className.replace(' active', '');
+      }
+
+      // Arată tab-ul selectat și activează butonul
+      document.getElementById(tabId).className += ' active';
+      evt.currentTarget.className += ' active';
+    }
+
+    // Încarcă detaliile de mediu
+    async function loadEnvironmentDetails() {
+      const detailsElement = document.getElementById('environment-details');
+      
+      try {
+        const response = await fetch('/api/server-status');
+        const data = await response.json();
+        
+        const details = {
+          "Timpul serverului": new Date(data.timestamp).toLocaleString(),
+          "Mediu": data.environment,
+          "În Replit": data.replit ? "Da" : "Nu",
+          "Port": data.port,
+          "Versiune": data.version,
+          "Endpoint DOXA AI": data.endpoints?.doxaAiChat || "N/A",
+          "Endpoint Asistent Pelerinaje": data.endpoints?.pilgrimageAssistant || "N/A",
+          "Servire directoare": JSON.stringify(data.servingDirs || {}, null, 2)
+        };
+        
+        detailsElement.textContent = Object.entries(details)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join('\n');
+      } catch (error) {
+        detailsElement.textContent = `Eroare la încărcarea detaliilor: ${error.message}`;
+      }
+    }
+
+    // Adaugă event listener pentru tasta Enter în input-uri
+    document.getElementById('doxaai-prompt').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendToDoxaAI();
       }
     });
+
+    document.getElementById('pilgrimage-prompt').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendToPilgrimageAssistant();
+      }
+    });
+
+    // Inițializează pagina
+    window.onload = function() {
+      checkServerStatus();
+      checkOpenAIStatus();
+      checkStaticFiles();
+      loadEnvironmentDetails();
+    };
   </script>
 </body>
 </html>
