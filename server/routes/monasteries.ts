@@ -296,6 +296,24 @@ export function registerMonasteryRoutes(app: Express) {
         }
       }
       
+      // Verificăm și procesăm array-ul de imagini
+      if ('images' in dataToUpdate) {
+        // Verificăm dacă images există și este un string (în loc de array)
+        if (dataToUpdate.images && typeof dataToUpdate.images === 'string') {
+          try {
+            // Încercăm să parsăm string-ul ca JSON pentru a obține array-ul
+            dataToUpdate.images = JSON.parse(dataToUpdate.images);
+          } catch (error) {
+            // În caz de eroare la parsare, folosim un array gol
+            console.error('Eroare la parsarea array-ului de imagini:', error);
+            dataToUpdate.images = [];
+          }
+        } else if (!dataToUpdate.images) {
+          // Dacă images este null/undefined, îl setăm la array gol
+          dataToUpdate.images = [];
+        }
+      }
+      
       // Actualizăm mănăstirea în baza de date
       await db.update(monasteries)
         .set({
