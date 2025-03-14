@@ -9,68 +9,89 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 20px;
       padding: 20px;
-      background-color: #f8f9fa;
+      background-color: #f5f5f7;
+      color: #333;
     }
     .container {
       max-width: 800px;
       margin: 0 auto;
       background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
     h1 {
       color: #3b5998;
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #eaeaea;
+      padding-bottom: 15px;
     }
-    .result {
-      padding: 15px;
-      margin: 20px 0;
+    .test-box {
+      padding: 20px;
+      margin-bottom: 20px;
       border-radius: 8px;
+      position: relative;
+    }
+    .pending {
+      background-color: #f9f9f9;
+      border: 1px dashed #ccc;
     }
     .success {
       background-color: #e6fffa;
       border: 1px solid #00c9a7;
-      color: #047857;
     }
     .error {
       background-color: #fef2f2;
       border: 1px solid #f87171;
-      color: #b91c1c;
     }
-    .info {
-      background-color: #eff6ff;
-      border: 1px solid #93c5fd;
-      color: #1e40af;
+    .test-title {
+      font-weight: bold;
+      margin-bottom: 10px;
     }
-    pre {
-      background-color: #f1f5f9;
+    .result {
+      font-family: monospace;
+      white-space: pre-wrap;
+      background-color: #f5f5f5;
       padding: 10px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
-    .nav {
-      margin-top: 20px;
-    }
-    .nav a {
-      display: inline-block;
-      margin-right: 10px;
-      padding: 8px 16px;
-      background-color: #3b5998;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
+      border-radius: 5px;
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
     }
     button {
-      padding: 8px 16px;
-      background-color: #4338ca;
+      background-color: #3b5998;
       color: white;
       border: none;
-      border-radius: 4px;
+      padding: 10px 15px;
+      border-radius: 5px;
       cursor: pointer;
+      font-weight: bold;
       margin-top: 10px;
     }
     button:hover {
-      background-color: #3730a3;
+      background-color: #2d4373;
+    }
+    .navigation {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .navigation a {
+      display: inline-block;
+      margin: 0 10px;
+      color: #3b5998;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .navigation a:hover {
+      text-decoration: underline;
+    }
+    .info-box {
+      background-color: #f0f7ff;
+      border: 1px solid #93c5fd;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
     }
   </style>
 </head>
@@ -78,126 +99,150 @@
   <div class="container">
     <h1>Test Conexiune DOXA</h1>
     
-    <div class="result info">
-      <h3>Informații despre mediu</h3>
-      <p>URL: <span id="current-url"></span></p>
-      <p>User Agent: <span id="user-agent"></span></p>
+    <div class="info-box">
+      <p><strong>Browser:</strong> <span id="browser-info"></span></p>
+      <p><strong>Timp:</strong> <span id="timestamp"></span></p>
     </div>
     
-    <div>
-      <h3>Încărcare Modul ES</h3>
-      <div id="module-result" class="result">Apăsați butonul pentru a testa încărcarea modulului...</div>
-      <button id="test-module">Testează Încărcarea Modulului</button>
+    <div id="server-test" class="test-box pending">
+      <div class="test-title">Test server API</div>
+      <div>Verifică dacă serverul API răspunde la cereri simple.</div>
+      <button id="test-server-btn">Verifică conexiunea</button>
+      <div id="server-result" class="result">Așteptare...</div>
     </div>
     
-    <div>
-      <h3>Testare API</h3>
-      <div id="api-result" class="result">Apăsați butonul pentru a testa conexiunea la API...</div>
-      <button id="test-api">Testează Conexiunea la API</button>
+    <div id="js-module-test" class="test-box pending">
+      <div class="test-title">Test încărcare modul ES</div>
+      <div>Verifică dacă modulele ES pot fi încărcate corect.</div>
+      <button id="test-module-btn">Testează modulul</button>
+      <div id="module-result" class="result">Așteptare...</div>
     </div>
     
-    <div>
-      <h3>Testare Server</h3>
-      <div id="server-result" class="result">Apăsați butonul pentru a verifica statusul serverului...</div>
-      <button id="test-server">Verifică Statusul Serverului</button>
+    <div id="mime-test" class="test-box pending">
+      <div class="test-title">Test configurare MIME</div>
+      <div>Verifică dacă tipurile MIME sunt configurate corect pentru fișierele JavaScript.</div>
+      <button id="test-mime-btn">Verifică tipuri MIME</button>
+      <div id="mime-result" class="result">Așteptare...</div>
     </div>
     
-    <div class="nav">
-      <a href="/">Pagina Principală</a>
-      <a href="/public/test.html">Test Modul</a>
+    <div class="navigation">
+      <a href="/">Pagina principală</a> | 
+      <a href="/check-frontend.html">Verificare Frontend</a> |
+      <a href="/test-react.html">Test React</a>
     </div>
   </div>
-
-  <script>
-    // Populăm informațiile despre mediu
-    document.getElementById('current-url').textContent = window.location.href;
-    document.getElementById('user-agent').textContent = navigator.userAgent;
+  
+  <script type="module">
+    // Setează informațiile despre browser și timestamp
+    document.getElementById('browser-info').textContent = navigator.userAgent;
+    document.getElementById('timestamp').textContent = new Date().toLocaleString('ro-RO');
     
-    // Test pentru încărcarea modulului ES
-    document.getElementById('test-module').addEventListener('click', async () => {
-      const moduleResult = document.getElementById('module-result');
+    // Test server API
+    document.getElementById('test-server-btn').addEventListener('click', async () => {
+      const testBox = document.getElementById('server-test');
+      const resultEl = document.getElementById('server-result');
       
-      try {
-        // Încercăm să importăm modulul
-        const module = await import('./test-module.js');
-        
-        moduleResult.className = 'result success';
-        moduleResult.innerHTML = `
-          <h4>✅ Modulul a fost încărcat cu succes!</h4>
-          <p>Mesaj: ${module.getMessage()}</p>
-          <p>Nume: ${module.default.name}</p>
-          <p>Versiune: ${module.default.version}</p>
-        `;
-        console.log('Module loaded successfully:', module);
-      } catch (error) {
-        moduleResult.className = 'result error';
-        moduleResult.innerHTML = `
-          <h4>❌ Eroare la încărcarea modulului</h4>
-          <p>Mesaj: ${error.message}</p>
-          <pre>${error.stack}</pre>
-          <p>Verificați consola pentru mai multe detalii.</p>
-        `;
-        console.error('Module loading error:', error);
-      }
-    });
-    
-    // Test pentru conexiunea la API
-    document.getElementById('test-api').addEventListener('click', async () => {
-      const apiResult = document.getElementById('api-result');
-      apiResult.className = 'result';
-      apiResult.textContent = 'Se testează conexiunea la API...';
+      testBox.className = 'test-box pending';
+      resultEl.textContent = 'Se verifică conexiunea...';
       
       try {
         const response = await fetch('/api/status');
-        const data = await response.json();
         
-        apiResult.className = 'result success';
-        apiResult.innerHTML = `
-          <h4>✅ Conexiune API reușită</h4>
-          <p>Status: ${response.status} ${response.statusText}</p>
-          <p>Date primite:</p>
-          <pre>${JSON.stringify(data, null, 2)}</pre>
-        `;
-        console.log('API response:', data);
+        if (response.ok) {
+          const data = await response.json();
+          testBox.className = 'test-box success';
+          resultEl.textContent = `✅ Conexiune reușită!\n\nRăspuns: ${JSON.stringify(data, null, 2)}`;
+        } else {
+          testBox.className = 'test-box error';
+          resultEl.textContent = `❌ Eroare HTTP: ${response.status} ${response.statusText}`;
+        }
       } catch (error) {
-        apiResult.className = 'result error';
-        apiResult.innerHTML = `
-          <h4>❌ Eroare de conexiune API</h4>
-          <p>Mesaj: ${error.message}</p>
-          <pre>${error.stack}</pre>
-          <p>Verificați consola pentru mai multe detalii.</p>
-        `;
-        console.error('API connection error:', error);
+        testBox.className = 'test-box error';
+        resultEl.textContent = `❌ Eroare de conexiune: ${error.message}`;
       }
     });
     
-    // Test pentru statusul serverului
-    document.getElementById('test-server').addEventListener('click', async () => {
-      const serverResult = document.getElementById('server-result');
-      serverResult.className = 'result';
-      serverResult.textContent = 'Se verifică statusul serverului...';
+    // Test încărcare modul ES
+    document.getElementById('test-module-btn').addEventListener('click', async () => {
+      const testBox = document.getElementById('js-module-test');
+      const resultEl = document.getElementById('module-result');
+      
+      testBox.className = 'test-box pending';
+      resultEl.textContent = 'Se testează încărcarea modulului...';
       
       try {
-        const response = await fetch('/api/server-status');
-        const data = await response.json();
+        const module = await import('../client/test-module.js');
         
-        serverResult.className = 'result success';
-        serverResult.innerHTML = `
-          <h4>✅ Serverul funcționează normal</h4>
-          <p>Status: ${response.status} ${response.statusText}</p>
-          <p>Date primite:</p>
-          <pre>${JSON.stringify(data, null, 2)}</pre>
-        `;
-        console.log('Server status response:', data);
+        if (module && typeof module.getMessage === 'function') {
+          testBox.className = 'test-box success';
+          resultEl.textContent = `✅ Modul încărcat cu succes!\n\nMesaj: ${module.getMessage()}\n\nStare: ${JSON.stringify(module.getTestStatus(), null, 2)}`;
+        } else {
+          testBox.className = 'test-box error';
+          resultEl.textContent = `⚠️ Modulul a fost importat, dar nu conține funcția așteptată: ${JSON.stringify(module, null, 2)}`;
+        }
       } catch (error) {
-        serverResult.className = 'result error';
-        serverResult.innerHTML = `
-          <h4>❌ Eroare la verificarea statusului serverului</h4>
-          <p>Mesaj: ${error.message}</p>
-          <pre>${error.stack}</pre>
-          <p>Verificați consola pentru mai multe detalii.</p>
-        `;
-        console.error('Server status check error:', error);
+        testBox.className = 'test-box error';
+        resultEl.textContent = `❌ Eroare la încărcarea modulului: ${error.message}\n\nStack: ${error.stack}`;
+      }
+    });
+    
+    // Test MIME Types
+    document.getElementById('test-mime-btn').addEventListener('click', async () => {
+      const testBox = document.getElementById('mime-test');
+      const resultEl = document.getElementById('mime-result');
+      
+      testBox.className = 'test-box pending';
+      resultEl.textContent = 'Se verifică tipurile MIME...';
+      
+      const files = [
+        '/client/test-module.js',
+        '/public/static/test.js',
+        '/client/src/main.tsx',
+        '/client/src/App.tsx'
+      ];
+      
+      try {
+        const results = {};
+        let allCorrect = true;
+        
+        for (const file of files) {
+          try {
+            const response = await fetch(file, { method: 'HEAD' });
+            const type = response.headers.get('content-type');
+            
+            const isCorrect = type && 
+              (type.includes('javascript') || 
+               type.includes('application/ecmascript') ||
+               type.includes('application/x-typescript'));
+            
+            results[file] = {
+              status: response.status,
+              contentType: type,
+              isCorrect
+            };
+            
+            if (!isCorrect) {
+              allCorrect = false;
+            }
+          } catch (e) {
+            results[file] = {
+              error: e.message,
+              isCorrect: false
+            };
+            allCorrect = false;
+          }
+        }
+        
+        if (allCorrect) {
+          testBox.className = 'test-box success';
+          resultEl.textContent = `✅ Toate tipurile MIME sunt configurate corect!\n\n${JSON.stringify(results, null, 2)}`;
+        } else {
+          testBox.className = 'test-box error';
+          resultEl.textContent = `⚠️ Au fost detectate probleme cu tipurile MIME:\n\n${JSON.stringify(results, null, 2)}`;
+        }
+      } catch (error) {
+        testBox.className = 'test-box error';
+        resultEl.textContent = `❌ Eroare la verificarea tipurilor MIME: ${error.message}`;
       }
     });
   </script>
