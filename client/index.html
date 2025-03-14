@@ -80,6 +80,88 @@
       </div>
     </div>
   </div>
-  <script type="module" src="/src/main.tsx"></script>
+  <!-- Folosim un script simplificat pentru a evita probleme de sintaxă și import -->
+  <script type="module">
+    // Încărcăm React și componentele necesare
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+    
+    // Verificăm dacă elementul root există
+    const rootElement = document.getElementById('root');
+    
+    if (rootElement) {
+      try {
+        // Inițializăm QueryClient simplu, fără configurările complexe
+        const queryClient = new QueryClient();
+        
+        // Importăm aplicația principală
+        import('./src/App.jsx').then((module) => {
+          const App = module.default;
+          
+          // Importăm contextele necesare
+          import('./src/hooks/use-auth.jsx').then((authModule) => {
+            const AuthProvider = authModule.AuthProvider;
+            
+            import('./src/components/shared/cms-content.jsx').then((cmsModule) => {
+              const CmsContentProvider = cmsModule.CmsContentProvider;
+              
+              // Creăm root-ul React și randăm aplicația
+              const root = createRoot(rootElement);
+              root.render(
+                React.createElement(
+                  QueryClientProvider, 
+                  { client: queryClient },
+                  React.createElement(
+                    AuthProvider,
+                    null,
+                    React.createElement(
+                      CmsContentProvider,
+                      null,
+                      React.createElement(App, null)
+                    )
+                  )
+                )
+              );
+              
+              console.log('Aplicația a fost inițializată cu succes');
+            }).catch(error => {
+              console.error('Eroare la importul CmsContentProvider:', error);
+              showError(error);
+            });
+          }).catch(error => {
+            console.error('Eroare la importul AuthProvider:', error);
+            showError(error);
+          });
+        }).catch(error => {
+          console.error('Eroare la importul App:', error);
+          showError(error);
+        });
+        
+        // Funcție pentru afișarea erorilor în UI
+        function showError(error) {
+          rootElement.innerHTML = `
+            <div style="max-width: 800px; margin: 50px auto; padding: 20px; background: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <h2 style="color: #e74c3c;">Eroare la inițializarea aplicației</h2>
+              <p>A apărut o eroare la încărcarea aplicației. Detalii în consola browser-ului.</p>
+              <pre style="background: #f1f1f1; padding: 10px; border-radius: 4px; overflow: auto;">${error}</pre>
+            </div>
+          `;
+        }
+        
+      } catch (error) {
+        console.error('Eroare generală la inițializarea aplicației:', error);
+        rootElement.innerHTML = `
+          <div style="max-width: 800px; margin: 50px auto; padding: 20px; background: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #e74c3c;">Eroare la inițializarea aplicației</h2>
+            <p>A apărut o eroare la încărcarea aplicației. Detalii în consola browser-ului.</p>
+            <pre style="background: #f1f1f1; padding: 10px; border-radius: 4px; overflow: auto;">${error}</pre>
+          </div>
+        `;
+      }
+    } else {
+      console.error('Nu s-a găsit elementul root în DOM');
+    }
+  </script>
 </body>
 </html>
