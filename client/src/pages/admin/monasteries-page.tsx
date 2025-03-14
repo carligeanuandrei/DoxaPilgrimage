@@ -107,12 +107,18 @@ export default function MonasteriesPage() {
   // Interogare pentru a obține mănăstirile
   const { data: monasteries, isLoading, error, refetch } = useQuery({
     queryKey: ['/api/admin/monasteries'],
-    queryFn: () => apiRequest('GET', '/api/admin/monasteries')
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/admin/monasteries');
+      return response.json();
+    }
   });
 
   // Mutație pentru ștergerea unei mănăstiri
   const deleteMonasteryMutation = useMutation({
-    mutationFn: (monasteryId: number) => apiRequest('DELETE', `/api/admin/monasteries/${monasteryId}`),
+    mutationFn: async (monasteryId: number) => {
+      const response = await apiRequest('DELETE', `/api/admin/monasteries/${monasteryId}`);
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Mănăstirea a fost ștearsă cu succes",
@@ -133,9 +139,10 @@ export default function MonasteriesPage() {
 
   // Mutație pentru actualizarea unei mănăstiri
   const updateMonasteryMutation = useMutation({
-    mutationFn: (data: Partial<Monastery> & { id: number }) => {
+    mutationFn: async (data: Partial<Monastery> & { id: number }) => {
       const { id, ...updateData } = data;
-      return apiRequest('PUT', `/api/admin/monasteries/${id}`, updateData);
+      const response = await apiRequest('PUT', `/api/admin/monasteries/${id}`, updateData);
+      return response.json();
     },
     onSuccess: () => {
       toast({
