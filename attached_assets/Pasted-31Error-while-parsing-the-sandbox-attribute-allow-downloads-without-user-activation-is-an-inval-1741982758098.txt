@@ -1,0 +1,71 @@
+31Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.Understand this errorAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'battery'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+framework-1a6de13499006ad2.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-1a6de13499006ad2.js:1Understand this warningAI
+20hook.js:608 Invalid href 'https://3465d494-39a1-4482-9ab0-942fe9316e6a-00-3rinfx19mbdxt.spock.replit.dev//' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+overrideMethod @ hook.js:608Understand this errorAI
+hook.js:608 Invalid href 'https://3465d494-39a1-4482-9ab0-942fe9316e6a-00-3rinfx19mbdxt.spock.replit.dev//client/test-connection.html' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+overrideMethod @ hook.js:608Understand this errorAI
+hook.js:608 Invalid href 'https://3465d494-39a1-4482-9ab0-942fe9316e6a-00-3rinfx19mbdxt.spock.replit.dev//' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+overrideMethod @ hook.js:608Understand this errorAI
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'battery'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'battery'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.Understand this warningAI
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.Understand this warningAI
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.Understand this warningAI
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.Understand this warningAI
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.Understand this warningAI
+2hook.js:608 Invalid href 'https://3465d494-39a1-4482-9ab0-942fe9316e6a-00-3rinfx19mbdxt.spock.replit.dev//' passed to next/router in page: '/replEnvironmentDesktop'. Repeated forward-slashes (//) or backslashes \ are not valid in the href.
+overrideMethod @ hook.js:608Understand this errorAI
+main.tsx:1 Failed to load module script: Expected a JavaScript module script but the server responded with a MIME type of "application/octet-stream". Strict MIME type checking is enforced for module scripts per HTML spec.Understand this errorAI
+main.tsx:1 Failed to load module script: Expected a JavaScript module script but the server responded with a MIME type of "application/octet-stream". Strict MIME type checking is enforced for module scripts per HTML spec.Understand this errorAI
+main.tsx:1 Failed to load module script: Expected a JavaScript module script but the server responded with a MIME type of "application/octet-stream". Strict MIME type checking is enforced for module scripts per HTML spec.Understand this errorAI
+main.tsx:1 Failed to load module script: Expected a JavaScript module script but the server responded with a MIME type of "application/octet-stream". Strict MIME type checking is enforced for module scripts per HTML spec.
