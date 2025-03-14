@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
@@ -34,6 +34,7 @@ import MonasteryDetailsPage from "@/pages/monasteries/[slug]";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import { useEffect } from "react";
 
 function Router() {
   return (
@@ -105,6 +106,13 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+  
+  // Realizează scroll către începutul paginii la fiecare schimbare de rută
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
