@@ -28,6 +28,7 @@ import OrganizerStatsPage from "@/pages/admin/organizer-stats-page";
 import MonasteriesPageAdmin from "@/pages/admin/monasteries-page";
 import FastingRecipesAdminPage from "@/pages/admin/fasting-recipes";
 import CustomCssEditor from "@/pages/admin/custom-css-editor";
+import DoxaAiDashboard from "@/pages/admin/doxaai-dashboard";
 import AdminLoginPage from "@/pages/admin/admin-login";
 import EditablePage from "@/pages/EditablePage";
 import MonasteriesPage from "@/pages/monasteries/index";
@@ -100,6 +101,9 @@ function Router() {
       </Route>
       <Route path="/admin/custom-css">
         <ProtectedRoute component={CustomCssEditor} path="/admin/custom-css" adminOnly={true} />
+      </Route>
+      <Route path="/admin/doxaai">
+        <ProtectedRoute component={DoxaAiDashboard} path="/admin/doxaai" adminOnly={true} />
       </Route>
       {/* Dynamic page route - matches custom pages created in the editor */}
       <Route path="/:slug">

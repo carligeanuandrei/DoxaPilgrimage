@@ -192,6 +192,12 @@ export default function Header() {
                           <span>Editor CSS</span>
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/doxaai" className="cursor-pointer w-full">
+                          <Brain className="mr-2 h-4 w-4" />
+                          <span>DOXA AI</span>
+                        </Link>
+                      </DropdownMenuItem>
                     </>
                   )}
                   
@@ -308,6 +314,10 @@ export default function Header() {
                       <Link href="/admin/custom-css" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
                         <Paintbrush className="inline mr-2 h-4 w-4" />
                         Editor CSS
+                      </Link>
+                      <Link href="/admin/doxaai" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <Brain className="inline mr-2 h-4 w-4" />
+                        DOXA AI
                       </Link>
                     </>
                   )}
