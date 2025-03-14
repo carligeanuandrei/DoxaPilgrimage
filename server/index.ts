@@ -15,6 +15,12 @@ app.use(express.urlencoded({ extended: false }));
 // Servim fișierele statice din folderul public, care conține imagini și alte resurse
 app.use(express.static(path.resolve("public")));
 
+// Servim și folderul node_modules și client în modul de dezvoltare
+if (process.env.NODE_ENV === "development") {
+  app.use('/node_modules', express.static(path.resolve("node_modules")));
+  app.use('/client', express.static(path.resolve("client")));
+}
+
 // Middleware pentru gestionarea timeout-urilor
 app.use((req, res, next) => {
   // Setează un timeout pentru toate cererile API
