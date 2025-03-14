@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <title>DOXA - Platformă de Pelerinaje Ortodoxe</title>
+  <meta http-equiv="refresh" content="0;url=/client/index.html">
+  <title>DOXA - Redirectare către aplicația completă</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -12,15 +13,14 @@
       padding: 0;
       background-color: #f8f9fa;
       color: #333;
-    }
-    .loading-container {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
       text-align: center;
     }
-    .loading-box {
+    .container {
       max-width: 600px;
       padding: 2rem;
       background-color: white;
@@ -47,12 +47,9 @@
     p {
       margin: 1rem 0;
     }
-    .links {
-      margin-top: 2rem;
-    }
-    .links a {
+    a {
       display: inline-block;
-      margin: 0 0.5rem;
+      margin-top: 1rem;
       padding: 0.5rem 1rem;
       background-color: #3b5998;
       color: white;
@@ -60,34 +57,15 @@
       border-radius: 4px;
       font-weight: 500;
     }
-    #root {
-      width: 100%;
-      min-height: 100vh;
-    }
   </style>
-  <!-- CSS pentru aplicație -->
-  <link rel="stylesheet" href="/src/index.css">
-  
-  <!-- Script JavaScript pentru aplicație -->
-  <script src="/src/main.js"></script>
 </head>
 <body>
-  <div id="root">
-    <div class="loading-container">
-      <div class="loading-box">
-        <h1>DOXA</h1>
-        <p>Platformă de Pelerinaje Ortodoxe</p>
-        <div class="spinner"></div>
-        <p>Aplicația se încarcă...</p>
-        <div class="links">
-          <a href="/diagnoza.html">Diagnostic Complet</a>
-          <a href="/api/server-status" target="_blank">Verificare Server</a>
-          <a href="/api/server-status/html" target="_blank">Status Server Detaliat</a>
-        </div>
-      </div>
-    </div>
+  <div class="container">
+    <h1>DOXA</h1>
+    <p>Redirectare către aplicația completă...</p>
+    <div class="spinner"></div>
+    <p>Dacă nu sunteți redirectat automat, faceți click pe butonul de mai jos:</p>
+    <a href="/client/index.html">Încarcă Aplicația Completă</a>
   </div>
-  
-  <!-- JavaScript vanilla va prelua controlul asupra DOM-ului când se încarcă -->
 </body>
 </html>
