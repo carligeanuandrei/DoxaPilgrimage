@@ -65,8 +65,11 @@
       min-height: 100vh;
     }
   </style>
-  <!-- Preact este o alternativă mai mică și mai rapidă la React -->
-  <script type="module" src="/src/main.tsx"></script>
+  <!-- CSS pentru aplicație -->
+  <link rel="stylesheet" href="/src/index.css">
+  
+  <!-- Script standard JavaScript pentru aplicație - nu module -->
+  <script src="/src/main.js" defer></script>
 </head>
 <body>
   <div id="root">
@@ -77,11 +80,9 @@
         <div class="spinner"></div>
         <p>Aplicația se încarcă...</p>
         <div class="links">
-          <a href="/client/test-connection.html">Verificare Conexiune</a>
-          <a href="/client/check-frontend.html">Diagnostic Frontend</a>
-          <a href="/test-react.html">Test React (JSX)</a>
-          <a href="/react-basic.html">Test React (Basic)</a>
+          <a href="/diagnoza.html">Diagnostic Complet</a>
           <a href="/api/server-status" target="_blank">Verificare Server</a>
+          <a href="/api/server-status/html" target="_blank">Status Server Detaliat</a>
         </div>
       </div>
     </div>

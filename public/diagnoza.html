@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOXA - Diagnoza Frontend</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #3b5998;
+      margin-top: 0;
+    }
+    .section {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+    .section:last-child {
+      border-bottom: none;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #3b5998;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .btn-secondary {
+      background-color: #27ae60;
+    }
+    .log-container {
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      font-family: monospace;
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .result-container {
+      margin-top: 15px;
+      padding: 15px;
+      border: 1px dashed #ddd;
+      border-radius: 4px;
+    }
+    .error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    .success {
+      color: #27ae60;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>DOXA - Diagnoza Frontend</h1>
+    <p>Această pagină ajută la diagnosticarea problemelor din frontend și testarea comunicării cu backend-ul.</p>
+    
+    <div class="section">
+      <h2>Informații despre Browser</h2>
+      <div id="browser-info"></div>
+    </div>
+    
+    <div class="section">
+      <h2>Status Server</h2>
+      <button id="check-server" class="btn">Verifică Statusul Serverului</button>
+      <div id="server-status" class="result-container">Apasă butonul pentru a verifica statusul serverului...</div>
+    </div>
+    
+    <div class="section">
+      <h2>Test API - Rețete de Post</h2>
+      <button id="test-recipes" class="btn">Testează API Rețete</button>
+      <div id="recipes-result" class="result-container">Apasă butonul pentru a testa API-ul de rețete...</div>
+    </div>
+    
+    <div class="section">
+      <h2>Test API - Mănăstiri</h2>
+      <button id="test-monasteries" class="btn">Testează API Mănăstiri</button>
+      <div id="monasteries-result" class="result-container">Apasă butonul pentru a testa API-ul de mănăstiri...</div>
+    </div>
+    
+    <div class="section">
+      <h2>Console Log</h2>
+      <div id="console-log" class="log-container">Logurile vor apărea aici...</div>
+    </div>
+    
+    <div class="section">
+      <h2>Navigare</h2>
+      <a href="/" class="btn">Pagina Principală</a>
+      <a href="/api/server-status/html" class="btn btn-secondary">Status Server Detaliat</a>
+    </div>
+  </div>
+
+  <script>
+    // Funcție pentru afișarea logurilor în pagină
+    function log(message, type = 'info') {
+      const logContainer = document.getElementById('console-log');
+      const logEntry = document.createElement('div');
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      
+      if (type === 'error') {
+        logEntry.className = 'error';
+      } else if (type === 'success') {
+        logEntry.className = 'success';
+      }
+      
+      logContainer.appendChild(logEntry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      
+      // Salvăm și în consola browser-ului
+      console[type === 'error' ? 'error' : type === 'success' ? 'info' : 'log'](message);
+    }
+
+    // Afișăm informații despre browser
+    function displayBrowserInfo() {
+      const browserInfoDiv = document.getElementById('browser-info');
+      const info = `
+        <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+        <p><strong>Platformă:</strong> ${navigator.platform}</p>
+        <p><strong>Limbă:</strong> ${navigator.language}</p>
+        <p><strong>Cookies Activate:</strong> ${navigator.cookieEnabled ? 'Da' : 'Nu'}</p>
+        <p><strong>Rezoluție Ecran:</strong> ${window.screen.width} x ${window.screen.height}</p>
+        <p><strong>Rezoluție Fereastră:</strong> ${window.innerWidth} x ${window.innerHeight}</p>
+      `;
+      browserInfoDiv.innerHTML = info;
+      log('Informațiile despre browser au fost încărcate');
+    }
+
+    // Funcție pentru verificarea statusului serverului
+    async function checkServerStatus() {
+      const statusDiv = document.getElementById('server-status');
+      statusDiv.innerHTML = 'Se verifică statusul serverului...';
+      
+      try {
+        log('Se trimite cerere către /api/server-status...');
+        const response = await fetch('/api/server-status');
+        
+        if (!response.ok) {
+          throw new Error(`Eroare HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        log('Răspuns primit de la server', 'success');
+        
+        statusDiv.innerHTML = `
+          <p class="success">✅ Serverul este online!</p>
+          <p><strong>Mediu:</strong> ${data.environment}</p>
+          <p><strong>Uptime:</strong> ${data.uptime}</p>
+          <p><strong>Versiune Node:</strong> ${data.nodeVersion}</p>
+          <p><strong>Memorie:</strong> ${Math.round(data.memoryUsage.rss / (1024 * 1024))} MB</p>
+        `;
+      } catch (error) {
+        log(`Eroare la verificarea statusului serverului: ${error.message}`, 'error');
+        statusDiv.innerHTML = `<p class="error">❌ Eroare la verificarea statusului serverului: ${error.message}</p>`;
+      }
+    }
+
+    // Funcție pentru testarea API-ului de rețete
+    async function testRecipesAPI() {
+      const resultDiv = document.getElementById('recipes-result');
+      resultDiv.innerHTML = 'Se testează API-ul de rețete...';
+      
+      try {
+        log('Se trimite cerere către /api/fasting-recipes/featured...');
+        const response = await fetch('/api/fasting-recipes/featured');
+        
+        if (!response.ok) {
+          throw new Error(`Eroare HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        log('Răspuns primit de la API-ul de rețete', 'success');
+        
+        if (data && Array.isArray(data) && data.length > 0) {
+          resultDiv.innerHTML = `
+            <p class="success">✅ API-ul de rețete funcționează!</p>
+            <p><strong>Număr rețete primite:</strong> ${data.length}</p>
+            <p><strong>Exemplu de rețetă:</strong> ${data[0].title}</p>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <p class="success">✅ API-ul de rețete funcționează, dar nu au fost găsite rețete.</p>
+          `;
+        }
+      } catch (error) {
+        log(`Eroare la testarea API-ului de rețete: ${error.message}`, 'error');
+        resultDiv.innerHTML = `<p class="error">❌ Eroare la testarea API-ului de rețete: ${error.message}</p>`;
+      }
+    }
+
+    // Funcție pentru testarea API-ului de mănăstiri
+    async function testMonasteriesAPI() {
+      const resultDiv = document.getElementById('monasteries-result');
+      resultDiv.innerHTML = 'Se testează API-ul de mănăstiri...';
+      
+      try {
+        log('Se trimite cerere către /api/monasteries/regions...');
+        const response = await fetch('/api/monasteries/regions');
+        
+        if (!response.ok) {
+          throw new Error(`Eroare HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        log('Răspuns primit de la API-ul de mănăstiri', 'success');
+        
+        if (data && Array.isArray(data) && data.length > 0) {
+          resultDiv.innerHTML = `
+            <p class="success">✅ API-ul de mănăstiri funcționează!</p>
+            <p><strong>Număr regiuni primite:</strong> ${data.length}</p>
+            <p><strong>Exemplu de regiune:</strong> ${data[0].name}</p>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <p class="success">✅ API-ul de mănăstiri funcționează, dar nu au fost găsite regiuni.</p>
+          `;
+        }
+      } catch (error) {
+        log(`Eroare la testarea API-ului de mănăstiri: ${error.message}`, 'error');
+        resultDiv.innerHTML = `<p class="error">❌ Eroare la testarea API-ului de mănăstiri: ${error.message}</p>`;
+      }
+    }
+
+    // Inițializăm toate funcționalitățile la încărcarea paginii
+    document.addEventListener('DOMContentLoaded', () => {
+      log('Pagina de diagnoză a fost încărcată');
+      
+      displayBrowserInfo();
+      
+      // Adăugăm event listeners pentru butoane
+      document.getElementById('check-server').addEventListener('click', checkServerStatus);
+      document.getElementById('test-recipes').addEventListener('click', testRecipesAPI);
+      document.getElementById('test-monasteries').addEventListener('click', testMonasteriesAPI);
+      
+      // Verificăm automat statusul serverului la încărcare
+      checkServerStatus();
+    });
+
+    // Interceptăm și afișăm erorile JavaScript
+    window.onerror = function(message, source, lineno, colno, error) {
+      log(`Eroare JavaScript: ${message} (${source}:${lineno}:${colno})`, 'error');
+      return false;
+    };
+  </script>
+</body>
+</html>

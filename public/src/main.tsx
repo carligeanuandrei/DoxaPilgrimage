@@ -44,8 +44,8 @@ function render(element, container) {
 // Stare simplă pentru aplicație
 const loading = false;
 const status = 'online';
-import './index.css';
-import App from './App';
+// Importul de CSS trebuie făcut diferit, nu ca modul ES
+// Vom adăuga CSS-ul direct în HTML
 
 // Componentă simplă Doxa pentru pagina principală
 function DoxaApp() {
