@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificare Frontend DOXA</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .info {
+      color: blue;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #357ac5;
+    }
+    #results {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Verificare Frontend DOXA</h1>
+  <p>Această pagină verifică starea și configurația frontend-ului pentru aplicația DOXA.</p>
+  
+  <button id="checkServer">Verifică Server</button>
+  <button id="checkApiStatus">Verifică API Status</button>
+  <button id="checkApiOpenAI">Verifică OpenAI API</button>
+  
+  <div id="results"></div>
+
+  <script>
+    document.getElementById('checkServer').addEventListener('click', async () => {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<p>Verificare server în curs...</p>';
+      
+      try {
+        const response = await fetch('/api/server-status');
+        const data = await response.json();
+        
+        resultsDiv.innerHTML = `
+          <h3 class="success">Server funcțional!</h3>
+          <pre>${JSON.stringify(data, null, 2)}</pre>
+        `;
+      } catch (error) {
+        resultsDiv.innerHTML = `
+          <h3 class="error">Eroare la verificarea serverului</h3>
+          <p>${error.message}</p>
+        `;
+      }
+    });
+    
+    document.getElementById('checkApiStatus').addEventListener('click', async () => {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<p>Verificare API în curs...</p>';
+      
+      try {
+        // Testăm un endpoint simplu
+        const response = await fetch('/api/server-status');
+        const data = await response.json();
+        
+        // Verificăm și fișierele statice
+        const staticResponse = await fetch('/static/test.txt')
+          .then(res => res.ok ? 'OK' : 'Nu s-a găsit')
+          .catch(err => 'Eroare: ' + err.message);
+        
+        resultsDiv.innerHTML = `
+          <h3 class="success">API funcțional!</h3>
+          <p>Status API: ${data.status}</p>
+          <p>Status fișiere statice: ${staticResponse}</p>
+          <p>Timestamp: ${data.timestamp}</p>
+          <p class="info">Verificați consolă pentru mai multe detalii.</p>
+        `;
+        console.log('Detalii API:', data);
+      } catch (error) {
+        resultsDiv.innerHTML = `
+          <h3 class="error">Eroare la verificarea API</h3>
+          <p>${error.message}</p>
+        `;
+      }
+    });
+    
+    document.getElementById('checkApiOpenAI').addEventListener('click', async () => {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<p>Verificare OpenAI API în curs...</p>';
+      
+      try {
+        const response = await fetch('/api/openai-status');
+        const data = await response.json();
+        
+        const statusClass = data.available ? 'success' : 'error';
+        
+        resultsDiv.innerHTML = `
+          <h3 class="${statusClass}">Status OpenAI API</h3>
+          <p>Disponibil: ${data.available ? 'Da' : 'Nu'}</p>
+          <p>Configurat corect: ${data.configured ? 'Da' : 'Nu'}</p>
+          <p>Mesaj: ${data.message}</p>
+        `;
+      } catch (error) {
+        resultsDiv.innerHTML = `
+          <h3 class="error">Eroare la verificarea OpenAI API</h3>
+          <p>${error.message}</p>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

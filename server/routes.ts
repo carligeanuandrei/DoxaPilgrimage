@@ -99,6 +99,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Înregistrăm rutele pentru harta interactivă
   await registerPilgrimageMapRoutes(app);
+  
+  // Endpoint pentru verificarea stării serverului și pentru depanare
+  app.get("/api/server-status", (req, res) => {
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+      replit: !!process.env.REPL_ID,
+      port: process.env.PORT || "5000",
+      servingDirs: {
+        public: true,
+        client: true,
+        nodeModules: true
+      },
+      endpoints: {
+        doxaAiChat: "/api/doxa-ai/chat",
+        pilgrimageAssistant: "/api/pilgrimage-assistant/chat"
+      },
+      version: "1.2.0"
+    });
+  });
+  
+  // Endpoint pentru verificarea API key-ului OpenAI (fără a expune cheia)
+  app.get("/api/openai-status", async (req, res) => {
+    const hasKey = !!process.env.OPENAI_API_KEY;
+    const keyLength = process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0;
+    
+    res.json({
+      available: hasKey,
+      configured: keyLength > 20, // Verificare simplă, cheile OpenAI au minim 51 caractere
+      message: hasKey 
+        ? "OpenAI API key este configurat și disponibil pentru DOXA AI" 
+        : "OpenAI API key nu este configurat. DOXA AI va folosi răspunsuri alternative."
+    });
+  });
 
   // Check auth middleware
   const isAuthenticated = (req: any, res: any, next: any) => {
