@@ -1,10 +1,13 @@
 // Implementare simplificată JavaScript pentru DOXA
 // Folosește DOM API direct pentru o abordare mai robustă
 
-// Stare simplă pentru aplicație
+// Stare pentru aplicație
 const appState = {
   loading: false,
-  status: 'online'
+  status: 'online',
+  featuredPilgrimages: [],
+  monasteries: [],
+  upcomingPilgrimages: []
 };
 
 // Funcție helper pentru crearea elementelor DOM
@@ -46,7 +49,233 @@ function createElement(tag, props, ...children) {
   return element;
 }
 
-// Funcție pentru a crea UI-ul aplicației
+// Componente de interfață
+function createNavbar() {
+  return createElement('nav', { className: 'navbar' },
+    createElement('div', { className: 'container navbar-content' },
+      createElement('a', { href: '/', className: 'navbar-brand' },
+        'DOXA'
+      ),
+      createElement('div', { className: 'navbar-links' },
+        createElement('a', { href: '/pilgrimages' }, 'Pelerinaje'),
+        createElement('a', { href: '/monasteries' }, 'Mănăstiri'),
+        createElement('a', { href: '/calendar' }, 'Calendar Ortodox'),
+        createElement('a', { href: '/fasting-recipes' }, 'Rețete de Post'),
+        createElement('a', { href: '/doxa-ai' }, 'DOXA AI')
+      ),
+      createElement('div', { className: 'navbar-auth' },
+        createElement('a', { href: '/auth', className: 'btn btn-outline' }, 'Autentificare'),
+        createElement('a', { href: '/auth?mode=register', className: 'btn btn-primary' }, 'Înregistrare')
+      )
+    )
+  );
+}
+
+function createHeroSection() {
+  return createElement('section', { className: 'hero' },
+    createElement('div', { className: 'container hero-content' },
+      createElement('h1', null, 'Descoperă locuri sfinte'),
+      createElement('p', null, 'Pelerinaje la cele mai frumoase mănăstiri și locuri sfinte din lume'),
+      createElement('div', { className: 'hero-buttons' },
+        createElement('a', { href: '/pilgrimages', className: 'btn btn-primary' }, 'Descoperă pelerinaje'),
+        createElement('a', { href: '/doxa-ai', className: 'btn btn-secondary' }, 'Asistent AI')
+      )
+    )
+  );
+}
+
+function createFeaturesSection() {
+  const features = [
+    {
+      title: 'Pelerinaje ghidate',
+      description: 'Excursii spirituale la cele mai importante mănăstiri și locuri sfinte, însoțite de ghizi specializați.',
+      icon: '🛣️'
+    },
+    {
+      title: 'Calendar Ortodox',
+      description: 'Calendar complet cu sărbătorile ortodoxe, zile de post și sfinți importanți din tradiția ortodoxă.',
+      icon: '📅'
+    },
+    {
+      title: 'Comunitate spirituală',
+      description: 'Conectează-te cu alți credincioși, împărtășește experiențe și participă la evenimente spirituale.',
+      icon: '🤝'
+    },
+    {
+      title: 'Asistent AI',
+      description: 'Utilizează asistentul nostru AI pentru a găsi informații precise despre tradiții, sărbători și pelerinaje.',
+      icon: '🤖'
+    }
+  ];
+
+  const featureCards = features.map(feature => 
+    createElement('div', { className: 'feature-card' },
+      createElement('div', { className: 'feature-icon' }, feature.icon),
+      createElement('h3', null, feature.title),
+      createElement('p', null, feature.description)
+    )
+  );
+
+  return createElement('section', { className: 'features' },
+    createElement('div', { className: 'container' },
+      createElement('div', { className: 'section-title' },
+        createElement('h2', null, 'Explorați credința cu DOXA'),
+        createElement('p', null, 'Platforma care te ghidează în călătoria spirituală, oferindu-ți acces la pelerinaje și tradiții ortodoxe.')
+      ),
+      createElement('div', { className: 'features-grid' }, ...featureCards)
+    )
+  );
+}
+
+function createFeaturedPilgrimagesSection() {
+  // Verificăm dacă avem pelerinaje disponibile
+  if (!appState.featuredPilgrimages.length) {
+    return null;
+  }
+
+  const pilgrimageCards = appState.featuredPilgrimages.map(pilgrimage => {
+    const startDate = new Date(pilgrimage.startDate).toLocaleDateString('ro-RO');
+    const endDate = new Date(pilgrimage.endDate).toLocaleDateString('ro-RO');
+    
+    return createElement('div', { className: 'pilgrimage-card' },
+      createElement('div', { className: 'pilgrimage-image' },
+        createElement('img', { src: pilgrimage.coverImage || '/images/default-pilgrimage.jpg', alt: pilgrimage.title })
+      ),
+      createElement('div', { className: 'pilgrimage-content' },
+        createElement('h3', { className: 'pilgrimage-title' }, pilgrimage.title),
+        createElement('div', { className: 'pilgrimage-meta' },
+          createElement('span', null, `${startDate} - ${endDate}`),
+          createElement('span', null, pilgrimage.location)
+        ),
+        createElement('p', { className: 'pilgrimage-description' }, pilgrimage.description.substring(0, 120) + '...'),
+        createElement('div', { className: 'pilgrimage-footer' },
+          createElement('span', { className: 'pilgrimage-price' }, `${pilgrimage.price} lei`),
+          createElement('a', { href: `/pilgrimages/${pilgrimage.id}`, className: 'btn btn-primary' }, 'Detalii')
+        )
+      )
+    );
+  });
+
+  return createElement('section', { className: 'pilgrimages' },
+    createElement('div', { className: 'container' },
+      createElement('div', { className: 'section-title' },
+        createElement('h2', null, 'Pelerinaje promovate'),
+        createElement('p', null, 'Călătorii spirituale organizate cu grijă pentru o experiență de neuitat')
+      ),
+      createElement('div', { className: 'pilgrimages-grid' }, ...pilgrimageCards)
+    )
+  );
+}
+
+function createMonasteriesSection() {
+  // Verificăm dacă avem mănăstiri disponibile
+  if (!appState.monasteries.length) {
+    return null;
+  }
+
+  const monasteryCards = appState.monasteries.map(monastery => {
+    return createElement('div', { className: 'monastery-card' },
+      createElement('div', { className: 'monastery-image' },
+        createElement('img', { src: monastery.coverImage || '/images/default-monastery.jpg', alt: monastery.name })
+      ),
+      createElement('div', { className: 'monastery-content' },
+        createElement('h3', { className: 'monastery-title' }, monastery.name),
+        createElement('div', { className: 'monastery-location' },
+          createElement('span', null, `${monastery.city}, ${monastery.region}`)
+        ),
+        createElement('p', { className: 'monastery-description' }, monastery.shortDescription || monastery.description.substring(0, 100) + '...'),
+        createElement('a', { href: `/monasteries/${monastery.id}`, className: 'btn btn-outline' }, 'Vizitează')
+      )
+    );
+  });
+
+  return createElement('section', { className: 'monasteries' },
+    createElement('div', { className: 'container' },
+      createElement('div', { className: 'section-title' },
+        createElement('h2', null, 'Mănăstiri remarcabile'),
+        createElement('p', null, 'Explorează frumusețea și istoria mănăstirilor ortodoxe')
+      ),
+      createElement('div', { className: 'monasteries-grid' }, ...monasteryCards)
+    )
+  );
+}
+
+function createCallToActionSection() {
+  return createElement('section', { className: 'cta-section' },
+    createElement('div', { className: 'container text-center', style: { padding: '4rem 0' } },
+      createElement('h2', { className: 'text-primary', style: { marginBottom: '1rem' } }, 'Pregătit pentru o călătorie spirituală?'),
+      createElement('p', { style: { marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' } }, 
+        'Rezervă acum și beneficiază de ofertele noastre speciale pentru pelerinaje în locuri sfinte'
+      ),
+      createElement('a', { href: '/pilgrimages', className: 'btn btn-primary' }, 'Descoperă pelerinaje')
+    )
+  );
+}
+
+function createFooter() {
+  return createElement('footer', { className: 'footer' },
+    createElement('div', { className: 'container' },
+      createElement('div', { className: 'footer-grid' },
+        // Coloana brand
+        createElement('div', { className: 'footer-brand' },
+          createElement('a', { href: '/' }, 'DOXA'),
+          createElement('p', null, 'Platformă dedicată călătoriilor spirituale și tradițiilor ortodoxe, oferind acces la pelerinaje, mănăstiri și resurse spirituale.'),
+          createElement('div', { className: 'footer-social' },
+            createElement('a', { href: '#', 'aria-label': 'Facebook' }, '📱'),
+            createElement('a', { href: '#', 'aria-label': 'Instagram' }, '📷'),
+            createElement('a', { href: '#', 'aria-label': 'YouTube' }, '📺')
+          )
+        ),
+        
+        // Coloana pelerinaje
+        createElement('div', { className: 'footer-links' },
+          createElement('h3', null, 'Pelerinaje'),
+          createElement('ul', null,
+            createElement('li', null, createElement('a', { href: '/pilgrimages' }, 'Toate pelerinajele')),
+            createElement('li', null, createElement('a', { href: '/pilgrimages?featured=true' }, 'Pelerinaje promovate')),
+            createElement('li', null, createElement('a', { href: '/pilgrimages?upcoming=true' }, 'Pelerinaje viitoare')),
+            createElement('li', null, createElement('a', { href: '/organizer/register' }, 'Devino organizator'))
+          )
+        ),
+        
+        // Coloana mănăstiri
+        createElement('div', { className: 'footer-links' },
+          createElement('h3', null, 'Mănăstiri'),
+          createElement('ul', null,
+            createElement('li', null, createElement('a', { href: '/monasteries' }, 'Toate mănăstirile')),
+            createElement('li', null, createElement('a', { href: '/monasteries?region=moldova' }, 'Mănăstiri din Moldova')),
+            createElement('li', null, createElement('a', { href: '/monasteries?region=muntenia' }, 'Mănăstiri din Muntenia')),
+            createElement('li', null, createElement('a', { href: '/monasteries?region=transilvania' }, 'Mănăstiri din Transilvania'))
+          )
+        ),
+        
+        // Coloana resurse
+        createElement('div', { className: 'footer-links' },
+          createElement('h3', null, 'Resurse'),
+          createElement('ul', null,
+            createElement('li', null, createElement('a', { href: '/calendar' }, 'Calendar ortodox')),
+            createElement('li', null, createElement('a', { href: '/fasting-recipes' }, 'Rețete de post')),
+            createElement('li', null, createElement('a', { href: '/doxa-ai' }, 'Asistent DOXA AI')),
+            createElement('li', null, createElement('a', { href: '/about' }, 'Despre noi'))
+          )
+        )
+      ),
+      
+      createElement('div', { className: 'footer-bottom' },
+        createElement('p', null, '© 2025 DOXA. Toate drepturile rezervate.'),
+        createElement('p', null,
+          createElement('a', { href: '/terms' }, 'Termeni și condiții'),
+          ' | ',
+          createElement('a', { href: '/privacy' }, 'Politica de confidențialitate'),
+          ' | ',
+          createElement('a', { href: '/cookies' }, 'Politica de cookies')
+        )
+      )
+    )
+  );
+}
+
+// Funcție pentru a crea întreaga pagină
 function createDoxaApp() {
   if (appState.loading) {
     return createElement('div', { className: 'loading-container' },
@@ -59,53 +288,60 @@ function createDoxaApp() {
     );
   }
 
-  return createElement('div', { className: 'card' },
-    createElement('h1', { style: { color: '#3b5998' } }, 'DOXA - Platformă de Pelerinaje Ortodoxe'),
-    createElement('p', null, 'Aplicația DOXA a fost încărcată cu succes în varianta simplificată!'),
-    createElement('p', null, 'Status server: ', 
-      createElement('span', { style: { 
-        color: appState.status === 'online' ? '#27ae60' : '#e74c3c',
-        fontWeight: 'bold'
-      }}, appState.status === 'online' ? 'Online' : 'Offline')
-    ),
-    
-    createElement('div', { style: { marginTop: '20px' } },
-      createElement('h2', null, 'Funcționalități DOXA:'),
-      createElement('ul', null,
-        createElement('li', null, 'Informații despre mănăstiri ortodoxe'),
-        createElement('li', null, 'Calendar ortodox și sărbători'),
-        createElement('li', null, 'Organizare și rezervare pelerinaje'),
-        createElement('li', null, 'Asistent AI pentru planificarea călătoriilor religioase')
-      )
-    ),
-    
-    createElement('div', { style: { marginTop: '30px' } },
-      createElement('h3', null, 'Navigare:'),
-      createElement('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } },
-        createElement('a', { 
-          href: '/diagnoza.html',
-          className: 'btn'
-        }, 'Diagnostic Frontend'),
-        
-        createElement('a', { 
-          href: '/api/server-status/html',
-          className: 'btn btn-secondary'
-        }, 'Status Server')
-      )
-    )
+  // Componentele paginii principale
+  return createElement('div', { className: 'app-container' },
+    createNavbar(),
+    createHeroSection(),
+    createFeaturesSection(),
+    createFeaturedPilgrimagesSection(),
+    createMonasteriesSection(),
+    createCallToActionSection(),
+    createFooter()
   );
 }
 
-// Verificare stare server la încărcare
+// Încarcă date pentru pelerinaje promovate
+function loadFeaturedPilgrimages() {
+  fetch('/api/pilgrimages?featured=true')
+    .then(response => response.json())
+    .then(data => {
+      appState.featuredPilgrimages = Array.isArray(data) ? data.slice(0, 3) : [];
+      renderApp();
+    })
+    .catch(error => {
+      console.error('Eroare la încărcarea pelerinajelor promovate:', error);
+      appState.featuredPilgrimages = [];
+    });
+}
+
+// Încarcă date pentru mănăstiri
+function loadMonasteries() {
+  fetch('/api/monasteries?limit=4')
+    .then(response => response.json())
+    .then(data => {
+      appState.monasteries = Array.isArray(data) ? data.slice(0, 4) : [];
+      renderApp();
+    })
+    .catch(error => {
+      console.error('Eroare la încărcarea mănăstirilor:', error);
+      appState.monasteries = [];
+    });
+}
+
+// Verificare stare server și încărcare date
 function checkServerStatus() {
   appState.loading = true;
+  renderApp();
   
   fetch('/api/server-status')
     .then(response => response.json())
     .then(data => {
       appState.status = 'online';
       appState.loading = false;
-      renderApp();
+      
+      // După ce am verificat statusul, încărcăm datele
+      loadFeaturedPilgrimages();
+      loadMonasteries();
     })
     .catch(error => {
       console.error('Eroare la verificarea statusului serverului:', error);
@@ -132,10 +368,11 @@ function renderApp() {
 // Inițializam aplicația când DOM-ul este încărcat
 document.addEventListener('DOMContentLoaded', () => {
   try {
-    // Prima randare cu starea inițială
+    // Prima randare cu starea inițială (loading)
+    appState.loading = true;
     renderApp();
     
-    // Verificăm statutul serverului
+    // Verificăm statutul serverului și încărcăm datele
     setTimeout(checkServerStatus, 1000);
   } catch (error) {
     console.error("Eroare la inițializarea aplicației DOXA:", error);
