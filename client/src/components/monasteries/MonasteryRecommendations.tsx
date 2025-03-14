@@ -202,7 +202,7 @@ export default function MonasteryRecommendations() {
         </CardContent>
         <CardFooter className="p-4 pt-0">
           <Button variant="outline" asChild className="w-full">
-            <Link href={`/monasteries/${monastery.slug}`}>
+            <Link to={`/monasteries/${monastery.slug}`}>
               Vezi detalii
             </Link>
           </Button>

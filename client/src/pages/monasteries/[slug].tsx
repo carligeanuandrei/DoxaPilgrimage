@@ -47,11 +47,9 @@ export default function MonasteryDetailsPage({ slug: propSlug }: MonasteryDetail
           <p className="text-muted-foreground mb-6">
             Ne pare rău, dar mănăstirea pe care o căutați nu există sau a fost eliminată.
           </p>
-          <Link href="/monasteries">
-            <a className="inline-flex items-center text-primary hover:underline">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Înapoi la lista de mănăstiri
-            </a>
+          <Link to="/monasteries" className="inline-flex items-center text-primary hover:underline">
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Înapoi la lista de mănăstiri
           </Link>
         </div>
       </div>
@@ -67,11 +65,9 @@ export default function MonasteryDetailsPage({ slug: propSlug }: MonasteryDetail
 
   return (
     <div className="container py-8 md:py-12">
-      <Link href="/monasteries">
-        <a className="inline-flex items-center text-primary hover:underline mb-6">
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Înapoi la lista de mănăstiri
-        </a>
+      <Link to="/monasteries" className="inline-flex items-center text-primary hover:underline mb-6">
+        <ChevronLeft className="h-4 w-4 mr-1" />
+        Înapoi la lista de mănăstiri
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
