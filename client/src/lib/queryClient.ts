@@ -8,10 +8,10 @@ async function throwIfResNotOk(res: Response) {
 }
 
 // Funcție pentru reîncercarea operațiunilor de rețea cu strategie de backoff exponențial
-async function fetchWithRetry(
-  url: string, 
-  options: RequestInit, 
-  maxRetries = 3, 
+export async function fetchWithRetry(
+  url: string,
+  options: RequestInit = {},
+  maxRetries = 3,
   delay = 500
 ): Promise<Response> {
   let retries = 0;
@@ -26,7 +26,9 @@ async function fetchWithRetry(
       let fetchPromise: Promise<Response>;
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(new DOMException('Timeout depășit', 'TimeoutError')), 15000);
+      const timeoutId = setTimeout(() => {
+        controller.abort(new DOMException('Timeout depășit', 'TimeoutError'));
+      }, 15000);
 
       try {
         fetchPromise = fetch(normalizedUrl, {
@@ -42,8 +44,13 @@ async function fetchWithRetry(
         const response = await fetchPromise;
         clearTimeout(timeoutId);
         return response;
-      } catch (error) {
+      } catch (error: any) {
         clearTimeout(timeoutId);
+        if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+          console.error(`Cererea a fost întreruptă: ${error.message || 'Timeout depășit'}`);
+          throw new Error(`Cererea a eșuat: ${error.message || 'Timeout depășit'}`);
+        }
+        console.error("Error in fetchWithRetry:", error);
         throw error;
       }
     } catch (error) {
