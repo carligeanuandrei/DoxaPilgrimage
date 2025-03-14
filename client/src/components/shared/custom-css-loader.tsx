@@ -1,83 +1,86 @@
-import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { useEffect, useState } from 'react';
 
 /**
- * Component pentru încărcarea și aplicarea CSS-ului personalizat din CMS.
- * Acesta va încărca automat CSS-ul global și cel pentru mobile și le va aplica
- * în pagină folosind tag-uri style.
+ * Componenta responsabilă pentru încărcarea și aplicarea CSS-ului personalizat global și pentru mobil
+ * CSS-ul este încărcat dinamic și injectat în pagină
  */
 export default function CustomCssLoader() {
-  // Încărcăm CSS-ul global din CMS
-  const { data: globalCssData } = useQuery({
-    queryKey: ['/api/cms/custom_css_global'],
-    queryFn: async () => {
-      try {
-        const response = await apiRequest('GET', '/api/cms/custom_css_global');
-        return response.data;
-      } catch (error) {
-        // Dacă nu există CSS global, nu afișăm erori - este opțional
-        console.debug('CSS Global nedetectat, se ignoră.');
-        return null;
-      }
-    },
-    retry: false,
-    refetchOnWindowFocus: false
-  });
+  const [globalCssLoaded, setGlobalCssLoaded] = useState(false);
+  const [mobileCssLoaded, setMobileCssLoaded] = useState(false);
 
-  // Încărcăm CSS-ul pentru dispozitive mobile
-  const { data: mobileCssData } = useQuery({
-    queryKey: ['/api/cms/custom_css_mobile'],
-    queryFn: async () => {
-      try {
-        const response = await apiRequest('GET', '/api/cms/custom_css_mobile');
-        return response.data;
-      } catch (error) {
-        // CSS-ul pentru mobile e opțional, deci nu arătăm erori
-        console.debug('CSS Mobile nedetectat, se ignoră.');
-        return null;
-      }
-    },
-    retry: false,
-    refetchOnWindowFocus: false
-  });
-
-  // Aplicăm CSS-ul global când este încărcat
+  // Încărcăm CSS-ul global
   useEffect(() => {
-    if (globalCssData && globalCssData.value) {
-      // Verificăm dacă există deja un element style pentru CSS global
-      let styleElement = document.getElementById('global-custom-css');
-      
-      // Dacă nu există, îl creăm
-      if (!styleElement) {
-        styleElement = document.createElement('style');
-        styleElement.id = 'global-custom-css';
-        document.head.appendChild(styleElement);
+    const loadGlobalCss = async () => {
+      try {
+        const response = await fetch('/api/cms/custom_css_global');
+        if (response.ok) {
+          const content = await response.json();
+          if (content && content.value) {
+            // Injectăm CSS-ul global în pagină
+            const styleElement = document.createElement('style');
+            styleElement.id = 'custom-global-css';
+            styleElement.textContent = content.value;
+            document.head.appendChild(styleElement);
+            setGlobalCssLoaded(true);
+          }
+        } else {
+          console.log('Nu există CSS global personalizat.');
+        }
+      } catch (error) {
+        console.error('Eroare la încărcarea CSS-ului global:', error);
       }
-      
-      // Actualizăm conținutul
-      styleElement.textContent = globalCssData.value;
-    }
-  }, [globalCssData]);
+    };
 
-  // Aplicăm CSS-ul pentru mobile când este încărcat
-  useEffect(() => {
-    if (mobileCssData && mobileCssData.value) {
-      // Verificăm dacă există deja un element style pentru CSS mobile
-      let styleElement = document.getElementById('mobile-custom-css');
-      
-      // Dacă nu există, îl creăm
-      if (!styleElement) {
-        styleElement = document.createElement('style');
-        styleElement.id = 'mobile-custom-css';
-        document.head.appendChild(styleElement);
+    // Încărcăm CSS-ul pentru mobile
+    const loadMobileCss = async () => {
+      try {
+        const response = await fetch('/api/cms/custom_css_mobile');
+        if (response.ok) {
+          const content = await response.json();
+          if (content && content.value) {
+            // Injectăm CSS-ul pentru mobile în pagină
+            const styleElement = document.createElement('style');
+            styleElement.id = 'custom-mobile-css';
+            styleElement.textContent = `@media (max-width: 768px) { ${content.value} }`;
+            document.head.appendChild(styleElement);
+            setMobileCssLoaded(true);
+          }
+        } else {
+          console.log('Nu există CSS pentru mobile personalizat.');
+        }
+      } catch (error) {
+        console.error('Eroare la încărcarea CSS-ului pentru mobile:', error);
       }
-      
-      // Actualizăm conținutul
-      styleElement.textContent = mobileCssData.value;
-    }
-  }, [mobileCssData]);
+    };
 
-  // Acest component nu renderizează nimic vizibil
+    // Eliminăm stilurile existente pentru a evita duplicate la reîncărcare
+    const existingGlobalStyle = document.getElementById('custom-global-css');
+    if (existingGlobalStyle) {
+      existingGlobalStyle.remove();
+    }
+
+    const existingMobileStyle = document.getElementById('custom-mobile-css');
+    if (existingMobileStyle) {
+      existingMobileStyle.remove();
+    }
+
+    loadGlobalCss();
+    loadMobileCss();
+
+    // La dezmontarea componentei, curățăm stilurile
+    return () => {
+      const globalStyle = document.getElementById('custom-global-css');
+      if (globalStyle) {
+        globalStyle.remove();
+      }
+
+      const mobileStyle = document.getElementById('custom-mobile-css');
+      if (mobileStyle) {
+        mobileStyle.remove();
+      }
+    };
+  }, []);
+
+  // Componenta nu render-ează nimic vizibil
   return null;
 }

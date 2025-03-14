@@ -2109,6 +2109,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * GET /api/cms/custom_css_global
+   * Returnează CSS-ul global personalizat
+   */
+  app.get("/api/cms/custom_css_global", async (req, res) => {
+    try {
+      const content = await storage.getCmsContent('custom_css_global');
+      
+      if (!content) {
+        console.log(`[DEBUG] No global CSS found`);
+        return res.status(404).json({ error: 'CSS global negăsit' });
+      }
+      
+      return res.json(content);
+    } catch (error) {
+      console.error('Error fetching global CSS:', error);
+      return res.status(500).json({ error: 'Eroare la obținerea CSS-ului global' });
+    }
+  });
+  
+  /**
+   * GET /api/cms/custom_css_mobile
+   * Returnează CSS-ul pentru mobile personalizat
+   */
+  app.get("/api/cms/custom_css_mobile", async (req, res) => {
+    try {
+      const content = await storage.getCmsContent('custom_css_mobile');
+      
+      if (!content) {
+        console.log(`[DEBUG] No mobile CSS found`);
+        return res.status(404).json({ error: 'CSS pentru mobile negăsit' });
+      }
+      
+      return res.json(content);
+    } catch (error) {
+      console.error('Error fetching mobile CSS:', error);
+      return res.status(500).json({ error: 'Eroare la obținerea CSS-ului pentru mobile' });
+    }
+  });
+  
+  /**
+   * POST /api/cms/custom_css_global
+   * Actualizează sau creează CSS-ul global personalizat
+   */
+  app.post("/api/cms/custom_css_global", isAdmin, async (req, res) => {
+    try {
+      const { css } = req.body;
+      
+      if (!css) {
+        return res.status(400).json({ error: 'Conținutul CSS este necesar' });
+      }
+      
+      // Verificăm dacă există deja 
+      const existingContent = await storage.getCmsContent('custom_css_global');
+      
+      if (existingContent) {
+        // Actualizăm CSS-ul existent
+        const updatedContent = await storage.updateCmsContent('custom_css_global', {
+          value: css,
+          content_type: 'css'
+        });
+        
+        return res.json({ success: true, content: updatedContent });
+      } else {
+        // Creăm CSS nou
+        const newContent = await storage.createCmsContent({
+          key: 'custom_css_global',
+          value: css,
+          content_type: 'css'
+        });
+        
+        return res.json({ success: true, content: newContent });
+      }
+    } catch (error) {
+      console.error('Error updating global CSS:', error);
+      return res.status(500).json({ error: 'Eroare la actualizarea CSS-ului global' });
+    }
+  });
+  
+  /**
+   * POST /api/cms/custom_css_mobile
+   * Actualizează sau creează CSS-ul pentru mobile personalizat
+   */
+  app.post("/api/cms/custom_css_mobile", isAdmin, async (req, res) => {
+    try {
+      const { css } = req.body;
+      
+      if (!css) {
+        return res.status(400).json({ error: 'Conținutul CSS este necesar' });
+      }
+      
+      // Verificăm dacă există deja 
+      const existingContent = await storage.getCmsContent('custom_css_mobile');
+      
+      if (existingContent) {
+        // Actualizăm CSS-ul existent
+        const updatedContent = await storage.updateCmsContent('custom_css_mobile', {
+          value: css,
+          content_type: 'css'
+        });
+        
+        return res.json({ success: true, content: updatedContent });
+      } else {
+        // Creăm CSS nou
+        const newContent = await storage.createCmsContent({
+          key: 'custom_css_mobile',
+          value: css,
+          content_type: 'css'
+        });
+        
+        return res.json({ success: true, content: newContent });
+      }
+    } catch (error) {
+      console.error('Error updating mobile CSS:', error);
+      return res.status(500).json({ error: 'Eroare la actualizarea CSS-ului pentru mobile' });
+    }
+  });
+
   // Înregistrăm rutele pentru mănăstiri
   // IMPORTANT: Înregistrăm mai întâi rutele pentru regiuni,
   // pentru a evita conflictele cu rutele parametrizate
