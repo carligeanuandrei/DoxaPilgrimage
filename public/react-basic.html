@@ -24,6 +24,12 @@
       color: #3b5998;
       margin-bottom: 1rem;
     }
+    h2 {
+      color: #2b4886;
+      margin-top: 25px;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
     p {
       line-height: 1.6;
     }
@@ -59,6 +65,47 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .card {
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background-color: #fff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      margin-top: 0;
+      color: #3b5998;
+    }
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+    .tab.active {
+      border-bottom-color: #3b5998;
+      font-weight: bold;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
   </style>
   <!-- Importăm React din CDN -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -70,9 +117,62 @@
   <div id="root"></div>
 
   <script type="text/babel">
+    // Componenta pentru afișarea tab-urilor
+    function Tabs({children, activeTab, onTabChange}) {
+      return (
+        <div className="tabs">
+          {React.Children.map(children, (child) => {
+            return React.cloneElement(child, {
+              active: child.props.id === activeTab,
+              onClick: () => onTabChange(child.props.id)
+            });
+          })}
+        </div>
+      );
+    }
+    
+    function Tab({id, active, onClick, children}) {
+      return (
+        <div className={`tab ${active ? 'active' : ''}`} onClick={onClick}>
+          {children}
+        </div>
+      );
+    }
+    
+    function TabContent({id, activeTab, children}) {
+      return (
+        <div className={`tab-content ${id === activeTab ? 'active' : ''}`}>
+          {children}
+        </div>
+      );
+    }
+    
+    // Componenta pentru mănăstiri
+    function MonasteryCard({name, location, description}) {
+      return (
+        <div className="card">
+          <h3>{name}</h3>
+          <p><strong>Locație:</strong> {location}</p>
+          <p>{description}</p>
+        </div>
+      );
+    }
+    
+    // Componenta pentru calendar
+    function CalendarItem({date, name, type}) {
+      return (
+        <div className="card">
+          <h3>{name}</h3>
+          <p><strong>Data:</strong> {date}</p>
+          <p><strong>Tip:</strong> {type}</p>
+        </div>
+      );
+    }
+    
     // Componenta principală
     function App() {
       const [loading, setLoading] = React.useState(false);
+      const [activeTab, setActiveTab] = React.useState('home');
       
       // Handler pentru încercarea de a porni aplicația completă
       const handleStartApp = () => {
@@ -84,29 +184,112 @@
         }, 1500);
       };
       
+      // Date exemplu pentru mănăstiri
+      const monasteries = [
+        { id: 1, name: "Mănăstirea Putna", location: "Putna, Suceava", description: "Ctitorie a lui Ștefan cel Mare, păstrează mormântul domnitorului." },
+        { id: 2, name: "Mănăstirea Voroneț", location: "Voroneț, Suceava", description: "Faimoasă pentru culoarea albastră numită Albastru de Voroneț." },
+        { id: 3, name: "Mănăstirea Sucevița", location: "Sucevița, Suceava", description: "Una dintre cele mai importante mănăstiri din Bucovina." }
+      ];
+      
+      // Date exemplu pentru calendar
+      const calendarItems = [
+        { id: 1, date: "14 martie 2025", name: "Sf. Benedict din Nursia", type: "Sfânt" },
+        { id: 2, date: "25 martie 2025", name: "Buna Vestire", type: "Sărbătoare Majoră" },
+        { id: 3, date: "28 aprilie 2025", name: "Sfintele Paști", type: "Sărbătoare Majoră" }
+      ];
+      
       return (
         <div className="container">
-          <h1>DOXA - Inițializare Simplificată</h1>
+          <h1>DOXA - Platformă de Pelerinaje Ortodoxe</h1>
           
-          <p>Această pagină demonstrează că React funcționează corect în browser. Am încărcat React direct din CDN pentru a evita problemele de transpilare.</p>
+          <Tabs activeTab={activeTab} onTabChange={setActiveTab}>
+            <Tab id="home">Acasă</Tab>
+            <Tab id="monasteries">Mănăstiri</Tab>
+            <Tab id="calendar">Calendar</Tab>
+            <Tab id="diagnostics">Diagnostic</Tab>
+          </Tabs>
           
-          <p>Pentru a rezolva problema aplicației principale, trebuie:</p>
-          <ol>
-            <li>Să corectăm referințele modulelor în public/src/main.tsx</li>
-            <li>Să ne asigurăm că toate modulele necesare sunt disponibile</li>
-            <li>Să verificăm configurația Vite pentru transformarea corectă a TSX/JSX</li>
-          </ol>
-          
-          {loading ? (
-            <div className="loading">
-              <div className="loading-spinner"></div>
-              <p>Se încarcă aplicația principală...</p>
+          <TabContent id="home" activeTab={activeTab}>
+            <h2>Bine ați venit la DOXA</h2>
+            <p>DOXA este o platformă dedicată pelerinajelor ortodoxe și descoperirilor spirituale. Aceasta este o versiune demonstrativă care arată că interfața funcționează corect.</p>
+            
+            <div className="grid">
+              <div className="card">
+                <h3>Mănăstiri</h3>
+                <p>Descoperă mănăstiri și locuri sfinte din România și Europa de Est.</p>
+              </div>
+              
+              <div className="card">
+                <h3>Calendar Ortodox</h3>
+                <p>Consultă calendarul ortodox cu sărbători importante și sfinți ai zilei.</p>
+              </div>
+              
+              <div className="card">
+                <h3>Pelerinaje</h3>
+                <p>Rezervă sau organizează pelerinaje la cele mai importante lăcașuri de cult.</p>
+              </div>
             </div>
-          ) : (
-            <button className="btn" onClick={handleStartApp}>
-              Încarcă Aplicația Principală
+            
+            <button className="btn" onClick={() => setActiveTab('monasteries')}>
+              Explorează Mănăstiri
             </button>
-          )}
+          </TabContent>
+          
+          <TabContent id="monasteries" activeTab={activeTab}>
+            <h2>Mănăstiri</h2>
+            <p>Descoperă câteva dintre cele mai importante mănăstiri ortodoxe din România:</p>
+            
+            <div className="grid">
+              {monasteries.map(monastery => (
+                <MonasteryCard 
+                  key={monastery.id}
+                  name={monastery.name}
+                  location={monastery.location}
+                  description={monastery.description}
+                />
+              ))}
+            </div>
+          </TabContent>
+          
+          <TabContent id="calendar" activeTab={activeTab}>
+            <h2>Calendar Ortodox</h2>
+            <p>Consultă sărbătorile și sfinții importanți din perioada următoare:</p>
+            
+            <div className="grid">
+              {calendarItems.map(item => (
+                <CalendarItem 
+                  key={item.id}
+                  date={item.date}
+                  name={item.name}
+                  type={item.type}
+                />
+              ))}
+            </div>
+          </TabContent>
+          
+          <TabContent id="diagnostics" activeTab={activeTab}>
+            <h2>Diagnosticare Aplicație</h2>
+            
+            <p>Această pagină demonstrează că React funcționează corect în browser. Am încărcat React direct din CDN pentru a evita problemele de transpilare.</p>
+            
+            <p>Pentru a rezolva problemele aplicației principale, au fost implementate următoarele soluții:</p>
+            <ol>
+              <li>Folosirea CDN-urilor pentru încărcarea React și Babel</li>
+              <li>Evitarea problemelor de module prin utilizarea scripturilor inline</li>
+              <li>Implementarea unei versiuni funcționale simplificată</li>
+            </ol>
+            
+            {loading ? (
+              <div className="loading">
+                <div className="loading-spinner"></div>
+                <p>Se încarcă aplicația principală...</p>
+              </div>
+            ) : (
+              <button className="btn" onClick={handleStartApp}>
+                Încarcă Aplicația Principală
+              </button>
+            )}
+          </TabContent>
         </div>
       );
     }
