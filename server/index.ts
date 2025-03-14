@@ -6,7 +6,26 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Middleware pentru gestionarea timeout-urilor
 app.use((req, res, next) => {
+  // Setează un timeout pentru toate cererile API
+  if (req.path.startsWith('/api')) {
+    const timeoutMs = 8000; // 8 secunde
+    const timeout = setTimeout(() => {
+      if (!res.headersSent) {
+        res.status(503).json({ 
+          message: 'Cerere timeout. Serverul este prea ocupat, încercați din nou.',
+          timeout: true
+        });
+      }
+    }, timeoutMs);
+
+    // Curăță timeout-ul când cererea se termină
+    res.on('finish', () => clearTimeout(timeout));
+    res.on('close', () => clearTimeout(timeout));
+  }
+  
+  // Continuă cu middleware-ul de logging
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;

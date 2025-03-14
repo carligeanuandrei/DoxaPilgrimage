@@ -8,12 +8,12 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// Funcție îmbunătățită pentru reîncercarea operațiunilor de rețea cu strategie de backoff exponențial
+// Funcție optimizată pentru reîncercarea operațiunilor de rețea cu strategie de backoff exponențial
 async function fetchWithRetry(
   url: string, 
-  options: RequestInit, 
-  maxRetries = 3, 
-  initialDelay = 500
+  options: RequestInit = {}, 
+  maxRetries = 2, 
+  initialDelay = 300
 ): Promise<Response> {
   let retries = 0;
   let lastError: Error;
@@ -23,13 +23,44 @@ async function fetchWithRetry(
     ? `${window.location.origin}${url}` 
     : url;
 
+  // Verifică dacă URL-ul este pentru un API intern
+  const isApiCall = url.startsWith('/api/') || normalizedUrl.includes('/api/');
+  
+  // Reducem timeout-ul pentru apeluri API care sunt mai ușoare
+  const timeoutDuration = isApiCall ? 6000 : 10000; // 6s pentru API, 10s pentru altele
+  
+  // Folosim un cache simplu pentru a evita reîncărcarea datelor care nu se schimbă frecvent
+  const cacheKey = `cache_${normalizedUrl}`;
+  if (options.method === 'GET' || !options.method) {
+    const cachedData = sessionStorage.getItem(cacheKey);
+    const cachedTime = sessionStorage.getItem(`${cacheKey}_time`);
+    
+    if (cachedData && cachedTime) {
+      const cacheAge = Date.now() - parseInt(cachedTime);
+      // Cache valid pentru 60 de secunde pentru apeluri GET
+      if (cacheAge < 60000) {
+        try {
+          // Construim o replică de Response din cache
+          const cachedResponse = new Response(cachedData, {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          });
+          return cachedResponse;
+        } catch (e) {
+          // Dacă avem probleme cu cache-ul, continuăm cu fetch normal
+          console.warn('Cache error, fetching from server', e);
+        }
+      }
+    }
+  }
+
   while (retries <= maxRetries) {
     try {
       // Creare controller nou pentru fiecare încercare
       const controller = new AbortController();
       const timeoutId = setTimeout(
         () => controller.abort(new DOMException('Timeout depășit', 'TimeoutError')), 
-        15000
+        timeoutDuration
       );
       
       const response = await fetch(normalizedUrl, {
@@ -38,16 +69,30 @@ async function fetchWithRetry(
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
+          // Adăugăm un header pentru a evita cache-ul browserului
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
           ...(options.headers || {})
         }
       });
       
       clearTimeout(timeoutId);
+      
+      // Păstrăm o copie a răspunsului în cache pentru apeluri GET
+      if ((options.method === 'GET' || !options.method) && response.ok) {
+        try {
+          const clonedResponse = response.clone();
+          const responseText = await clonedResponse.text();
+          sessionStorage.setItem(cacheKey, responseText);
+          sessionStorage.setItem(`${cacheKey}_time`, Date.now().toString());
+        } catch (e) {
+          console.warn('Could not cache response', e);
+        }
+      }
+      
       return response;
     } catch (error: any) {
       lastError = error as Error;
-      
-      // Curăță timeout-ul în caz de eroare
       
       // Nu reîncerca în caz de eroare de abort intenționată
       if (error.name === 'AbortError' && error.message !== 'Timeout depășit') {
@@ -58,8 +103,8 @@ async function fetchWithRetry(
       
       if (retries > maxRetries) break;
       
-      // Așteptăm un timp exponențial între reîncercări
-      const waitTime = initialDelay * Math.pow(2, retries - 1);
+      // Așteptăm un timp exponențial între reîncercări, dar cu un delay mai mic
+      const waitTime = initialDelay * Math.pow(1.5, retries - 1);
       console.log(`Reîncercare ${retries}/${maxRetries} pentru ${url} în ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
