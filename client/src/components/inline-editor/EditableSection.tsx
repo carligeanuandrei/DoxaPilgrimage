@@ -450,6 +450,12 @@ export function EditableSection({
               />
             </div>
             
+            {/* Adăugare componenta de CSS Controls */}
+            <CssControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="mt-4 border-t pt-4">
               <h3 className="font-medium mb-3">Setări overlay</h3>
               <div className="space-y-3">
