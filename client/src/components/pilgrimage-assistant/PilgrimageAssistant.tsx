@@ -28,7 +28,9 @@ export function PilgrimageAssistant() {
       });
       
       if (!response.ok) {
-        throw new Error('Eroare la comunicarea cu asistentul AI');
+        // Încercăm să extragem mesajul de eroare din răspuns
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Eroare la comunicarea cu asistentul AI');
       }
       
       return response.json();
@@ -41,9 +43,10 @@ export function PilgrimageAssistant() {
       setMessage('');
     },
     onError: (error: Error) => {
+      console.error("Eroare la comunicarea cu asistentul AI:", error);
       toast({
         title: 'Eroare',
-        description: error.message,
+        description: `${error.message}. Vă rugăm încercați din nou sau contactați administratorul.`,
         variant: 'destructive',
       });
     },

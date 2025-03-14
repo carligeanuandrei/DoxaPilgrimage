@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate, Edit, Landmark, Utensils, Paintbrush, Brain } from "lucide-react";
+import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate, Edit, Landmark, Utensils, Paintbrush, Brain, Bot } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -103,6 +103,10 @@ export default function Header() {
             <Link href="/retete-de-post" className={`font-medium flex items-center ${isActiveLink('/retete-de-post') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
               <Utensils className="h-4 w-4 mr-1" />
               Rețete de Post
+            </Link>
+            <Link href="/doxa-ai" className={`font-medium flex items-center ${isActiveLink('/doxa-ai') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              <Bot className="h-4 w-4 mr-1" />
+              DOXA AI
             </Link>
             <Link href="/about" className={`font-medium ${isActiveLink('/about') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
               Despre Noi
@@ -260,6 +264,10 @@ export default function Header() {
               <Link href="/retete-de-post" className={`px-4 font-medium flex items-center ${isActiveLink('/retete-de-post') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
                 <Utensils className="h-4 w-4 mr-1" />
                 Rețete de Post
+              </Link>
+              <Link href="/doxa-ai" className={`px-4 font-medium flex items-center ${isActiveLink('/doxa-ai') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                <Bot className="h-4 w-4 mr-1" />
+                DOXA AI
               </Link>
               <Link href="/about" className={`px-4 font-medium ${isActiveLink('/about') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
                 Despre Noi

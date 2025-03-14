@@ -16,6 +16,7 @@ import PrivacyPolicyPage from "@/pages/privacy-policy-page";
 import CookiesPage from "@/pages/cookies-page";
 import FastingRecipesPage from "@/pages/fasting-recipes-page";
 import FastingRecipeDetailsPage from "@/pages/fasting-recipe-details-page";
+import DoxaAIPage from "@/pages/doxa-ai-page";
 import OrganizerDashboard from "@/pages/organizer/new-dashboard";
 import CreatePilgrimageNewPage from "@/pages/organizer/create-pilgrimage-new";
 import EditPilgrimagePage from "@/pages/organizer/edit-pilgrimage";
@@ -61,6 +62,7 @@ function Router() {
       <Route path="/retete-de-post/:slug">
         {(params) => <FastingRecipeDetailsPage />}
       </Route>
+      <Route path="/doxa-ai" component={DoxaAIPage} />
       <Route path="/profile">
         <ProtectedRoute component={ProfilePage} path="/profile" />
       </Route>
