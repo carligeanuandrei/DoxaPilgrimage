@@ -9,6 +9,7 @@ import fs from 'fs';
 import { getCompanyInfoByCUI, validateRomanianCUI } from "./anaf";
 import { registerMonasteryRoutes } from './routes/monasteries';
 import { registerMonasteryRegionsRoutes } from './routes/monastery-regions';
+import { registerMonasteryRecommendationsRoutes } from './routes/monastery-recommendations';
 import { registerUploadRoutes } from './routes/upload';
 import { 
   insertPilgrimageSchema, 
@@ -2111,6 +2112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // IMPORTANT: Înregistrăm mai întâi rutele pentru regiuni,
   // pentru a evita conflictele cu rutele parametrizate
   registerMonasteryRegionsRoutes(app);
+  registerMonasteryRecommendationsRoutes(app);
   registerMonasteryRoutes(app);
   
   // Înregistrăm rutele pentru încărcarea fișierelor
