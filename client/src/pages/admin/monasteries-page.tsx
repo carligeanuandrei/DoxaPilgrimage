@@ -241,6 +241,18 @@ export default function MonasteriesPage() {
 
   // Funcție pentru a deschide dialogul de editare al unei mănăstiri
   const handleEditMonastery = (monastery: Monastery) => {
+    console.log("Date from server:", monastery.patronSaintDate);
+    
+    // Formatăm data pentru a fi compatibilă cu formularul
+    let formattedPatronSaintDate = "";
+    if (monastery.patronSaintDate) {
+      // Dacă data există, o formatăm ca YYYY-MM-DD pentru input
+      const date = new Date(monastery.patronSaintDate);
+      if (!isNaN(date.getTime())) {
+        formattedPatronSaintDate = date.toISOString().split('T')[0];
+      }
+    }
+    
     form.reset({
       id: monastery.id,
       name: monastery.name,
@@ -252,12 +264,13 @@ export default function MonasteriesPage() {
       shortDescription: monastery.shortDescription || "",
       foundedYear: monastery.foundedYear,
       patronSaint: monastery.patronSaint || "",
-      patronSaintDate: monastery.patronSaintDate || "",
+      patronSaintDate: formattedPatronSaintDate,
       contactEmail: monastery.contactEmail || "",
       contactPhone: monastery.contactPhone || "",
       website: monastery.website || "",
       verification: !!monastery.verification
     });
+    
     setEditDialogOpen(true);
   };
 
