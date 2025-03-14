@@ -479,31 +479,62 @@ async function initFastingRecipes() {
     for (const recipe of demoRecipes) {
       const slug = generateSlug(recipe.title);
       try {
-        // Serializăm array-urile ca JSON și apoi le convertim în array PostgreSQL
-        const ingredientsJson = JSON.stringify(recipe.ingredients);
-        const stepsJson = JSON.stringify(recipe.steps);
-        const occasionTagsJson = recipe.occasionTags ? JSON.stringify(recipe.occasionTags) : null;
-        const recommendedDaysJson = recipe.recommendedForDays ? JSON.stringify(recipe.recommendedForDays) : null;
+        // În loc să convertim array-urile direct în SQL, vom construi un query parametrizat
+        // cu FORMAT pentru array-uri în PostgreSQL
         
-        await db.execute(
-          sql`INSERT INTO fasting_recipes (
+        // Construim o comandă SQL directă care folosește sintaxa de array PostgreSQL
+        const ingredientsArray = `ARRAY[${recipe.ingredients.map(i => `'${i.replace(/'/g, "''")}'`).join(', ')}]`;
+        const stepsArray = `ARRAY[${recipe.steps.map(s => `'${s.replace(/'/g, "''")}'`).join(', ')}]`;
+        
+        const occasionTagsArray = recipe.occasionTags 
+          ? `ARRAY[${recipe.occasionTags.map(t => `'${t.replace(/'/g, "''")}'`).join(', ')}]`
+          : 'NULL';
+          
+        const recommendedDaysArray = recipe.recommendedForDays 
+          ? `ARRAY[${recipe.recommendedForDays.map(d => `'${d.replace(/'/g, "''")}'`).join(', ')}]`
+          : 'NULL';
+        
+        // Construim query-ul SQL complet
+        const query = `
+          INSERT INTO fasting_recipes (
             title, slug, description, recipe_type, category, difficulty, 
             preparation_time, ingredients, steps, image_url, calories, 
             servings, preparation_minutes, cooking_minutes, is_featured, 
             source, created_by, monastery_id, occasion_tags, 
             feast_day, recommended_for_days
           ) VALUES (
-            ${recipe.title}, ${slug}, ${recipe.description}, ${recipe.recipeType}, 
-            ${recipe.category}, ${recipe.difficulty}, ${recipe.preparationTime || '30_60_minute'}, 
-            ${ingredientsJson}::text[], ${stepsJson}::text[], 
-            ${recipe.imageUrl || null}, ${recipe.calories || null}, 
-            ${recipe.servings}, ${recipe.preparationMinutes}, ${recipe.cookingMinutes}, 
-            ${recipe.isFeatured || false}, ${recipe.source || null}, 
-            ${1}, ${recipe.monasteryId || null}, 
-            ${occasionTagsJson}::text[], 
-            ${recipe.feastDay || null}, 
-            ${recommendedDaysJson}::text[]
-          )`
+            $1, $2, $3, $4, $5, $6, $7, 
+            ${ingredientsArray}, ${stepsArray}, 
+            $8, $9, $10, $11, $12, $13, $14, $15, $16, 
+            ${occasionTagsArray}, 
+            $17, 
+            ${recommendedDaysArray}
+          )
+        `;
+        
+        // Executăm query-ul cu parametrii
+        await db.execute({
+          text: query,
+          values: [
+            recipe.title, 
+            slug, 
+            recipe.description, 
+            recipe.recipeType,
+            recipe.category, 
+            recipe.difficulty, 
+            recipe.preparationTime || '30_60_minute',
+            recipe.imageUrl || null, 
+            recipe.calories || null,
+            recipe.servings, 
+            recipe.preparationMinutes, 
+            recipe.cookingMinutes,
+            recipe.isFeatured || false, 
+            recipe.source || null,
+            1, 
+            recipe.monasteryId || null,
+            recipe.feastDay || null
+          ]
+        })
         );
         console.log(`✅ Rețeta "${recipe.title}" a fost adăugată cu succes.`);
       } catch (error) {
