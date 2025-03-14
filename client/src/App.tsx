@@ -14,6 +14,8 @@ import ContactPage from "@/pages/contact-page";
 import TermsPage from "@/pages/terms-page";
 import PrivacyPolicyPage from "@/pages/privacy-policy-page";
 import CookiesPage from "@/pages/cookies-page";
+import FastingRecipesPage from "@/pages/fasting-recipes-page";
+import FastingRecipeDetailsPage from "@/pages/fasting-recipe-details-page";
 import OrganizerDashboard from "@/pages/organizer/new-dashboard";
 import CreatePilgrimageNewPage from "@/pages/organizer/create-pilgrimage-new";
 import EditPilgrimagePage from "@/pages/organizer/edit-pilgrimage";
@@ -50,6 +52,10 @@ function Router() {
         {(params) => <MonasteryDetailsPage />}
       </Route>
       <Route path="/orthodox-calendar" component={OrthodoxCalendarPage} />
+      <Route path="/retete-de-post" component={FastingRecipesPage} />
+      <Route path="/retete-de-post/:slug">
+        {(params) => <FastingRecipeDetailsPage />}
+      </Route>
       <Route path="/profile">
         <ProtectedRoute component={ProfilePage} path="/profile" />
       </Route>

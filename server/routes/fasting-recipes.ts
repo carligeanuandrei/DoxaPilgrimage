@@ -1,10 +1,21 @@
-import { Express, Request, Response } from 'express';
-import { eq, SQL, sql } from 'drizzle-orm';
+/**
+ * Rute API pentru gestionarea rețetelor de post
+ */
+
+import { Request, Response } from 'express';
+import { Express } from 'express';
 import { storage } from '../storage';
-import { FastingRecipe, InsertFastingRecipe, InsertRecipeComment, insertFastingRecipeSchema, insertRecipeCommentSchema } from '../../shared/schema';
-import { isAdmin } from '../auth';
+import { eq } from 'drizzle-orm';
+import { fastingRecipes } from '../../shared/schema';
 import { z } from 'zod';
-import slugify from 'slugify';
+
+const isAdmin = (req: Request): boolean => {
+  return req.user?.role === 'admin';
+};
+
+const isAuthenticated = (req: Request): boolean => {
+  return !!req.user;
+};
 
 /**
  * Înregistrează rutele pentru Rețetele de Post
@@ -17,61 +28,52 @@ export function registerFastingRecipesRoutes(app: Express) {
    */
   app.get('/api/fasting-recipes', async (req: Request, res: Response) => {
     try {
-      const { recipeType, category, difficulty, day, monasteryId, featured } = req.query;
+      const filters: any = {};
       
-      // Construim filtrele pe baza query params
-      const filters: Partial<FastingRecipe> = {};
-      
-      if (recipeType) {
-        filters.recipeType = recipeType as any;
+      // Adaugă filtrele din query params
+      if (req.query.recipeType) {
+        filters.recipeType = req.query.recipeType as string;
       }
       
-      if (category) {
-        filters.category = category as any;
+      if (req.query.category) {
+        filters.category = req.query.category as string;
       }
       
-      if (difficulty) {
-        filters.difficulty = difficulty as any;
+      if (req.query.difficulty) {
+        filters.difficulty = req.query.difficulty as string;
       }
       
-      if (monasteryId) {
-        filters.monasteryId = Number(monasteryId);
-      }
-      
-      if (featured === 'true') {
-        filters.isFeatured = true;
-      }
-      
-      if (day) {
-        // Pentru filtrare după zi, folosim o metodă separată
-        const dayOfWeek = day as string;
-        const recipes = await storage.getRecipesForDay(dayOfWeek);
+      if (req.query.day) {
+        // Pentru filtrarea după zile recomandate, vom face o filtrare specială în storage
+        // deoarece acest câmp este un array în baza de date
+        const day = req.query.day as string;
+        const recipes = await storage.getRecipesForDay(day);
         return res.json(recipes);
       }
       
       const recipes = await storage.getRecipes(filters);
       res.json(recipes);
     } catch (error) {
-      console.error('Error fetching fasting recipes:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea rețetelor' });
+      console.error('Eroare la obținerea rețetelor de post:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetelor de post' });
     }
   });
-  
+
   /**
    * GET /api/fasting-recipes/featured
    * Returnează rețetele de post promovate/recomandate
    */
   app.get('/api/fasting-recipes/featured', async (req: Request, res: Response) => {
     try {
-      const limit = req.query.limit ? Number(req.query.limit) : 10;
-      const recipes = await storage.getFeaturedRecipes(limit);
-      res.json(recipes);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const featuredRecipes = await storage.getFeaturedRecipes(limit);
+      res.json(featuredRecipes);
     } catch (error) {
-      console.error('Error fetching featured recipes:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea rețetelor promovate' });
+      console.error('Eroare la obținerea rețetelor de post recomandate:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetelor de post recomandate' });
     }
   });
-  
+
   /**
    * GET /api/fasting-recipes/type/:type
    * Returnează rețetele de post de un anumit tip
@@ -82,11 +84,11 @@ export function registerFastingRecipesRoutes(app: Express) {
       const recipes = await storage.getRecipesByType(type);
       res.json(recipes);
     } catch (error) {
-      console.error('Error fetching recipes by type:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea rețetelor' });
+      console.error('Eroare la obținerea rețetelor de post după tip:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetelor de post după tip' });
     }
   });
-  
+
   /**
    * GET /api/fasting-recipes/category/:category
    * Returnează rețetele de post dintr-o anumită categorie
@@ -97,11 +99,11 @@ export function registerFastingRecipesRoutes(app: Express) {
       const recipes = await storage.getRecipesByCategory(category);
       res.json(recipes);
     } catch (error) {
-      console.error('Error fetching recipes by category:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea rețetelor' });
+      console.error('Eroare la obținerea rețetelor de post după categorie:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetelor de post după categorie' });
     }
   });
-  
+
   /**
    * GET /api/fasting-recipes/day/:day
    * Returnează rețetele de post recomandate pentru o anumită zi
@@ -112,34 +114,34 @@ export function registerFastingRecipesRoutes(app: Express) {
       const recipes = await storage.getRecipesForDay(day);
       res.json(recipes);
     } catch (error) {
-      console.error('Error fetching recipes for day:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea rețetelor' });
+      console.error('Eroare la obținerea rețetelor de post pentru ziua specificată:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetelor de post pentru ziua specificată' });
     }
   });
-  
+
   /**
    * GET /api/fasting-recipes/monastery/:id
    * Returnează rețetele de post asociate unei mănăstiri
    */
   app.get('/api/fasting-recipes/monastery/:id', async (req: Request, res: Response) => {
     try {
-      const monasteryId = Number(req.params.id);
+      const monasteryId = parseInt(req.params.id);
       const recipes = await storage.getMonasteryRecipes(monasteryId);
       res.json(recipes);
     } catch (error) {
-      console.error('Error fetching monastery recipes:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea rețetelor mănăstirii' });
+      console.error('Eroare la obținerea rețetelor de post de la mănăstire:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetelor de post de la mănăstire' });
     }
   });
-  
+
   /**
    * GET /api/fasting-recipes/:id
    * Returnează o rețetă de post după ID
    */
   app.get('/api/fasting-recipes/:id', async (req: Request, res: Response) => {
     try {
-      const recipeId = Number(req.params.id);
-      const recipe = await storage.getRecipe(recipeId);
+      const id = parseInt(req.params.id);
+      const recipe = await storage.getRecipe(id);
       
       if (!recipe) {
         return res.status(404).json({ error: 'Rețeta nu a fost găsită' });
@@ -147,11 +149,11 @@ export function registerFastingRecipesRoutes(app: Express) {
       
       res.json(recipe);
     } catch (error) {
-      console.error('Error fetching recipe:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea rețetei' });
+      console.error('Eroare la obținerea rețetei de post:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetei de post' });
     }
   });
-  
+
   /**
    * GET /api/fasting-recipes/slug/:slug
    * Returnează o rețetă de post după slug
@@ -167,212 +169,261 @@ export function registerFastingRecipesRoutes(app: Express) {
       
       res.json(recipe);
     } catch (error) {
-      console.error('Error fetching recipe by slug:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea rețetei' });
+      console.error('Eroare la obținerea rețetei de post după slug:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetei de post după slug' });
     }
   });
-  
+
   /**
    * GET /api/fasting-recipes/:id/comments
    * Returnează comentariile pentru o rețetă
    */
   app.get('/api/fasting-recipes/:id/comments', async (req: Request, res: Response) => {
     try {
-      const recipeId = Number(req.params.id);
+      const recipeId = parseInt(req.params.id);
       const comments = await storage.getRecipeComments(recipeId);
       res.json(comments);
     } catch (error) {
-      console.error('Error fetching recipe comments:', error);
-      res.status(500).json({ error: 'A apărut o eroare la obținerea comentariilor' });
+      console.error('Eroare la obținerea comentariilor pentru rețeta de post:', error);
+      res.status(500).json({ error: 'Eroare la obținerea comentariilor pentru rețeta de post' });
     }
   });
-  
+
   /**
    * POST /api/fasting-recipes
    * Adaugă o nouă rețetă de post
    * Necesită autentificare
    */
   app.post('/api/fasting-recipes', async (req: Request, res: Response) => {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Autentificarea este necesară' });
-    }
-    
     try {
-      const recipeData = req.body;
-      
-      // Validare
-      const validationResult = insertFastingRecipeSchema.safeParse(recipeData);
-      if (!validationResult.success) {
-        return res.status(400).json({ 
-          error: 'Date invalide pentru rețetă', 
-          details: validationResult.error.format() 
-        });
+      if (!isAuthenticated(req)) {
+        return res.status(401).json({ error: 'Trebuie să fiți autentificat pentru a adăuga o rețetă' });
       }
+
+      // Schema de validare pentru rețeta de post
+      const recipeSchema = z.object({
+        title: z.string().min(3, 'Titlul trebuie să aibă cel puțin 3 caractere'),
+        slug: z.string().optional(),
+        description: z.string().min(10, 'Descrierea trebuie să aibă cel puțin 10 caractere'),
+        recipeType: z.string(),
+        category: z.string(),
+        difficulty: z.string(),
+        preparationMinutes: z.number().min(1),
+        cookingMinutes: z.number().min(0),
+        preparationTime: z.string(),
+        servings: z.number().min(1),
+        calories: z.number().optional(),
+        ingredients: z.array(z.string()),
+        steps: z.array(z.string()),
+        imageUrl: z.string().optional(),
+        source: z.string().optional(),
+        monasteryId: z.number().optional(),
+        isFeatured: z.boolean().optional(),
+        recommendedForDays: z.array(z.string()).optional(),
+        occasionTags: z.array(z.string()).optional(),
+        feastDay: z.string().optional()
+      });
+
+      const validData = recipeSchema.parse(req.body);
       
-      // Generăm un slug dacă nu există
-      if (!recipeData.slug) {
-        recipeData.slug = slugify(recipeData.title, { 
-          lower: true,
-          strict: true,
-          locale: 'ro'
-        });
-      }
-      
-      // Setăm utilizatorul care a creat rețeta
-      recipeData.createdBy = req.user.id;
+      // Asigurăm că autorul rețetei este utilizatorul autentificat
+      const recipeData = {
+        ...validData,
+        authorId: req.user?.id,
+        slug: validData.slug || validData.title.toLowerCase().replace(/\s+/g, '-'),
+      };
       
       const newRecipe = await storage.createRecipe(recipeData);
       res.status(201).json(newRecipe);
     } catch (error) {
-      console.error('Error creating recipe:', error);
-      res.status(500).json({ error: 'A apărut o eroare la crearea rețetei' });
+      console.error('Eroare la adăugarea rețetei de post:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Date invalide', details: error.errors });
+      }
+      res.status(500).json({ error: 'Eroare la adăugarea rețetei de post' });
     }
   });
-  
+
   /**
    * PATCH /api/fasting-recipes/:id
    * Actualizează o rețetă de post existentă
    * Necesită autentificare și drepturi
    */
   app.patch('/api/fasting-recipes/:id', async (req: Request, res: Response) => {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Autentificarea este necesară' });
-    }
-    
     try {
-      const recipeId = Number(req.params.id);
-      const recipeData = req.body;
+      if (!isAuthenticated(req)) {
+        return res.status(401).json({ error: 'Trebuie să fiți autentificat pentru a actualiza o rețetă' });
+      }
+
+      const id = parseInt(req.params.id);
+      const recipe = await storage.getRecipe(id);
       
-      // Verificăm dacă rețeta există
-      const existingRecipe = await storage.getRecipe(recipeId);
-      if (!existingRecipe) {
+      if (!recipe) {
         return res.status(404).json({ error: 'Rețeta nu a fost găsită' });
       }
       
-      // Verificăm drepturile: doar creatorul sau admin poate edita
-      if (existingRecipe.createdBy !== req.user.id && !isAdmin(req)) {
-        return res.status(403).json({ error: 'Nu aveți permisiunea de a edita această rețetă' });
+      // Verifică drepturile utilizatorului
+      if (recipe.authorId !== req.user?.id && !isAdmin(req)) {
+        return res.status(403).json({ error: 'Nu aveți permisiunea de a modifica această rețetă' });
+      }
+
+      // Schema de validare pentru actualizarea rețetei
+      const updateSchema = z.object({
+        title: z.string().min(3).optional(),
+        slug: z.string().optional(),
+        description: z.string().min(10).optional(),
+        recipeType: z.string().optional(),
+        category: z.string().optional(),
+        difficulty: z.string().optional(),
+        preparationMinutes: z.number().min(1).optional(),
+        cookingMinutes: z.number().min(0).optional(),
+        preparationTime: z.string().optional(),
+        servings: z.number().min(1).optional(),
+        calories: z.number().optional(),
+        ingredients: z.array(z.string()).optional(),
+        steps: z.array(z.string()).optional(),
+        imageUrl: z.string().optional(),
+        source: z.string().optional(),
+        monasteryId: z.number().optional(),
+        isFeatured: z.boolean().optional(),
+        recommendedForDays: z.array(z.string()).optional(),
+        occasionTags: z.array(z.string()).optional(),
+        feastDay: z.string().optional()
+      });
+
+      const validData = updateSchema.parse(req.body);
+      
+      // Doar administratorii pot marca o rețetă ca fiind promovată
+      if (validData.isFeatured !== undefined && !isAdmin(req)) {
+        delete validData.isFeatured;
       }
       
-      // Actualizăm rețeta
-      const updatedRecipe = await storage.updateRecipe(recipeId, recipeData);
+      const updatedRecipe = await storage.updateRecipe(id, validData);
+      
+      if (!updatedRecipe) {
+        return res.status(500).json({ error: 'Eroare la actualizarea rețetei de post' });
+      }
+      
       res.json(updatedRecipe);
     } catch (error) {
-      console.error('Error updating recipe:', error);
-      res.status(500).json({ error: 'A apărut o eroare la actualizarea rețetei' });
+      console.error('Eroare la actualizarea rețetei de post:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Date invalide', details: error.errors });
+      }
+      res.status(500).json({ error: 'Eroare la actualizarea rețetei de post' });
     }
   });
-  
+
   /**
    * DELETE /api/fasting-recipes/:id
    * Șterge o rețetă de post
    * Necesită autentificare și drepturi
    */
   app.delete('/api/fasting-recipes/:id', async (req: Request, res: Response) => {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Autentificarea este necesară' });
-    }
-    
     try {
-      const recipeId = Number(req.params.id);
+      if (!isAuthenticated(req)) {
+        return res.status(401).json({ error: 'Trebuie să fiți autentificat pentru a șterge o rețetă' });
+      }
+
+      const id = parseInt(req.params.id);
+      const recipe = await storage.getRecipe(id);
       
-      // Verificăm dacă rețeta există
-      const existingRecipe = await storage.getRecipe(recipeId);
-      if (!existingRecipe) {
+      if (!recipe) {
         return res.status(404).json({ error: 'Rețeta nu a fost găsită' });
       }
       
-      // Verificăm drepturile: doar creatorul sau admin poate șterge
-      if (existingRecipe.createdBy !== req.user.id && !isAdmin(req)) {
+      // Verifică drepturile utilizatorului
+      if (recipe.authorId !== req.user?.id && !isAdmin(req)) {
         return res.status(403).json({ error: 'Nu aveți permisiunea de a șterge această rețetă' });
       }
       
-      // Ștergem rețeta
-      const success = await storage.deleteRecipe(recipeId);
+      const success = await storage.deleteRecipe(id);
       
-      if (success) {
-        res.status(204).end(); // No content
-      } else {
-        res.status(500).json({ error: 'Ștergerea rețetei a eșuat' });
+      if (!success) {
+        return res.status(500).json({ error: 'Eroare la ștergerea rețetei de post' });
       }
+      
+      res.json({ success: true, message: 'Rețeta a fost ștearsă cu succes' });
     } catch (error) {
-      console.error('Error deleting recipe:', error);
-      res.status(500).json({ error: 'A apărut o eroare la ștergerea rețetei' });
+      console.error('Eroare la ștergerea rețetei de post:', error);
+      res.status(500).json({ error: 'Eroare la ștergerea rețetei de post' });
     }
   });
-  
+
   /**
    * POST /api/fasting-recipes/:id/comments
    * Adaugă un comentariu la o rețetă
    * Necesită autentificare
    */
   app.post('/api/fasting-recipes/:id/comments', async (req: Request, res: Response) => {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Autentificarea este necesară' });
-    }
-    
     try {
-      const recipeId = Number(req.params.id);
-      const commentData = req.body;
+      if (!isAuthenticated(req)) {
+        return res.status(401).json({ error: 'Trebuie să fiți autentificat pentru a adăuga un comentariu' });
+      }
+
+      const recipeId = parseInt(req.params.id);
+      const recipe = await storage.getRecipe(recipeId);
       
-      // Verificăm dacă rețeta există
-      const existingRecipe = await storage.getRecipe(recipeId);
-      if (!existingRecipe) {
+      if (!recipe) {
         return res.status(404).json({ error: 'Rețeta nu a fost găsită' });
       }
+
+      // Schema de validare pentru comentariu
+      const commentSchema = z.object({
+        content: z.string().min(3, 'Comentariul trebuie să aibă cel puțin 3 caractere'),
+        rating: z.number().min(1).max(5)
+      });
+
+      const validData = commentSchema.parse(req.body);
       
-      // Validare
-      const validationResult = insertRecipeCommentSchema.safeParse(commentData);
-      if (!validationResult.success) {
-        return res.status(400).json({ 
-          error: 'Date invalide pentru comentariu', 
-          details: validationResult.error.format() 
-        });
-      }
-      
-      // Setăm utilizatorul și ID-ul rețetei
-      commentData.userId = req.user.id;
-      commentData.recipeId = recipeId;
+      const commentData = {
+        ...validData,
+        recipeId,
+        userId: req.user!.id
+      };
       
       const newComment = await storage.createRecipeComment(commentData);
       res.status(201).json(newComment);
     } catch (error) {
-      console.error('Error creating recipe comment:', error);
-      res.status(500).json({ error: 'A apărut o eroare la adăugarea comentariului' });
+      console.error('Eroare la adăugarea comentariului:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Date invalide', details: error.errors });
+      }
+      res.status(500).json({ error: 'Eroare la adăugarea comentariului' });
     }
   });
-  
+
   /**
    * DELETE /api/fasting-recipes/comments/:id
    * Șterge un comentariu
    * Necesită autentificare și drepturi
    */
   app.delete('/api/fasting-recipes/comments/:id', async (req: Request, res: Response) => {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Autentificarea este necesară' });
-    }
-    
     try {
-      const commentId = Number(req.params.id);
-      
-      // Verificăm dacă comentariul există și aparține utilizatorului sau este admin
-      // Ar trebui adăugată funcționalitatea pentru a obține un comentariu după ID
-      // Deocamdată, vom permite doar adminilor să șteargă comentarii
+      if (!isAuthenticated(req)) {
+        return res.status(401).json({ error: 'Trebuie să fiți autentificat pentru a șterge un comentariu' });
+      }
+
+      const id = parseInt(req.params.id);
+      // Verifică drepturile utilizatorului
+      // Doar administratorii sau utilizatorul care a adăugat comentariul îl pot șterge
       if (!isAdmin(req)) {
+        // TODO: Verifică dacă utilizatorul este autorul comentariului
+        // Aceasta necesită modificarea storage pentru a obține un comentariu după ID
+        // Pentru acum, doar adminii pot șterge comentarii
         return res.status(403).json({ error: 'Nu aveți permisiunea de a șterge acest comentariu' });
       }
       
-      // Ștergem comentariul
-      const success = await storage.deleteRecipeComment(commentId);
+      const success = await storage.deleteRecipeComment(id);
       
-      if (success) {
-        res.status(204).end(); // No content
-      } else {
-        res.status(500).json({ error: 'Ștergerea comentariului a eșuat' });
+      if (!success) {
+        return res.status(500).json({ error: 'Eroare la ștergerea comentariului' });
       }
+      
+      res.json({ success: true, message: 'Comentariul a fost șters cu succes' });
     } catch (error) {
-      console.error('Error deleting recipe comment:', error);
-      res.status(500).json({ error: 'A apărut o eroare la ștergerea comentariului' });
+      console.error('Eroare la ștergerea comentariului:', error);
+      res.status(500).json({ error: 'Eroare la ștergerea comentariului' });
     }
   });
 }
