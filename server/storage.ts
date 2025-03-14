@@ -90,6 +90,22 @@ export interface IStorage {
   updateBuilderPage(id: number, page: Partial<BuilderPage>): Promise<BuilderPage | undefined>;
   deleteBuilderPage(id: number): Promise<boolean>;
   
+  // Fasting Recipes operations
+  getRecipe(id: number): Promise<FastingRecipe | undefined>;
+  getRecipeBySlug(slug: string): Promise<FastingRecipe | undefined>;
+  getRecipes(filters?: Partial<FastingRecipe>): Promise<FastingRecipe[]>;
+  getRecipesByType(recipeType: string): Promise<FastingRecipe[]>;
+  getRecipesByCategory(category: string): Promise<FastingRecipe[]>;
+  getRecipesForDay(dayOfWeek: string): Promise<FastingRecipe[]>;
+  getMonasteryRecipes(monasteryId: number): Promise<FastingRecipe[]>;
+  getFeaturedRecipes(limit?: number): Promise<FastingRecipe[]>;
+  getRecipeComments(recipeId: number): Promise<RecipeComment[]>;
+  createRecipe(recipe: InsertFastingRecipe): Promise<FastingRecipe>;
+  updateRecipe(id: number, recipe: Partial<FastingRecipe>): Promise<FastingRecipe | undefined>;
+  deleteRecipe(id: number): Promise<boolean>;
+  createRecipeComment(comment: InsertRecipeComment): Promise<RecipeComment>;
+  deleteRecipeComment(id: number): Promise<boolean>;
+  
   // Session store
   sessionStore: any;
 }

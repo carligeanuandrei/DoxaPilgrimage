@@ -429,6 +429,139 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertProductReview = z.infer<typeof insertProductReviewSchema>;
 export type ProductReview = typeof productReviews.$inferSelect;
 
+// Enumerare pentru tipurile de rețete de post
+export const recipeTypeEnum = pgEnum('recipe_type', [
+  'de_post', // Rețete de post complet (fără produse animale)
+  'cu_dezlegare_la_ulei', // Rețete cu dezlegare la ulei
+  'cu_dezlegare_la_vin', // Rețete cu dezlegare la vin
+  'cu_dezlegare_la_peste', // Rețete cu dezlegare la pește
+  'cu_dezlegare_completa', // Rețete pentru zile cu dezlegare completă
+  'manastireasca' // Rețete specifice mănăstirești
+]);
+
+// Enumerare pentru categoriile de rețete
+export const recipeCategoryEnum = pgEnum('recipe_category', [
+  'supe_si_ciorbe',
+  'aperitive',
+  'feluri_principale',
+  'garnituri',
+  'salate',
+  'deserturi',
+  'conserve',
+  'bauturi',
+  'paine_si_panificatie'
+]);
+
+// Enumerare pentru dificultatea rețetelor
+export const recipeDifficultyEnum = pgEnum('recipe_difficulty', [
+  'incepator',
+  'mediu',
+  'avansat'
+]);
+
+// Enumerare pentru timpul de preparare
+export const recipeTimeEnum = pgEnum('recipe_time', [
+  'sub_30_minute',
+  '30_60_minute',
+  'peste_60_minute'
+]);
+
+// Tabelul pentru rețete de post
+export const fastingRecipes = pgTable("fasting_recipes", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description").notNull(),
+  recipeType: recipeTypeEnum("recipe_type").notNull().default('de_post'),
+  category: recipeCategoryEnum("category").notNull(),
+  difficulty: recipeDifficultyEnum("difficulty").notNull().default('mediu'),
+  preparationTime: recipeTimeEnum("preparation_time").notNull().default('30_60_minute'),
+  ingredients: text("ingredients").array().notNull(),
+  steps: text("steps").array().notNull(),
+  imageUrl: text("image_url"),
+  calories: integer("calories"),
+  servings: integer("servings").notNull().default(4),
+  preparationMinutes: integer("preparation_minutes").notNull(),
+  cookingMinutes: integer("cooking_minutes").notNull(),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  isVerified: boolean("is_verified").notNull().default(false),
+  source: text("source"),
+  createdBy: integer("created_by").references(() => users.id),
+  monasteryId: integer("monastery_id").references(() => monasteries.id),
+  occasionTags: text("occasion_tags").array(), // Ex: "Postul Paștelui", "Postul Crăciunului"
+  feastDay: text("feast_day"), // Ex: "Adormirea Maicii Domnului"
+  recommendedForDays: text("recommended_for_days").array(), // Ex: ["monday", "wednesday", "friday"]
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relații pentru rețete de post
+export const fastingRecipesRelations = relations(fastingRecipes, ({ one }) => ({
+  creator: one(users, {
+    fields: [fastingRecipes.createdBy],
+    references: [users.id],
+  }),
+  monastery: one(monasteries, {
+    fields: [fastingRecipes.monasteryId],
+    references: [monasteries.id],
+  }),
+}));
+
+// Tabelul pentru comentarii la rețete
+export const recipeComments = pgTable("recipe_comments", {
+  id: serial("id").primaryKey(),
+  recipeId: integer("recipe_id").notNull().references(() => fastingRecipes.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  rating: integer("rating").notNull().default(5),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Relații pentru comentarii la rețete
+export const recipeCommentsRelations = relations(recipeComments, ({ one }) => ({
+  recipe: one(fastingRecipes, {
+    fields: [recipeComments.recipeId],
+    references: [fastingRecipes.id],
+  }),
+  user: one(users, {
+    fields: [recipeComments.userId],
+    references: [users.id],
+  }),
+}));
+
+// Actualizare relații pentru utilizatori
+export const usersRelationsWithRecipes = relations(users, ({ many }) => ({
+  pilgrimages: many(pilgrimages),
+  reviews: many(reviews),
+  bookings: many(bookings),
+  messages: many(messages),
+  products: many(products),
+  orders: many(orders),
+  recipes: many(fastingRecipes),
+  recipeComments: many(recipeComments),
+}));
+
+// Schema pentru inserare rețete
+export const insertFastingRecipeSchema = createInsertSchema(fastingRecipes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Schema pentru inserare comentarii la rețete
+export const insertRecipeCommentSchema = createInsertSchema(recipeComments).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Tipuri pentru rețete
+export type InsertFastingRecipe = z.infer<typeof insertFastingRecipeSchema>;
+export type FastingRecipe = typeof fastingRecipes.$inferSelect;
+
+// Tipuri pentru comentarii la rețete
+export type InsertRecipeComment = z.infer<typeof insertRecipeCommentSchema>;
+export type RecipeComment = typeof recipeComments.$inferSelect;
+
 // Tipuri pentru mănăstiri
 export type InsertMonastery = z.infer<typeof insertMonasterySchema>;
 export type Monastery = typeof monasteries.$inferSelect;
