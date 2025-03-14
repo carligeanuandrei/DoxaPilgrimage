@@ -1,7 +1,8 @@
 /**
  * Componentă simplă App pentru varianta DOXA
  */
-import React from "react";
+// Folosim variabila globală React definită în vite-react-compat.js
+const React = window.React;
 
 /**
  * O componentă simplă de test care să ne ajute să diagnosticăm problemele
