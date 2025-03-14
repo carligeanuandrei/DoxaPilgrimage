@@ -1,3 +1,4 @@
+
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
@@ -18,27 +19,34 @@ async function fetchWithRetry(
   let lastError: Error = new Error("Unknown fetch error");
 
   // Funcția pentru a normaliza URL-ul (adaugă baza dacă lipsește)
-  const normalizedUrl = url.startsWith('/') ? window.location.origin + url : url;
+  const normalizedUrl = url.startsWith('/') ? `${window.location.origin}${url}` : url;
 
   while (retries < maxRetries) {
     try {
       // Implementăm un timeout pentru a evita blocarea
-      const timeoutPromise = new Promise<Response>((_, reject) => {
-        setTimeout(() => reject(new Error(`Timeout accessing ${url}`)), 15000);
-      });
-
-      const fetchPromise = fetch(normalizedUrl, {
-        ...options,
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        }
-      });
-
-      // Race între fetch și timeout
-      const res = await Promise.race([fetchPromise, timeoutPromise]) as Response;
-      return res;
+      let fetchPromise: Promise<Response>;
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
+      try {
+        fetchPromise = fetch(normalizedUrl, {
+          ...options,
+          credentials: 'include',
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+          }
+        });
+        
+        const response = await fetchPromise;
+        clearTimeout(timeoutId);
+        return response;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
     } catch (error) {
       lastError = error as Error;
       retries++;
