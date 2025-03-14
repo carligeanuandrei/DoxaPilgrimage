@@ -27,9 +27,24 @@ app.use(express.static(path.resolve("public")));
 // Servim și folderul node_modules și client în modul de dezvoltare
 if (process.env.NODE_ENV === "development") {
   console.log("Servim fișiere statice din node_modules și client");
+  
+  // Configurăm MIME types corect pentru module ES
+  express.static.mime.define({
+    'application/javascript': ['js', 'mjs'],
+    'text/javascript': ['jsx', 'tsx', 'ts']
+  });
+  
   app.use('/node_modules', express.static(path.resolve("node_modules")));
   app.use('/client', express.static(path.resolve("client")));
-  app.use('/src', express.static(path.resolve("client/src")));
+  app.use('/src', express.static(path.resolve("client/src"), {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.js') || path.endsWith('.mjs') || 
+          path.endsWith('.ts') || path.endsWith('.tsx') || 
+          path.endsWith('.jsx')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      }
+    }
+  }));
 }
 
 // Middleware pentru gestionarea timeout-urilor

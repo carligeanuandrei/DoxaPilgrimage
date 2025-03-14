@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <meta http-equiv="refresh" content="0;url=/" />
   <title>DOXA - Platformă de Pelerinaje Ortodoxe</title>
   <style>
     body {
@@ -12,13 +11,15 @@
       padding: 0;
       background-color: #f8f9fa;
       color: #333;
+    }
+    .loading-container {
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       text-align: center;
     }
-    .container {
+    .loading-box {
       max-width: 600px;
       padding: 2rem;
       background-color: white;
@@ -58,27 +59,27 @@
       border-radius: 4px;
       font-weight: 500;
     }
+    #root {
+      width: 100%;
+      min-height: 100vh;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>DOXA</h1>
-    <p>Platformă de Pelerinaje Ortodoxe</p>
-
-    <div class="spinner"></div>
-    <p>Vă redirecționăm către aplicație...</p>
-
-    <div class="links">
-      <a href="/">Accesare Aplicație</a>
-      <a href="/client/test-connection.html">Verificare Conexiune</a>
+  <div id="root">
+    <div class="loading-container">
+      <div class="loading-box">
+        <h1>DOXA</h1>
+        <p>Platformă de Pelerinaje Ortodoxe</p>
+        <div class="spinner"></div>
+        <p>Aplicația se încarcă...</p>
+        <div class="links">
+          <a href="/client/test-connection.html">Verificare Conexiune</a>
+          <a href="/api/server-status" target="_blank">Verificare Server</a>
+        </div>
+      </div>
     </div>
   </div>
-
-  <script>
-    // Redirecționare manuală după 1 secundă
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 1000);
-  </script>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
