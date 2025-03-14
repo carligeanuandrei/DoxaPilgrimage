@@ -125,6 +125,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
+  // Endpoint secundar pentru testare, compatibil cu paginile de diagnosticare
+  app.get("/api/status", (req, res) => {
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+      message: "Conectarea la API a reușit!",
+      tests: {
+        serverRunning: true,
+        apiAccessible: true,
+        dbConnection: true,
+        mimeTypes: {
+          js: "application/javascript",
+          mjs: "application/javascript",
+          jsx: "text/javascript",
+          tsx: "text/javascript",
+          ts: "text/javascript",
+        }
+      },
+      version: "1.0.0"
+    });
+  });
+  
   // Endpoint pentru verificarea API key-ului OpenAI (fără a expune cheia)
   app.get("/api/openai-status", async (req, res) => {
     const hasKey = !!process.env.OPENAI_API_KEY;

@@ -3,134 +3,584 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verificare MIME Type pentru TSX</title>
+  <title>Diagnosticare Frontend DOXA</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 20px;
       padding: 20px;
-      background-color: #f0f2f5;
+      background-color: #f5f5f7;
+      color: #333;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     h1 {
       color: #3b5998;
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #eaeaea;
+      padding-bottom: 15px;
     }
-    pre {
-      background-color: #f5f5f5;
-      padding: 15px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
-    .info-box {
-      padding: 15px;
+    .test-group {
+      margin-bottom: 30px;
+      border: 1px solid #e0e0e0;
       border-radius: 8px;
-      margin: 20px 0;
+      padding: 20px;
+    }
+    .test-group h2 {
+      margin-top: 0;
+      color: #555;
+      font-size: 1.5rem;
+    }
+    .test-item {
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 6px;
+      position: relative;
+    }
+    .pending {
+      background-color: #f9f9f9;
+      border: 1px dashed #ccc;
     }
     .success {
       background-color: #e6fffa;
       border: 1px solid #00c9a7;
-      color: #047857;
     }
     .error {
       background-color: #fef2f2;
       border: 1px solid #f87171;
-      color: #b91c1c;
     }
-    .button {
-      display: inline-block;
-      padding: 10px 16px;
+    .status-icon {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      font-size: 24px;
+    }
+    .test-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+    .test-description {
+      margin-bottom: 10px;
+      color: #666;
+    }
+    .test-result {
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      background-color: #f5f5f5;
+      padding: 8px;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .code-block {
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: monospace;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+    button {
       background-color: #3b5998;
       color: white;
-      text-decoration: none;
-      border-radius: 4px;
       border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
       cursor: pointer;
-      font-size: 16px;
-      margin-top: 20px;
+      font-weight: bold;
+      transition: background-color 0.2s;
     }
-    .button:hover {
+    button:hover {
       background-color: #2d4373;
+    }
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+    }
+    .badge {
+      display: inline-block;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    .browser-info {
+      background-color: #eff6ff;
+      border: 1px solid #93c5fd;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    .navigation {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .navigation a {
+      display: inline-block;
+      margin: 0 10px;
+      color: #3b5998;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .navigation a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Verificare MIME Type pentru TSX</h1>
+    <h1>Diagnosticare Frontend DOXA</h1>
     
-    <div id="mime-info" class="info-box">
-      Se verifică tipul MIME pentru fișierele TSX...
+    <div class="browser-info">
+      <div><strong>Browser:</strong> <span id="browser-info"></span></div>
+      <div><strong>User Agent:</strong> <span id="user-agent"></span></div>
+      <div><strong>URL curent:</strong> <span id="current-url"></span></div>
     </div>
     
-    <h2>Informații cerere</h2>
-    <pre id="request-info">Se încarcă...</pre>
+    <div class="test-group">
+      <h2>1. Verificare server și API</h2>
+      
+      <div id="test-server" class="test-item pending">
+        <div class="test-title">Test server API</div>
+        <div class="test-description">Verifică dacă serverul răspunde la endpoint-ul /api/status</div>
+        <button id="run-server-test">Rulează test</button>
+        <div class="test-result" id="server-result">Așteptare...</div>
+      </div>
+      
+      <div id="test-endpoints" class="test-item pending">
+        <div class="test-title">Verificare endpoints API</div>
+        <div class="test-description">Verifică disponibilitatea principalelor endpoint-uri</div>
+        <button id="run-endpoints-test">Rulează test</button>
+        <div class="test-result" id="endpoints-result">Așteptare...</div>
+      </div>
+    </div>
     
-    <a href="/" class="button">Înapoi la pagina principală</a>
+    <div class="test-group">
+      <h2>2. Verificare încărcare module</h2>
+      
+      <div id="test-js-module" class="test-item pending">
+        <div class="test-title">Încărcare modul JavaScript</div>
+        <div class="test-description">Verifică încărcarea unui modul JavaScript simplu</div>
+        <button id="run-js-module-test">Rulează test</button>
+        <div class="test-result" id="js-module-result">Așteptare...</div>
+      </div>
+      
+      <div id="test-mime-types" class="test-item pending">
+        <div class="test-title">Verificare tipuri MIME</div>
+        <div class="test-description">Verifică configurarea corectă a tipurilor MIME pentru module ES</div>
+        <button id="run-mime-test">Rulează test</button>
+        <div class="test-result" id="mime-result">Așteptare...</div>
+      </div>
+      
+      <div id="test-remote-import" class="test-item pending">
+        <div class="test-title">Importare dinamică module</div>
+        <div class="test-description">Testează importarea dinamică a modulelor ES</div>
+        <button id="run-import-test">Rulează test</button>
+        <div class="test-result" id="import-result">Așteptare...</div>
+      </div>
+    </div>
+    
+    <div class="test-group">
+      <h2>3. Verificare mediu React</h2>
+      
+      <div id="test-react-env" class="test-item pending">
+        <div class="test-title">Mediu React</div>
+        <div class="test-description">Verifică dacă mediul React este configurat corect</div>
+        <button id="run-react-test">Rulează test</button>
+        <div class="test-result" id="react-result">Așteptare...</div>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <button id="run-all-tests">Rulează toate testele</button>
+      <button id="download-report">Descarcă raport</button>
+    </div>
+    
+    <div class="navigation">
+      <a href="/">Acasă</a> | 
+      <a href="/client/test-connection.html">Test Conexiune</a> | 
+      <a href="/public/test.html">Test Module</a>
+    </div>
   </div>
 
   <script>
-    async function checkMimeType() {
-      const mimeInfoEl = document.getElementById('mime-info');
-      const requestInfoEl = document.getElementById('request-info');
+    // Populăm informațiile despre browser
+    document.getElementById('browser-info').textContent = getBrowserInfo();
+    document.getElementById('user-agent').textContent = navigator.userAgent;
+    document.getElementById('current-url').textContent = window.location.href;
+    
+    // Test server API
+    document.getElementById('run-server-test').addEventListener('click', async () => {
+      const testElement = document.getElementById('test-server');
+      const resultElement = document.getElementById('server-result');
+      
+      testElement.className = 'test-item pending';
+      resultElement.textContent = 'Testare în curs...';
       
       try {
-        const response = await fetch('/src/main.tsx', { method: 'HEAD' });
-        const headers = {};
+        const response = await fetch('/api/status');
+        const data = await response.json();
         
-        for (const [key, value] of response.headers.entries()) {
-          headers[key] = value;
-        }
-        
-        const contentType = response.headers.get('content-type');
-        const statusText = response.status + ' ' + response.statusText;
-        
-        requestInfoEl.textContent = JSON.stringify({
-          url: '/src/main.tsx',
-          status: statusText,
-          headers
-        }, null, 2);
-        
-        if (contentType) {
-          if (contentType.includes('javascript') || contentType.includes('text/jsx')) {
-            mimeInfoEl.className = 'info-box success';
-            mimeInfoEl.innerHTML = `
-              <h3>✅ Tip MIME corect detectat</h3>
-              <p>Fișierul este servit cu tipul MIME: <strong>${contentType}</strong></p>
-              <p>Acest tip MIME permite încărcarea ca modul JavaScript.</p>
-            `;
+        testElement.className = 'test-item success';
+        resultElement.textContent = `✅ Conectare reușită la server!\n\nRăspuns API: ${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        testElement.className = 'test-item error';
+        resultElement.textContent = `❌ Eroare la conectarea la server: ${error.message}`;
+      }
+    });
+    
+    // Test API endpoints
+    document.getElementById('run-endpoints-test').addEventListener('click', async () => {
+      const testElement = document.getElementById('test-endpoints');
+      const resultElement = document.getElementById('endpoints-result');
+      
+      testElement.className = 'test-item pending';
+      resultElement.textContent = 'Testare în curs...';
+      
+      const endpoints = [
+        '/api/status',
+        '/api/server-status',
+        '/api/openai-status'
+      ];
+      
+      const results = {};
+      let overallSuccess = true;
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetch(endpoint);
+          const status = response.status;
+          
+          if (status >= 200 && status < 300) {
+            results[endpoint] = `✅ OK (${status})`;
           } else {
-            mimeInfoEl.className = 'info-box error';
-            mimeInfoEl.innerHTML = `
-              <h3>❌ Tip MIME incorect</h3>
-              <p>Fișierul este servit cu tipul MIME: <strong>${contentType}</strong></p>
-              <p>Pentru module JavaScript, browserul așteaptă <code>text/javascript</code> sau alt tip MIME specific JavaScript.</p>
-            `;
+            results[endpoint] = `⚠️ Răspuns neașteptat (${status})`;
+            overallSuccess = false;
           }
+        } catch (error) {
+          results[endpoint] = `❌ Eroare: ${error.message}`;
+          overallSuccess = false;
+        }
+      }
+      
+      if (overallSuccess) {
+        testElement.className = 'test-item success';
+        resultElement.textContent = `✅ Toate endpoint-urile funcționează corect!\n\n${formatResults(results)}`;
+      } else {
+        testElement.className = 'test-item error';
+        resultElement.textContent = `⚠️ Unele endpoint-uri nu funcționează corect.\n\n${formatResults(results)}`;
+      }
+    });
+    
+    // Test încărcare modul JS
+    document.getElementById('run-js-module-test').addEventListener('click', async () => {
+      const testElement = document.getElementById('test-js-module');
+      const resultElement = document.getElementById('js-module-result');
+      
+      testElement.className = 'test-item pending';
+      resultElement.textContent = 'Testare în curs...';
+      
+      try {
+        // Încercăm să importăm un modul ES
+        const module = await import('../client/test-module.js');
+        
+        if (module && module.getMessage) {
+          testElement.className = 'test-item success';
+          resultElement.textContent = `✅ Modul încărcat cu succes!\n\nMessaj: ${module.getMessage()}\nTip: ${typeof module.getMessage}\nModule: ${JSON.stringify(module.default || {}, null, 2)}`;
         } else {
-          mimeInfoEl.className = 'info-box error';
-          mimeInfoEl.innerHTML = `
-            <h3>❌ Tip MIME lipsă</h3>
-            <p>Serverul nu a specificat tipul MIME pentru fișier.</p>
-          `;
+          testElement.className = 'test-item error';
+          resultElement.textContent = `⚠️ Modulul a fost importat, dar nu conține funcția așteptată 'getMessage'.\nConținut modul: ${JSON.stringify(module, null, 2)}`;
         }
       } catch (error) {
-        mimeInfoEl.className = 'info-box error';
-        mimeInfoEl.innerHTML = `
-          <h3>❌ Eroare la verificarea tipului MIME</h3>
-          <p>${error.message}</p>
-        `;
-        requestInfoEl.textContent = `Eroare: ${error.message}`;
+        testElement.className = 'test-item error';
+        resultElement.textContent = `❌ Eroare la încărcarea modulului: ${error.message}\n\nStack: ${error.stack}`;
       }
+    });
+    
+    // Test tipuri MIME
+    document.getElementById('run-mime-test').addEventListener('click', async () => {
+      const testElement = document.getElementById('test-mime-types');
+      const resultElement = document.getElementById('mime-result');
+      
+      testElement.className = 'test-item pending';
+      resultElement.textContent = 'Testare în curs...';
+      
+      const filesToCheck = [
+        '/client/test-module.js',
+        '/public/static/test.js',
+        '/client/src/main.tsx',
+        '/client/src/App.tsx'
+      ];
+      
+      const results = {};
+      let overallSuccess = true;
+      
+      for (const file of filesToCheck) {
+        try {
+          const response = await fetch(file, { method: 'HEAD' });
+          const contentType = response.headers.get('content-type');
+          
+          if (contentType && 
+              (contentType.includes('javascript') || 
+               contentType.includes('application/ecmascript'))) {
+            results[file] = `✅ OK (${contentType})`;
+          } else {
+            results[file] = `⚠️ Tip MIME incorect: ${contentType || 'nedefinit'}`;
+            overallSuccess = false;
+          }
+        } catch (error) {
+          results[file] = `❌ Eroare: ${error.message}`;
+          overallSuccess = false;
+        }
+      }
+      
+      if (overallSuccess) {
+        testElement.className = 'test-item success';
+        resultElement.textContent = `✅ Toate fișierele au tipurile MIME corecte!\n\n${formatResults(results)}`;
+      } else {
+        testElement.className = 'test-item error';
+        resultElement.textContent = `⚠️ Unele fișiere nu au tipurile MIME corecte pentru module ES.\n\n${formatResults(results)}`;
+      }
+    });
+    
+    // Test importare dinamică
+    document.getElementById('run-import-test').addEventListener('click', async () => {
+      const testElement = document.getElementById('test-remote-import');
+      const resultElement = document.getElementById('import-result');
+      
+      testElement.className = 'test-item pending';
+      resultElement.textContent = 'Testare în curs...';
+      
+      try {
+        // Construim conținutul unui modul dinamic
+        const moduleCode = `
+          export function testDynamicImport() {
+            return {
+              success: true,
+              timestamp: "${new Date().toISOString()}",
+              message: "Import dinamic funcțional!"
+            };
+          }
+          export default { version: "1.0.0" };
+        `;
+        
+        // Creăm un blob și URL pentru modulul dinamic
+        const blob = new Blob([moduleCode], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        
+        // Încercăm importul dinamic
+        const module = await import(url);
+        
+        if (module && module.testDynamicImport) {
+          const result = module.testDynamicImport();
+          testElement.className = 'test-item success';
+          resultElement.textContent = `✅ Import dinamic reușit!\n\nResultat: ${JSON.stringify(result, null, 2)}\nTipul modulului: ${typeof module}`;
+        } else {
+          testElement.className = 'test-item error';
+          resultElement.textContent = `⚠️ Modulul a fost importat, dar nu conține funcția așteptată 'testDynamicImport'.\nConținut modul: ${JSON.stringify(module, null, 2)}`;
+        }
+        
+        // Curățăm URL-ul creat
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        testElement.className = 'test-item error';
+        resultElement.textContent = `❌ Eroare la importul dinamic: ${error.message}\n\nStack: ${error.stack}`;
+      }
+    });
+    
+    // Test mediu React
+    document.getElementById('run-react-test').addEventListener('click', async () => {
+      const testElement = document.getElementById('test-react-env');
+      const resultElement = document.getElementById('react-result');
+      
+      testElement.className = 'test-item pending';
+      resultElement.textContent = 'Testare în curs...';
+      
+      try {
+        // Verificăm dacă React și ReactDOM sunt disponibile global
+        const hasReactGlobal = typeof window.React !== 'undefined';
+        const hasReactDOMGlobal = typeof window.ReactDOM !== 'undefined';
+        
+        // Încercăm să importăm React
+        let reactImported = false;
+        let reactDOMImported = false;
+        let reactVersion = 'nedisponibil';
+        
+        try {
+          const reactModule = await import('react');
+          reactImported = true;
+          reactVersion = reactModule.version || 'nedefinit';
+        } catch (e) {
+          console.error('Eroare la importul React:', e);
+        }
+        
+        try {
+          const reactDOMModule = await import('react-dom');
+          reactDOMImported = true;
+        } catch (e) {
+          console.error('Eroare la importul ReactDOM:', e);
+        }
+        
+        // Verificăm integrarea JSX
+        const jsxSupport = checkJSXSupport();
+        
+        // Construim rezultatul
+        const results = {
+          'React global': hasReactGlobal ? '✅ Disponibil' : '❌ Indisponibil',
+          'ReactDOM global': hasReactDOMGlobal ? '✅ Disponibil' : '❌ Indisponibil',
+          'Import React': reactImported ? '✅ Funcțional' : '❌ Eșuat',
+          'Import ReactDOM': reactDOMImported ? '✅ Funcțional' : '❌ Eșuat',
+          'Versiune React': reactVersion,
+          'Suport JSX': jsxSupport ? '✅ Disponibil' : '❌ Indisponibil'
+        };
+        
+        const success = (reactImported || hasReactGlobal) && (reactDOMImported || hasReactDOMGlobal);
+        
+        if (success) {
+          testElement.className = 'test-item success';
+          resultElement.textContent = `✅ Mediul React este configurat corect!\n\n${formatResults(results)}`;
+        } else {
+          testElement.className = 'test-item error';
+          resultElement.textContent = `❌ Mediul React nu este configurat corect.\n\n${formatResults(results)}`;
+        }
+      } catch (error) {
+        testElement.className = 'test-item error';
+        resultElement.textContent = `❌ Eroare la testarea mediului React: ${error.message}\n\nStack: ${error.stack}`;
+      }
+    });
+    
+    // Rulează toate testele
+    document.getElementById('run-all-tests').addEventListener('click', async () => {
+      // Rulăm fiecare test în ordine
+      document.getElementById('run-server-test').click();
+      
+      // Introducem un delay între teste pentru a evita supraîncărcarea
+      await delay(500);
+      document.getElementById('run-endpoints-test').click();
+      
+      await delay(500);
+      document.getElementById('run-js-module-test').click();
+      
+      await delay(500);
+      document.getElementById('run-mime-test').click();
+      
+      await delay(500);
+      document.getElementById('run-import-test').click();
+      
+      await delay(500);
+      document.getElementById('run-react-test').click();
+    });
+    
+    // Descarcă raport
+    document.getElementById('download-report').addEventListener('click', () => {
+      // Obținem rezultatele fiecărui test
+      const serverResult = document.getElementById('server-result').textContent;
+      const endpointsResult = document.getElementById('endpoints-result').textContent;
+      const jsModuleResult = document.getElementById('js-module-result').textContent;
+      const mimeResult = document.getElementById('mime-result').textContent;
+      const importResult = document.getElementById('import-result').textContent;
+      const reactResult = document.getElementById('react-result').textContent;
+      
+      // Construim conținutul raportului
+      const reportContent = `
+RAPORT DIAGNOSTICARE FRONTEND DOXA
+Data: ${new Date().toLocaleString()}
+Url: ${window.location.href}
+Browser: ${getBrowserInfo()}
+User Agent: ${navigator.userAgent}
+
+==== TEST SERVER API ====
+${serverResult}
+
+==== TEST ENDPOINTS API ====
+${endpointsResult}
+
+==== TEST ÎNCĂRCARE MODUL JS ====
+${jsModuleResult}
+
+==== TEST TIPURI MIME ====
+${mimeResult}
+
+==== TEST IMPORTARE DINAMICĂ ====
+${importResult}
+
+==== TEST MEDIU REACT ====
+${reactResult}
+      `;
+      
+      // Creăm un blob și generăm URL-ul de descărcare
+      const blob = new Blob([reportContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      
+      // Creăm un link și simulăm click-ul pentru descărcare
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `doxa-diagnostic-${formatDate(new Date())}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Curățăm elementele create
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+    
+    // Funcții utilitare
+    function getBrowserInfo() {
+      const userAgent = navigator.userAgent;
+      let browserName = "Necunoscut";
+      
+      if (userAgent.match(/chrome|chromium|crios/i)) {
+        browserName = "Chrome";
+      } else if (userAgent.match(/firefox|fxios/i)) {
+        browserName = "Firefox";
+      } else if (userAgent.match(/safari/i)) {
+        browserName = "Safari";
+      } else if (userAgent.match(/opr\//i)) {
+        browserName = "Opera";
+      } else if (userAgent.match(/edg/i)) {
+        browserName = "Edge";
+      }
+      
+      return browserName;
     }
     
-    // Executăm verificarea la încărcarea paginii
-    checkMimeType();
+    function formatResults(results) {
+      return Object.entries(results)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n');
+    }
+    
+    function formatDate(date) {
+      return date.toISOString().replace(/[:.]/g, '-').replace('T', '_').split('.')[0];
+    }
+    
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    function checkJSXSupport() {
+      try {
+        // Încercăm să evaluăm sintaxa JSX
+        const testFunc = new Function('return () => <div>Test</div>');
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
   </script>
 </body>
 </html>
