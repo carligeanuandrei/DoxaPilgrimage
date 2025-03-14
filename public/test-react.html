@@ -119,23 +119,77 @@
       );
     }
     
-    // Inițializare React
-    document.getElementById('test-react').addEventListener('click', () => {
-      // Afișăm informații React
-      const reactInfo = {
-        version: React.version,
-        ReactDOM: typeof ReactDOM !== 'undefined',
-        createElement: typeof React.createElement === 'function',
-        useState: typeof React.useState === 'function',
-        useEffect: typeof React.useEffect === 'function'
-      };
+    // Asigurăm-ne că React și ReactDOM au fost încărcate complet
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM încărcat, verificăm React:', {
+        reactLoaded: typeof React !== 'undefined',
+        reactDOMLoaded: typeof ReactDOM !== 'undefined'
+      });
       
-      console.log('Informații React:', reactInfo);
-      
-      // Rendăm componenta React
-      const root = ReactDOM.createRoot(document.getElementById('react-root'));
-      root.render(<TestComponent message="React funcționează corect!" />);
+      // Adăugăm un event listener pentru butonul de test
+      const testButton = document.getElementById('test-react');
+      if (testButton) {
+        testButton.addEventListener('click', renderReactComponent);
+      } else {
+        console.error('Butonul de test React nu a fost găsit!');
+      }
     });
+    
+    // Funcție pentru renderizarea componentei React
+    function renderReactComponent() {
+      try {
+        // Afișăm informații React
+        const reactInfo = {
+          version: React.version,
+          ReactDOM: typeof ReactDOM !== 'undefined',
+          createElement: typeof React.createElement === 'function',
+          useState: typeof React.useState === 'function',
+          useEffect: typeof React.useEffect === 'function'
+        };
+        
+        console.log('Informații React:', reactInfo);
+        
+        // Obținem elementul root
+        const rootElement = document.getElementById('react-root');
+        if (!rootElement) {
+          console.error('Elementul root pentru React nu a fost găsit!');
+          return;
+        }
+        
+        // Curățăm conținutul anterior
+        rootElement.innerHTML = '';
+        
+        // Rendăm componenta React folosind noua API din React 18
+        try {
+          const root = ReactDOM.createRoot(rootElement);
+          root.render(<TestComponent message="React funcționează corect!" />);
+          console.log('Componenta React a fost renderizată cu succes!');
+        } catch (error) {
+          console.error('Eroare la renderizarea cu createRoot:', error);
+          
+          // Fallback la ReactDOM.render pentru compatibilitate
+          try {
+            ReactDOM.render(<TestComponent message="React funcționează corect (legacy mode)!" />, rootElement);
+            console.log('Componenta React a fost renderizată în mod legacy!');
+          } catch (legacyError) {
+            console.error('Eroare și la renderizarea legacy:', legacyError);
+            rootElement.innerHTML = '<div class="panel error"><h2>Eroare React</h2>' +
+              '<p>Nu s-a putut inițializa React: ' + error.message + '</p></div>';
+          }
+        }
+      } catch (error) {
+        console.error('Eroare la verificarea React:', error);
+        document.getElementById('react-root').innerHTML = 
+          '<div class="panel error"><h2>Eroare</h2>' +
+          '<p>A apărut o eroare la inițializarea React: ' + error.message + '</p></div>';
+      }
+    }
+    
+    // Renderăm automat componenta la încărcarea paginii (opțional)
+    setTimeout(() => {
+      console.log('Încercăm să renderăm React automat...');
+      renderReactComponent();
+    }, 1000);
   </script>
 </body>
 </html>
