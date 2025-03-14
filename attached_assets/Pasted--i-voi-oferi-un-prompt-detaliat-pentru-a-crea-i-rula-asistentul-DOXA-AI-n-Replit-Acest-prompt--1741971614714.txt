@@ -1,0 +1,117 @@
+Îți voi oferi un prompt detaliat pentru a crea și rula asistentul DOXA AI în Replit. Acest prompt îți va genera un proiect complet cu Flask pentru backend și OpenAI API pentru AI.
+
+🔹 Pasul 1: Creează un proiect nou în Replit
+Accesează Replit și creează un proiect nou de tip Python (Flask).
+În fișierul main.py, inserează codul de mai jos.
+🔹 Pasul 2: Adaugă acest cod în main.py
+Acest cod implementează chatbot-ul, rezervările, încărcarea documentelor și rapoartele pentru administrator.
+
+python
+Copiază
+Editează
+from flask import Flask, request, jsonify
+import openai
+from datetime import datetime
+import os
+
+app = Flask(__name__)
+
+# Setează cheia API pentru OpenAI
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# Simulăm o bază de date pentru utilizatori, organizatori și rezervări
+users = {}
+reservations = {}
+interactions = []
+
+@app.route("/")
+def home():
+    return "DOXA AI este activ! 🚀"
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.json
+    user_id = data.get("user_id")
+    message = data.get("message")
+    user_type = data.get("user_type")  # 'user' sau 'organizer'
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "Ești DOXA AI, asistentul oficial al platformei DOXA. Oferă suport utilizatorilor și organizatorilor."},
+            {"role": "user", "content": message}
+        ]
+    )
+
+    bot_response = response["choices"][0]["message"]["content"]
+    interactions.append({"user_id": user_id, "message": message, "response": bot_response, "timestamp": datetime.now()})
+
+    return jsonify({"response": bot_response})
+
+@app.route("/reservation", methods=["POST"])
+def make_reservation():
+    data = request.json
+    user_id = data.get("user_id")
+    package_id = data.get("package_id")
+    organizer_id = data.get("organizer_id")
+
+    if not user_id or not package_id or not organizer_id:
+        return jsonify({"error": "Date incomplete!"}), 400
+
+    reservations[user_id] = {"package_id": package_id, "organizer_id": organizer_id, "status": "pending"}
+
+    return jsonify({"message": "Rezervarea a fost înregistrată și trimisă organizatorului."})
+
+@app.route("/upload_document", methods=["POST"])
+def upload_document():
+    user_id = request.form.get("user_id")
+    file = request.files.get("file")
+
+    if not file:
+        return jsonify({"error": "Niciun document încărcat!"}), 400
+
+    file_path = f"uploads/{user_id}_{file.filename}"
+    file.save(file_path)
+
+    return jsonify({"message": "Documentul a fost încărcat cu succes!", "file_path": file_path})
+
+@app.route("/admin_report", methods=["GET"])
+def generate_report():
+    global interactions
+
+    # Procesăm interacțiunile pentru sugestii
+    suggestions = analyze_interactions(interactions)
+
+    report = {
+        "total_users": len(set(i["user_id"] for i in interactions)),
+        "total_interactions": len(interactions),
+        "suggestions": suggestions,
+        "timestamp": datetime.now().isoformat()
+    }
+
+    interactions = []  # Resetăm interacțiunile după raport
+    return jsonify(report)
+
+def analyze_interactions(interactions):
+    suggestions = []
+    if len(interactions) > 50:
+        suggestions.append("Activitate intensă detectată. Luați în considerare optimizarea serverului.")
+    return suggestions
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
+🔹 Pasul 3: Adaugă un fișier .replit pentru configurare
+Creează un fișier .replit și adaugă următoarele linii pentru a rula automat aplicația:
+
+ini
+Copiază
+Editează
+run = "python3 main.py"
+🔹 Pasul 4: Adaugă cheia API OpenAI
+În Replit, accesează Environment Variables (securitate > variabile de mediu).
+Creează o variabilă numită OPENAI_API_KEY.
+Introdu cheia ta OpenAI (o poți obține de pe platforma OpenAI).
+🔹 Pasul 5: Rulează aplicația
+Apasă butonul Run în Replit.
+Vei vedea un mesaj "DOXA AI este activ! 🚀" în consola de Replit.
+API-ul poate fi accesat prin https://your-replit-project-name.replit.app/.

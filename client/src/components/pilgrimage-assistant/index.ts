@@ -1,0 +1,1 @@
+export { PilgrimageAssistant } from './PilgrimageAssistant';
