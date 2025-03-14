@@ -116,7 +116,7 @@ export default function MonasteriesPage() {
     onSuccess: () => {
       toast({
         title: "Mănăstirea a fost ștearsă cu succes",
-        variant: "success",
+        variant: "default",
       });
       refetch(); // Reîncarcă lista de mănăstiri
       setMonasteryToDelete(null);
@@ -140,7 +140,7 @@ export default function MonasteriesPage() {
     onSuccess: () => {
       toast({
         title: "Mănăstirea a fost actualizată cu succes",
-        variant: "success",
+        variant: "default",
       });
       refetch(); // Reîncarcă lista de mănăstiri
       setEditDialogOpen(false);
@@ -282,7 +282,7 @@ export default function MonasteriesPage() {
   const getVerificationBadge = (verified: boolean | null) => {
     if (verified) {
       return (
-        <Badge variant="success" className="ml-2">
+        <Badge variant="default" className="ml-2 bg-green-100 text-green-800 hover:bg-green-200">
           <CheckCircle2 className="h-3 w-3 mr-1" />
           Verificat
         </Badge>
