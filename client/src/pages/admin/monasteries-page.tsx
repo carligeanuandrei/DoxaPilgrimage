@@ -81,6 +81,7 @@ import {
   Search,
   X
 } from "lucide-react";
+import { ImageUploader, MultipleImageUploader } from "@/components/admin/ImageUploader";
 import { formatRegionName } from "@/lib/format-utils";
 
 // Creează un client de interogare pentru a putea invalida interogările
@@ -875,24 +876,16 @@ export default function MonasteriesPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Imagine de copertă</FormLabel>
-                      <div className="space-y-3">
-                        <FormControl>
-                          <Input {...field} placeholder="URL imagine copertă" value={field.value || ""} />
-                        </FormControl>
-                        {field.value && (
-                          <div className="mt-2">
-                            <img 
-                              src={field.value} 
-                              alt="Imagine copertă" 
-                              className="w-full max-w-md h-auto rounded-md border" 
-                              onError={(e) => (e.target as HTMLImageElement).src = "/images/default-monastery.svg"}
-                            />
-                          </div>
-                        )}
-                        <FormDescription>
-                          Introduceți URL-ul imaginii de copertă
-                        </FormDescription>
-                      </div>
+                      <FormControl>
+                        <ImageUploader 
+                          existingImageUrl={field.value || ""}
+                          onImageUploaded={(imageUrl) => field.onChange(imageUrl)}
+                          label="Încărcați imaginea de copertă"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Încărcați o imagine de copertă pentru mănăstire (JPG, PNG, GIF max. 5MB)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -900,61 +893,22 @@ export default function MonasteriesPage() {
               </div>
 
               <div className="col-span-full">
-                <FormLabel className="block mb-2">Imagini galerie</FormLabel>
                 <FormField
                   control={form.control}
                   name="images"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
-                        {(field.value || []).map((imageUrl, index) => (
-                          <div key={index} className="relative rounded-md overflow-hidden border">
-                            <img 
-                              src={imageUrl} 
-                              alt={`Imagine ${index + 1}`} 
-                              className="w-full h-48 object-cover" 
-                              onError={(e) => (e.target as HTMLImageElement).src = "/images/default-monastery.svg"}
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              className="absolute top-2 right-2 p-1 h-8 w-8"
-                              onClick={() => {
-                                const newImages = [...(field.value || [])];
-                                newImages.splice(index, 1);
-                                field.onChange(newImages);
-                              }}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                        <div className="border border-dashed rounded-md flex items-center justify-center h-48">
-                          <div className="text-center p-4">
-                            <Plus className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                            <Input 
-                              type="text" 
-                              placeholder="Adaugă URL imagine" 
-                              className="mb-2" 
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  const input = e.currentTarget;
-                                  const url = input.value.trim();
-                                  if (url) {
-                                    field.onChange([...(field.value || []), url]);
-                                    input.value = '';
-                                  }
-                                }
-                              }}
-                            />
-                            <FormDescription>
-                              Introduceți URL și apăsați Enter
-                            </FormDescription>
-                          </div>
-                        </div>
-                      </div>
+                      <FormLabel>Imagini galerie</FormLabel>
+                      <FormControl>
+                        <MultipleImageUploader 
+                          existingImageUrls={field.value || []}
+                          onImagesChange={(imageUrls) => field.onChange(imageUrls)}
+                          maxImages={10}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Încărcați imagini pentru galeria mănăstirii (maximum 10 imagini)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
