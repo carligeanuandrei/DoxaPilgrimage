@@ -1,14 +1,15 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Spinner } from '../ui/spinner';
 
-type UserType = 'user' | 'organizer' | 'admin';
-
-interface Message {
+type Message = {
   id: string;
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
-}
+};
+
+type UserType = 'user' | 'organizer' | 'admin';
 
 function getWelcomeMessage(userType: UserType): string {
   switch (userType) {
@@ -26,10 +27,11 @@ export function DoxaAI({ userType = 'user' }: { userType?: UserType }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scorulare automată la mesajele noi
+  // Scrollare automată la mesajele noi
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -52,79 +54,64 @@ export function DoxaAI({ userType = 'user' }: { userType?: UserType }) {
   }, [userType, messages.length]);
 
   const handleSendMessage = async () => {
-    if (input.trim() === '') return;
-
+    if (input.trim() === '' || isLoading) return;
+    
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      content: input,
+      role: 'user' as const,
+      timestamp: new Date(),
+    };
+    
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setError(null);
+    setIsLoading(true);
+    
+    // Adăugăm mesajul utilizatorului la istoricul conversației
+    const updatedHistory = [...messageHistory, userMessage];
+    setMessageHistory(updatedHistory);
+    
     try {
-      // Adăugăm mesajul utilizatorului în lista de mesaje
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        content: input,
-        role: 'user',
+      // Trimitem cererea către backend
+      const response = await fetch('/api/doxa-ai/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          userType,
+          messageHistory: updatedHistory.slice(-10), // limităm la ultimele 10 mesaje pentru context
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Eroare: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Creăm și adăugăm răspunsul asistentului
+      const assistantMessage = {
+        id: `assistant-${Date.now()}`,
+        content: data.reply || data.response || "Ne pare rău, a apărut o eroare în procesarea răspunsului.",
+        role: 'assistant' as const,
         timestamp: new Date(),
       };
-
-      setMessages(prev => [...prev, userMessage]);
-      setInput('');
-      setIsLoading(true);
-      setError(null);
-
-      console.log("Trimit mesaj către API:", input);
-
-      try {
-        // Încercăm să trimitem mesajul către API real
-        const response = await fetch('/api/doxa-ai/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: input,
-            userType: userType,
-            history: messages.map(msg => ({
-              role: msg.role,
-              content: msg.content
-            }))
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Eroare server: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: data.reply || "Nu am putut obține un răspuns. Te rog încearcă din nou.",
-          role: 'assistant',
-          timestamp: new Date(),
-        };
-
-        setMessages(prev => [...prev, assistantMessage]);
-      } catch (apiError) {
-        console.error('Eroare la comunicarea cu API-ul:', apiError);
-        
-        // Răspuns de fallback în caz de eroare
-        const fallbackMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: "În acest moment nu pot procesa cererea ta. Contactează administratorul platformei pentru asistență.",
-          role: 'assistant',
-          timestamp: new Date(),
-        };
-
-        setMessages(prev => [...prev, fallbackMessage]);
-        setError("Eroare de comunicare cu serverul. Încercați din nou mai târziu.");
-      }
-
-    } catch (error) {
-      console.error('Eroare la trimiterea mesajului:', error);
-      setError("A apărut o eroare. Te rugăm să încerci din nou.");
+      
+      setMessages((prev) => [...prev, assistantMessage]);
+      setMessageHistory((prev) => [...prev, assistantMessage]);
+      
+    } catch (err) {
+      console.error('Eroare la trimiterea mesajului:', err);
+      setError('A apărut o eroare la comunicarea cu asistentul. Te rugăm să încerci din nou.');
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -132,62 +119,65 @@ export function DoxaAI({ userType = 'user' }: { userType?: UserType }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 rounded-lg shadow-md overflow-hidden">
-      <div className="bg-primary p-4 text-white">
-        <h2 className="text-xl font-bold">DOXA AI - Asistent Ortodox</h2>
-        <p className="text-sm">Întreabă orice despre pelerinaje, mănăstiri, tradiții sau sfinți</p>
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-lg shadow">
+      <div className="p-4 bg-blue-600 text-white rounded-t-lg">
+        <h2 className="text-xl font-bold">DOXA AI</h2>
+        <p className="text-sm opacity-80">Asistentul tău personal pentru pelerinaje ortodoxe</p>
       </div>
-
+      
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`p-3 rounded-lg ${
+            className={`${
               message.role === 'assistant'
-                ? 'bg-white border border-gray-200'
-                : 'bg-primary-50 ml-auto'
-            } max-w-[80%] ${message.role === 'user' ? 'ml-auto' : 'mr-auto'}`}
+                ? 'bg-blue-50 dark:bg-blue-900/20 text-gray-900 dark:text-gray-100'
+                : 'bg-blue-100 dark:bg-blue-800/40 text-gray-900 dark:text-white ml-auto'
+            } p-3 rounded-lg max-w-[80%] ${message.role === 'user' ? 'ml-auto' : ''}`}
           >
-            <p>{message.content}</p>
-            <span className="text-xs text-gray-500 mt-1 block">
-              {message.timestamp.toLocaleTimeString()}
-            </span>
+            <p className="whitespace-pre-wrap">{message.content}</p>
+            <div className="text-xs opacity-70 mt-1">
+              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
           </div>
         ))}
-        <div ref={messagesEndRef} />
-
+        
         {isLoading && (
-          <div className="bg-white p-3 rounded-lg max-w-[80%] animate-pulse">
-            <div className="h-2 bg-slate-200 rounded"></div>
-            <div className="h-2 bg-slate-200 rounded mt-2 w-3/4"></div>
+          <div className="flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg max-w-[80%]">
+            <Spinner size="sm" />
+            <p className="text-sm text-gray-600 dark:text-gray-300">DOXA AI se gândește...</p>
           </div>
         )}
         
         {error && (
-          <div className="bg-red-50 p-3 rounded-lg border border-red-200 text-red-600 max-w-[80%]">
-            {error}
+          <div className="bg-red-100 dark:bg-red-900/20 p-3 rounded-lg text-red-800 dark:text-red-200">
+            <p>{error}</p>
           </div>
         )}
+        
+        <div ref={messagesEndRef} />
       </div>
-
-      <div className="p-4 border-t">
-        <div className="flex gap-2">
+      
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex space-x-2">
           <textarea
-            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            placeholder="Întreabă ceva despre pelerinaje, mănăstiri sau tradiții ortodoxe..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={2}
+            onKeyPress={handleKeyPress}
+            placeholder="Întreabă ceva despre pelerinaje..."
+            className="flex-1 min-h-[60px] p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
           />
           <button
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50"
             onClick={handleSendMessage}
             disabled={isLoading || input.trim() === ''}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Trimite
+            {isLoading ? <Spinner size="sm" /> : 'Trimite'}
           </button>
         </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Powered by DOXA AI - Asistentul tău pentru pelerinaje ortodoxe
+        </p>
       </div>
     </div>
   );
