@@ -1,8 +1,9 @@
-import { Express } from 'express';
+import { Express, Request, Response } from 'express';
 import { storage } from '../storage';
 import { monasteries, cmsContent } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db';
+import { isAdmin } from '../auth';
 
 // Handler pentru rutele legate de mănăstiri
 export function registerMonasteryRoutes(app: Express) {

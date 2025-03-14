@@ -23,6 +23,7 @@ import BuilderPage from "@/pages/admin/builder-page";
 import UsersPage from "@/pages/admin/users-page";
 import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
 import OrganizerStatsPage from "@/pages/admin/organizer-stats-page";
+import MonasteriesPageAdmin from "@/pages/admin/monasteries-page";
 import AdminLoginPage from "@/pages/admin/admin-login";
 import EditablePage from "@/pages/EditablePage";
 import MonasteriesPage from "@/pages/monasteries/index";
@@ -80,6 +81,9 @@ function Router() {
       </Route>
       <Route path="/admin/builder">
         <ProtectedRoute component={BuilderPage} path="/admin/builder" adminOnly={true} />
+      </Route>
+      <Route path="/admin/monasteries">
+        <ProtectedRoute component={MonasteriesPageAdmin} path="/admin/monasteries" adminOnly={true} />
       </Route>
       {/* Dynamic page route - matches custom pages created in the editor */}
       <Route path="/:slug">
