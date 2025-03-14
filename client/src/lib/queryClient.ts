@@ -16,39 +16,42 @@ async function fetchWithRetry(
 ): Promise<Response> {
   let retries = 0;
   let lastError: Error = new Error("Unknown fetch error");
-  
+
   // Funcția pentru a normaliza URL-ul (adaugă baza dacă lipsește)
   const normalizedUrl = url.startsWith('/') ? window.location.origin + url : url;
-  
+
   while (retries < maxRetries) {
     try {
       // Implementăm un timeout pentru a evita blocarea
       const timeoutPromise = new Promise<Response>((_, reject) => {
         setTimeout(() => reject(new Error(`Timeout accessing ${url}`)), 15000);
       });
-      
+
       const fetchPromise = fetch(normalizedUrl, {
         ...options,
-        // Asigurăm-ne că avem mode: 'cors' pentru cereri externe
-        mode: 'cors' as RequestMode,
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        }
       });
-      
+
       // Race între fetch și timeout
       const res = await Promise.race([fetchPromise, timeoutPromise]) as Response;
       return res;
     } catch (error) {
       lastError = error as Error;
       retries++;
-      
+
       if (retries >= maxRetries) break;
-      
+
       // Așteptăm un timp exponențial între reîncercări
       const waitTime = delay * Math.pow(2, retries - 1);
       console.log(`Reîncercare ${retries}/${maxRetries} pentru ${url} în ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
-  
+
   // Dacă am ajuns aici, toate reîncercările au eșuat
   console.error(`Toate încercările de fetch au eșuat pentru ${url}`, lastError);
   throw lastError;
@@ -64,14 +67,14 @@ export async function apiRequest(
     if (data) {
       headers["Content-Type"] = "application/json";
     }
-    
+
     const options = {
       method,
       headers,
       body: data ? JSON.stringify(data) : undefined,
       credentials: "include" as RequestCredentials,
     };
-    
+
     // Folosim fetchWithRetry pentru a reîncerca automat dacă apar erori de rețea
     const res = await fetchWithRetry(url, options);
 
@@ -93,7 +96,7 @@ export const getQueryFn: <T>(options: {
       const options = {
         credentials: "include" as RequestCredentials,
       };
-      
+
       // Folosim fetchWithRetry pentru a reîncerca automat dacă apar erori de rețea
       const res = await fetchWithRetry(queryKey[0] as string, options);
 
