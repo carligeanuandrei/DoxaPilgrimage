@@ -485,6 +485,40 @@ export function EditableSection({
             </div>
             
             <div className="mt-4 border-t pt-4">
+              <h3 className="font-medium mb-3">Setări mobile</h3>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="mobileTextSize">Dimensiune text titlu pe mobil</Label>
+                  <select
+                    id="mobileTextSize"
+                    value={localContent.mobileTextSize || 'default'}
+                    onChange={e => setLocalContent({...localContent, mobileTextSize: e.target.value})}
+                    className="block w-full mt-1 border rounded-md shadow-sm focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm p-2"
+                  >
+                    <option value="default">Implicit</option>
+                    <option value="small">Mic</option>
+                    <option value="medium">Mediu</option>
+                    <option value="large">Mare</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="mobileOverlay">Ajustare overlay pe mobil</Label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="mobileFullOverlay"
+                      checked={localContent.mobileFullOverlay !== false}
+                      onChange={e => setLocalContent({...localContent, mobileFullOverlay: e.target.checked})}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <Label htmlFor="mobileFullOverlay">Overlay 100% pe mobil</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 border-t pt-4">
               <h3 className="font-medium mb-3">Filtru de căutare</h3>
               <div className="flex items-center space-x-2">
                 <input
@@ -510,6 +544,7 @@ export function EditableSection({
           </div>
         ) : (
           <div 
+            className="w-full"
             style={{
               height: `${localContent.height || 400}px`,
               backgroundImage: `url(${localContent.backgroundImage || '/placeholder-hero.jpg'})`,
@@ -523,6 +558,8 @@ export function EditableSection({
               color: '#fff',
               textAlign: 'center',
               padding: '2rem',
+              marginLeft: '0',
+              marginRight: '0',
             }}
           >
             {/* Overlay complet pentru întreaga secțiune */}
@@ -542,11 +579,11 @@ export function EditableSection({
             )}
             
             {/* Conținutul hero */}
-            <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px' }}>
-              <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+            <div className="z-10 relative px-4" style={{ position: 'relative', zIndex: 2, maxWidth: '800px' }}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl drop-shadow-md" style={{ fontWeight: 'bold', marginBottom: '1rem' }}>
                 {localContent.title || 'Titlu secțiune Hero'}
               </h1>
-              <p style={{ fontSize: '1.25rem', marginBottom: '2rem' }}>
+              <p className="text-base sm:text-xl drop-shadow-md" style={{ marginBottom: '2rem' }}>
                 {localContent.subtitle || 'Subtitlu secțiune Hero'}
               </p>
               
