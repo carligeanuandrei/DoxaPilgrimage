@@ -175,9 +175,9 @@ export default function MonasteriesPage() {
     foundedYear: z.number().int().positive().nullable().optional(),
     patronSaint: z.string().nullable().optional(),
     patronSaintDate: z.string().nullable().optional(),
-    contactEmail: z.string().email().nullable().optional(),
-    contactPhone: z.string().nullable().optional(),
-    website: z.string().url().nullable().optional(),
+    contactEmail: z.string().email().nullable().optional().or(z.string().length(0)),
+    contactPhone: z.string().nullable().optional().or(z.string().length(0)),
+    website: z.string().url().nullable().optional().or(z.string().length(0)),
     verification: z.boolean().default(true),
     // Adăugăm câmpurile pentru imagini
     coverImage: z.string().nullable().optional(),
