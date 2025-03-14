@@ -8,8 +8,13 @@ import BookingForm from "@/components/pilgrimages/booking-form";
 import ReviewsSection from "@/components/pilgrimages/reviews-section";
 import { useState } from "react";
 
-export default function PilgrimageDetailsPage() {
-  const { id } = useParams();
+interface PilgrimageDetailsPageProps {
+  id?: string;
+}
+
+export default function PilgrimageDetailsPage({ id: propId }: PilgrimageDetailsPageProps) {
+  const params = useParams();
+  const id = propId || params?.id;
   const [showBookingForm, setShowBookingForm] = useState(false);
   
   const { data: pilgrimage, isLoading: pilgrimageLoading, error: pilgrimageError } = useQuery<Pilgrimage>({

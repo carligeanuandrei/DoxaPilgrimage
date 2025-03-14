@@ -52,7 +52,9 @@ function Router() {
       <Route path="/cookies" component={CookiesPage} />
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/pilgrimages" component={PilgrimagesPage} />
-      <Route path="/pilgrimages/:id" component={PilgrimageDetailsPage} />
+      <Route path="/pilgrimages/:id">
+        {(params) => <PilgrimageDetailsPage id={params.id} />}
+      </Route>
       <Route path="/monasteries" component={MonasteriesPage} />
       <Route path="/monasteries/:slug">
         {(params) => <MonasteryDetailsPage slug={params.slug} />}
