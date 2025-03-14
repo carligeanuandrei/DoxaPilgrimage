@@ -15,6 +15,7 @@ import { registerFastingRecipesRoutes } from './routes/fasting-recipes';
 import { registerPilgrimageAssistantRoutes } from './routes/pilgrimage-assistant';
 import { registerPilgrimageMapRoutes } from './routes/pilgrimage-map';
 import { registerDoxaAIRoutes } from './routes/doxa-ai';
+import { registerServerStatusRoutes } from './routes/server-status';
 import { 
   insertPilgrimageSchema, 
   insertReviewSchema, 
@@ -104,7 +105,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Înregistrăm rutele pentru DOXA AI
   await registerDoxaAIRoutes(app);
   
-  // Endpoint pentru verificarea stării serverului și pentru depanare
+  // Înregistrăm rutele pentru verificarea statusului serverului
+  registerServerStatusRoutes(app);
+  
+  // Endpoint pentru verificarea stării serverului și pentru depanare (simplificat)
   app.get("/api/server-status", (req, res) => {
     res.json({
       status: "ok",
@@ -119,7 +123,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       },
       endpoints: {
         doxaAiChat: "/api/doxa-ai/chat",
-        pilgrimageAssistant: "/api/pilgrimage-assistant/chat"
+        pilgrimageAssistant: "/api/pilgrimage-assistant/chat",
+        serverStatus: "/api/server-status/html"
       },
       version: "1.2.0"
     });
