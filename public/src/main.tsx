@@ -1,12 +1,9 @@
-// Importuri pentru React și ReactDOM
-import React from "react";
-import { createRoot } from "react-dom/client";
+// Folosim variabilele globale React și ReactDOM definite în vite-react-compat.js
+const React = window.React;
+const ReactDOM = window.ReactDOM;
 
-// Importuri pentru componente și stiluri
-import App from "./App";
-import "./index.css";
-
-// Folosim o implementare simplificată fără contexte complexe
+// Importăm componenta noastră principală
+import App from "./App.js";
 
 // Funcție pentru inițializarea aplicației
 function initializeApp() {
@@ -21,7 +18,7 @@ function initializeApp() {
   
   try {
     // Creăm root-ul React
-    const root = createRoot(container);
+    const root = ReactDOM.createRoot(container);
     
     // Randăm aplicația simplificată
     root.render(<App />);

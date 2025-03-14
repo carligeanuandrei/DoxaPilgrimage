@@ -65,7 +65,19 @@ if (process.env.NODE_ENV === "development") {
     }
   }));
   
+  // Servim fișiere din directorul client/src
   app.use('/src', express.static(path.resolve("client/src"), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js') || filePath.endsWith('.mjs') || 
+          filePath.endsWith('.ts') || filePath.endsWith('.tsx') || 
+          filePath.endsWith('.jsx')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      }
+    }
+  }));
+  
+  // Servim și fișiere din directorul public/src pentru versiunea simplificată React
+  app.use('/src', express.static(path.resolve("public/src"), {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.js') || filePath.endsWith('.mjs') || 
           filePath.endsWith('.ts') || filePath.endsWith('.tsx') || 
