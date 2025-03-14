@@ -338,6 +338,49 @@ const BuilderSection = ({ section, onUpdateSection }: {
               <CardDescription>Modifică proprietățile componentei</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Secțiunea comună pentru toate tipurile de componente - CSS classes și ID */}
+              <div className="bg-secondary/20 p-3 rounded-md mb-2">
+                <h3 className="font-medium text-sm mb-2 text-primary">Stilizare CSS</h3>
+                <div className="space-y-2">
+                  <div>
+                    <Label htmlFor="css-class" className="text-xs">Clase CSS</Label>
+                    <Input 
+                      id="css-class" 
+                      value={editingComponent.properties?.className || ''} 
+                      onChange={(e) => setEditingComponent({
+                        ...editingComponent,
+                        properties: {
+                          ...editingComponent.properties,
+                          className: e.target.value
+                        }
+                      })}
+                      placeholder="my-class another-class"
+                      className="text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Adaugă clase separate prin spații.</p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="css-id" className="text-xs">ID CSS</Label>
+                    <Input 
+                      id="css-id" 
+                      value={editingComponent.properties?.id || ''} 
+                      onChange={(e) => setEditingComponent({
+                        ...editingComponent,
+                        properties: {
+                          ...editingComponent.properties,
+                          id: e.target.value
+                        }
+                      })}
+                      placeholder="unique-id"
+                      className="text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">ID-ul trebuie să fie unic în pagină.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Conținut specific pentru fiecare tip de componentă */}
               {editingComponent.type === 'heading' && (
                 <div className="space-y-2">
                   <Label htmlFor="heading-content">Conținut titlu</Label>
@@ -379,6 +422,20 @@ const BuilderSection = ({ section, onUpdateSection }: {
                     })}
                     placeholder="https://example.com/image.jpg"
                   />
+                  
+                  <Label htmlFor="image-alt" className="mt-2">Text alternativ (alt)</Label>
+                  <Input 
+                    id="image-alt" 
+                    value={editingComponent.properties?.alt || ''} 
+                    onChange={(e) => setEditingComponent({
+                      ...editingComponent,
+                      properties: {
+                        ...editingComponent.properties,
+                        alt: e.target.value
+                      }
+                    })}
+                    placeholder="Descriere imagine"
+                  />
                 </div>
               )}
               
@@ -407,6 +464,51 @@ const BuilderSection = ({ section, onUpdateSection }: {
                     })}
                     placeholder="https://example.com or /page"
                   />
+                  
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div>
+                      <Label htmlFor="button-variant">Stil buton</Label>
+                      <select 
+                        id="button-variant"
+                        className="w-full p-2 border rounded-md"
+                        value={editingComponent.properties?.variant || 'default'}
+                        onChange={(e) => setEditingComponent({
+                          ...editingComponent,
+                          properties: {
+                            ...editingComponent.properties,
+                            variant: e.target.value
+                          }
+                        })}
+                      >
+                        <option value="default">Default</option>
+                        <option value="destructive">Destructive</option>
+                        <option value="outline">Outline</option>
+                        <option value="secondary">Secondary</option>
+                        <option value="ghost">Ghost</option>
+                        <option value="link">Link</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="button-size">Dimensiune</Label>
+                      <select 
+                        id="button-size"
+                        className="w-full p-2 border rounded-md"
+                        value={editingComponent.properties?.size || 'default'}
+                        onChange={(e) => setEditingComponent({
+                          ...editingComponent,
+                          properties: {
+                            ...editingComponent.properties,
+                            size: e.target.value
+                          }
+                        })}
+                      >
+                        <option value="default">Default</option>
+                        <option value="sm">Mic</option>
+                        <option value="lg">Mare</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               )}
               
