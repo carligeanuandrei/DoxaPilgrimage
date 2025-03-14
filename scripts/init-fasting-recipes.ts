@@ -4,7 +4,7 @@
 
 import { db } from '../server/db';
 import { fastingRecipes } from '../shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import slugify from 'slugify';
 
 interface FastingRecipeData {
@@ -48,18 +48,27 @@ async function initFastingRecipes() {
     console.log('🌱 Inițializăm rețetele de post demonstrative...');
 
     // Verifică dacă există deja rețete
-    const existingRecipes = await db.select({ count: db.fn.count() }).from(fastingRecipes);
-    if (existingRecipes[0].count > 0) {
-      console.log(`⚠️ Există deja ${existingRecipes[0].count} rețete în baza de date.`);
-      const overwrite = process.argv.includes('--overwrite');
+    try {
+      const existingRecipes = await db.execute(sql`SELECT COUNT(*) FROM fasting_recipes`);
       
-      if (overwrite) {
-        console.log('🔄 Opțiunea --overwrite detectată. Ștergem rețetele existente...');
-        await db.delete(fastingRecipes);
-      } else {
-        console.log('ℹ️ Pentru a suprascrie rețetele existente, rulați script-ul cu opțiunea --overwrite');
-        return;
+      if (existingRecipes && existingRecipes.rows && existingRecipes.rows.length > 0) {
+        const count = Number(existingRecipes.rows[0].count);
+        if (count > 0) {
+          console.log(`⚠️ Există deja ${count} rețete în baza de date.`);
+          const overwrite = process.argv.includes('--overwrite');
+          
+          if (overwrite) {
+            console.log('🔄 Opțiunea --overwrite detectată. Ștergem rețetele existente...');
+            await db.execute(sql`DELETE FROM fasting_recipes`);
+          } else {
+            console.log('ℹ️ Pentru a suprascrie rețetele existente, rulați script-ul cu opțiunea --overwrite');
+            return;
+          }
+        }
       }
+    } catch (error) {
+      console.log('ℹ️ Nu s-au putut verifica rețetele existente, vom continua cu adăugarea de rețete noi.');
+      console.error(error);
     }
 
     // Rețete demonstrative
