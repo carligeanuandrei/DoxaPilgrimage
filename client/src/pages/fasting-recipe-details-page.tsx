@@ -24,9 +24,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 
-export default function FastingRecipeDetailsPage() {
+interface FastingRecipeDetailsPageProps {
+  slug?: string;
+}
+
+export default function FastingRecipeDetailsPage({ slug: propSlug }: FastingRecipeDetailsPageProps) {
   const [_, params] = useRoute('/retete-de-post/:slug');
-  const slug = params?.slug;
+  const slug = propSlug || params?.slug;
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();

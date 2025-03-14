@@ -55,12 +55,12 @@ function Router() {
       <Route path="/pilgrimages/:id" component={PilgrimageDetailsPage} />
       <Route path="/monasteries" component={MonasteriesPage} />
       <Route path="/monasteries/:slug">
-        {(params) => <MonasteryDetailsPage />}
+        {(params) => <MonasteryDetailsPage slug={params.slug} />}
       </Route>
       <Route path="/orthodox-calendar" component={OrthodoxCalendarPage} />
       <Route path="/retete-de-post" component={FastingRecipesPage} />
       <Route path="/retete-de-post/:slug">
-        {(params) => <FastingRecipeDetailsPage />}
+        {(params) => <FastingRecipeDetailsPage slug={params.slug} />}
       </Route>
       <Route path="/doxa-ai" component={DoxaAIPage} />
       <Route path="/profile">

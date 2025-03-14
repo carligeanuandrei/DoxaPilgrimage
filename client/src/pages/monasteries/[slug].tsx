@@ -10,10 +10,14 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect } from "react";
 
-export default function MonasteryDetailsPage() {
-  // Extragem slug-ul din URL
+interface MonasteryDetailsPageProps {
+  slug?: string;
+}
+
+export default function MonasteryDetailsPage({ slug: propSlug }: MonasteryDetailsPageProps) {
+  // Extragem slug-ul din URL sau folosim prop
   const [match, params] = useRoute<{ slug: string }>("/monasteries/:slug");
-  const slug = params?.slug;
+  const slug = propSlug || params?.slug;
 
   // Încărcăm datele mănăstirii
   const { isLoading, data: monastery } = useQuery<Monastery>({
