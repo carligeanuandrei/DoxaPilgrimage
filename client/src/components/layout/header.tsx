@@ -77,20 +77,7 @@ export default function Header() {
   return (
     <header className="bg-white shadow-md">
       <div className="container mx-auto px-4">
-        {/* Buton de editare pagină pentru admin */}
-        {user?.role === 'admin' && isEditablePage() && (
-          <div className="absolute top-2 right-4 z-50">
-            <Button 
-              onClick={activateEditMode}
-              size="sm" 
-              variant="outline" 
-              className="flex items-center gap-1 bg-white text-primary hover:bg-primary-100 border-primary"
-            >
-              <Edit className="h-4 w-4" />
-              Editează pagina
-            </Button>
-          </div>
-        )}
+{/* Am eliminat butonul de editare pagină din header pentru a evita duplicarea cu cel din editor */}
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
