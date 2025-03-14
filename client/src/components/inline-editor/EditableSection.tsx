@@ -14,6 +14,20 @@ import { useLocation } from 'wouter';
 
 export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features' | 'banners' | 'cta' | 'pilgrimages';
 
+// Funcție pentru a obține clasa de text potrivită pentru dimensiunea selectată pe mobile
+function getMobileTextSizeClass(size?: string): string {
+  switch(size) {
+    case 'small':
+      return 'text-2xl sm:text-3xl md:text-4xl';
+    case 'medium':
+      return 'text-3xl sm:text-4xl md:text-5xl';
+    case 'large':
+      return 'text-4xl sm:text-5xl md:text-6xl';
+    default:
+      return 'text-3xl sm:text-4xl md:text-5xl';
+  }
+}
+
 interface EditableSectionProps {
   id: string;
   type: SectionType;
@@ -580,7 +594,8 @@ export function EditableSection({
             
             {/* Conținutul hero */}
             <div className="z-10 relative px-4" style={{ position: 'relative', zIndex: 2, maxWidth: '800px' }}>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl drop-shadow-md" style={{ fontWeight: 'bold', marginBottom: '1rem' }}>
+              <h1 className={`${getMobileTextSizeClass(localContent.mobileTextSize)} drop-shadow-md`} 
+                  style={{ fontWeight: 'bold', marginBottom: '1rem' }}>
                 {localContent.title || 'Titlu secțiune Hero'}
               </h1>
               <p className="text-base sm:text-xl drop-shadow-md" style={{ marginBottom: '2rem' }}>
