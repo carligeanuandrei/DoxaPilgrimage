@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ro">
   <head>
@@ -89,8 +90,8 @@
       </div>
       
       <div class="links">
-        <a href="/client/check-frontend.html">Verificare Frontend</a>
-        <a href="/api/server-status" target="_blank">Verificare Server</a>
+        <a href="https://${window.location.hostname}/client/check-frontend.html">Verificare Frontend</a>
+        <a href="https://${window.location.hostname}/api/server-status" target="_blank">Verificare Server</a>
       </div>
       
       <div class="status">
@@ -99,12 +100,12 @@
     </div>
     
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="https://${window.location.hostname}/src/main.tsx"></script>
     <script>
       document.getElementById('timestamp').textContent = new Date().toLocaleString('ro-RO');
       
-      // Verificare server
-      fetch('/api/server-status')
+      // Verifică manual conectarea la server
+      fetch('https://' + window.location.hostname + '/api/server-status')
         .then(response => response.json())
         .then(data => {
           console.log('Server status:', data);
@@ -119,8 +120,8 @@
             <p>Nu s-a putut stabili conexiunea cu serverul. Vă recomandăm să:</p>
             <ul>
               <li>Reîmprospătați pagina</li>
-              <li>Verificați dacă serverul rulează (npm run dev)</li>
-              <li>Accesați <a href="/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
+              <li>Verificați dacă serverul rulează</li>
+              <li>Accesați <a href="https://${window.location.hostname}/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
             </ul>
           `;
         });
@@ -136,8 +137,8 @@
             <ul>
               <li>Verificați conexiunea la internet</li>
               <li>Verificați consola pentru eventuale erori</li>
-              <li>Accesați <a href="/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
-              <li>Accesați direct <a href="/client/">pagina principală</a></li>
+              <li>Accesați <a href="https://${window.location.hostname}/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
+              <li>Accesați direct <a href="https://${window.location.hostname}/">pagina principală</a></li>
             </ul>
           `;
         }

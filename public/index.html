@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0;url=/client/" />
+  <meta http-equiv="refresh" content="0;url=/" />
   <title>DOXA - Redirectionare</title>
   <style>
     body {
@@ -57,20 +58,20 @@
 <body>
   <div class="container">
     <h1>DOXA</h1>
-    <p>Vă redirectăm către pagina de diagnosticare...</p>
+    <p>Vă redirectăm către pagina principală...</p>
     <div class="loader"></div>
     <p>Dacă nu sunteți redirecționat automat, apăsați pe unul din link-urile de mai jos:</p>
     <div class="links">
-      <a href="/client/check-frontend.html">Pagina de Diagnosticare</a>
+      <a href="/">Pagina Principală</a>
       <a href="/api/server-status">Verificare API</a>
     </div>
   </div>
 
   <script>
-    // Vom redirecta manual după 2 secunde dacă meta refresh nu funcționează
+    // Vom redirecta manual după 1 secundă dacă meta refresh nu funcționează
     setTimeout(() => {
-      window.location.href = '/client/check-frontend.html';
-    }, 2000);
+      window.location.href = '/';
+    }, 1000);
   </script>
 </body>
 </html>
