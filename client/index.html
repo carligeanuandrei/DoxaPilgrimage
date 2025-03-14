@@ -80,10 +80,10 @@
       </div>
     </div>
   </div>
-  <!-- Folosim versiunea JSX pentru a evita probleme de sintaxă -->
-  <script type="module" src="/src/main.jsx"></script>
+  <!-- Încărcăm versiunea minimală pentru diagnostic -->
+  <script type="module" src="/src/minimal-starter.js?v=1"></script>
   
-  <!-- Script de diagnostic pentru a afișa erori -->
+  <!-- Script de diagnostic pentru a afișa erori globale -->
   <script>
     window.addEventListener('error', function(event) {
       console.error('Eroare detectată:', event.message, 'la linia:', event.lineno, 'în fișierul:', event.filename);
