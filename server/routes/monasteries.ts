@@ -270,10 +270,30 @@ export function registerMonasteryRoutes(app: Express) {
         return res.status(404).json({ message: 'Mănăstirea nu a fost găsită' });
       }
       
+      // Prelucrăm datele înainte de actualizare pentru a gestiona formatul datei
+      let dataToUpdate = { ...validationResult.data };
+      
+      // Verificăm dacă patronSaintDate este string și îl convertim la Date dacă este valid
+      if (dataToUpdate.patronSaintDate && typeof dataToUpdate.patronSaintDate === 'string') {
+        try {
+          // Dacă este o dată validă, o convertim în obiect Date
+          const date = new Date(dataToUpdate.patronSaintDate);
+          if (!isNaN(date.getTime())) {
+            dataToUpdate.patronSaintDate = date;
+          } else {
+            // Dacă nu e validă, o setăm la null
+            dataToUpdate.patronSaintDate = null;
+          }
+        } catch (error) {
+          // În caz de eroare, setăm la null
+          dataToUpdate.patronSaintDate = null;
+        }
+      }
+      
       // Actualizăm mănăstirea în baza de date
       await db.update(monasteries)
         .set({
-          ...validationResult.data,
+          ...dataToUpdate,
           updatedAt: new Date()
         })
         .where(eq(monasteries.id, monasteryId));

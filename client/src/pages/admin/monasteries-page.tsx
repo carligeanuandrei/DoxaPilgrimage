@@ -263,7 +263,14 @@ export default function MonasteriesPage() {
 
   // Funcție pentru a trimite datele de editare a mănăstirii
   const onSubmitEdit = (data: MonasteryFormValues) => {
-    updateMonasteryMutation.mutate(data);
+    // Asigurăm că valorile sunt în formatul corect înainte de a le trimite
+    const formattedData = {
+      ...data,
+      // Convertim patronSaintDate la string ISO sau null
+      patronSaintDate: data.patronSaintDate ? data.patronSaintDate : null
+    };
+    
+    updateMonasteryMutation.mutate(formattedData);
   };
 
   // Obține numele regiunii formatat
