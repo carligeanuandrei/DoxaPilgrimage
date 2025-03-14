@@ -170,8 +170,8 @@
           <p class="success">✅ Serverul este online!</p>
           <p><strong>Mediu:</strong> ${data.environment}</p>
           <p><strong>Uptime:</strong> ${data.uptime}</p>
-          <p><strong>Versiune Node:</strong> ${data.nodeVersion}</p>
-          <p><strong>Memorie:</strong> ${Math.round(data.memoryUsage.rss / (1024 * 1024))} MB</p>
+          <p><strong>Versiune Node:</strong> ${data.node_version}</p>
+          <p><strong>Memorie:</strong> ${Math.round(data.memory.rss / (1024 * 1024))} MB</p>
         `;
       } catch (error) {
         log(`Eroare la verificarea statusului serverului: ${error.message}`, 'error');
