@@ -478,13 +478,31 @@ async function initFastingRecipes() {
     // Inserăm rețetele în baza de date
     for (const recipe of demoRecipes) {
       const slug = generateSlug(recipe.title);
-      await db.insert(fastingRecipes).values({
-        ...recipe,
-        slug,
-        authorId: 1, // Presupunem că admin are ID 1
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
+      try {
+        await db.execute(
+          sql`INSERT INTO fasting_recipes (
+            title, slug, description, recipe_type, category, difficulty, 
+            preparation_time, ingredients, steps, image_url, calories, 
+            servings, preparation_minutes, cooking_minutes, is_featured, 
+            source, created_by, monastery_id, occasion_tags, 
+            feast_day, recommended_for_days
+          ) VALUES (
+            ${recipe.title}, ${slug}, ${recipe.description}, ${recipe.recipeType}, 
+            ${recipe.category}, ${recipe.difficulty}, ${recipe.preparationTime || '30_60_minute'}, 
+            ${sql.array(recipe.ingredients)}, ${sql.array(recipe.steps)}, 
+            ${recipe.imageUrl || null}, ${recipe.calories || null}, 
+            ${recipe.servings}, ${recipe.preparationMinutes}, ${recipe.cookingMinutes}, 
+            ${recipe.isFeatured || false}, ${recipe.source || null}, 
+            ${1}, ${recipe.monasteryId || null}, 
+            ${recipe.occasionTags ? sql.array(recipe.occasionTags) : null}, 
+            ${recipe.feastDay || null}, 
+            ${recipe.recommendedForDays ? sql.array(recipe.recommendedForDays) : null}
+          )`
+        );
+        console.log(`✅ Rețeta "${recipe.title}" a fost adăugată cu succes.`);
+      } catch (error) {
+        console.error(`❌ Eroare la adăugarea rețetei "${recipe.title}":`, error);
+      }
     }
 
     console.log(`✅ Am adăugat ${demoRecipes.length} rețete de post demonstrative în baza de date.`);
