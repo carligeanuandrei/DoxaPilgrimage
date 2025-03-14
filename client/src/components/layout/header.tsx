@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate, Edit, Landmark } from "lucide-react";
+import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate, Edit, Landmark, Utensils } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -189,6 +189,12 @@ export default function Header() {
                           <span>Gestiune Mănăstiri</span>
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/fasting-recipes" className="cursor-pointer w-full">
+                          <Utensils className="mr-2 h-4 w-4" />
+                          <span>Gestiune Rețete Post</span>
+                        </Link>
+                      </DropdownMenuItem>
                     </>
                   )}
                   
@@ -293,6 +299,10 @@ export default function Header() {
                       <Link href="/admin/monasteries" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
                         <Landmark className="inline mr-2 h-4 w-4" />
                         Gestiune Mănăstiri
+                      </Link>
+                      <Link href="/admin/fasting-recipes" className="text-primary hover:text-primary-dark font-medium" onClick={closeMobileMenu}>
+                        <Utensils className="inline mr-2 h-4 w-4" />
+                        Gestiune Rețete Post
                       </Link>
                     </>
                   )}
