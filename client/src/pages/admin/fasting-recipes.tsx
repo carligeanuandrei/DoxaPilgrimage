@@ -127,8 +127,8 @@ export default function FastingRecipesAdminPage() {
   
   // State pentru căutare și filtrare
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState<string>("");
-  const [filterCategory, setFilterCategory] = useState<string>("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   
   // State pentru editare/adăugare
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -409,8 +409,8 @@ export default function FastingRecipesAdminPage() {
       recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesType = filterType === "" || recipe.recipeType === filterType;
-    const matchesCategory = filterCategory === "" || recipe.category === filterCategory;
+    const matchesType = filterType === "all" || recipe.recipeType === filterType;
+    const matchesCategory = filterCategory === "all" || recipe.category === filterCategory;
     
     return matchesSearch && matchesType && matchesCategory;
   }) : [];
@@ -490,7 +490,7 @@ export default function FastingRecipesAdminPage() {
               <SelectValue placeholder="Tip rețetă" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Toate tipurile</SelectItem>
+              <SelectItem value="all">Toate tipurile</SelectItem>
               {Object.entries(recipeTypeTranslations).map(([value, label]) => (
                 <SelectItem key={value} value={value}>{label}</SelectItem>
               ))}
@@ -504,7 +504,7 @@ export default function FastingRecipesAdminPage() {
               <SelectValue placeholder="Categorie" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Toate categoriile</SelectItem>
+              <SelectItem value="all">Toate categoriile</SelectItem>
               {Object.entries(recipeCategoryTranslations).map(([value, label]) => (
                 <SelectItem key={value} value={value}>{label}</SelectItem>
               ))}
