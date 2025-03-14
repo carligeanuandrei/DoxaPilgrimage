@@ -2310,6 +2310,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Înregistrăm rutele pentru rețetele de post
   registerFastingRecipesRoutes(app);
   
+  // Rute pentru diagnosticare și testare
+  app.get('/api/status', (req, res) => {
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+  
+  app.get('/api/server-status', async (req, res) => {
+    try {
+      let dbStatus = false;
+      try {
+        const dbModule = await import('./db');
+        dbStatus = await dbModule.testConnection().then(() => true).catch(() => false);
+      } catch (err) {
+        console.error('Error testing DB connection:', err);
+      }
+      
+      res.json({
+        server: {
+          status: 'running',
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          nodeVersion: process.version
+        },
+        database: {
+          connected: dbStatus
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+  
+  app.get('/api/openai-status', (req, res) => {
+    const apiKey = process.env.OPENAI_API_KEY || '';
+    const hasApiKey = apiKey.length > 0;
+    
+    res.json({
+      status: hasApiKey ? 'configured' : 'not_configured',
+      timestamp: new Date().toISOString()
+    });
+  });
+  
   const httpServer = createServer(app);
 
   return httpServer;

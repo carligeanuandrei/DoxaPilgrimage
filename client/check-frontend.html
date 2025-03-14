@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diagnosticare Frontend DOXA</title>
+  <title>Diagnostic Frontend DOXA</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -212,12 +212,12 @@
     
     <div class="navigation">
       <a href="/">Acasă</a> | 
-      <a href="/client/test-connection.html">Test Conexiune</a> | 
-      <a href="/public/test.html">Test Module</a>
+      <a href="/test-connection.html">Test Conexiune</a> | 
+      <a href="/test-react.html">Test React</a>
     </div>
   </div>
 
-  <script>
+  <script type="module">
     // Populăm informațiile despre browser
     document.getElementById('browser-info').textContent = getBrowserInfo();
     document.getElementById('user-agent').textContent = navigator.userAgent;
@@ -300,7 +300,7 @@
         
         if (module && module.getMessage) {
           testElement.className = 'test-item success';
-          resultElement.textContent = `✅ Modul încărcat cu succes!\n\nMessaj: ${module.getMessage()}\nTip: ${typeof module.getMessage}\nModule: ${JSON.stringify(module.default || {}, null, 2)}`;
+          resultElement.textContent = `✅ Modul încărcat cu succes!\n\nMessaj: ${module.getMessage()}\nTip: ${typeof module.getMessage}\nModule: ${JSON.stringify(module, null, 2)}`;
         } else {
           testElement.className = 'test-item error';
           resultElement.textContent = `⚠️ Modulul a fost importat, dar nu conține funcția așteptată 'getMessage'.\nConținut modul: ${JSON.stringify(module, null, 2)}`;
@@ -326,34 +326,48 @@
         '/client/src/App.tsx'
       ];
       
-      const results = {};
-      let overallSuccess = true;
-      
-      for (const file of filesToCheck) {
-        try {
-          const response = await fetch(file, { method: 'HEAD' });
-          const contentType = response.headers.get('content-type');
-          
-          if (contentType && 
+      try {
+        const results = {};
+        let allCorrect = true;
+        
+        for (const file of filesToCheck) {
+          try {
+            const response = await fetch(file, { method: 'HEAD' });
+            const contentType = response.headers.get('content-type');
+            
+            const isCorrect = contentType && 
               (contentType.includes('javascript') || 
-               contentType.includes('application/ecmascript'))) {
-            results[file] = `✅ OK (${contentType})`;
-          } else {
-            results[file] = `⚠️ Tip MIME incorect: ${contentType || 'nedefinit'}`;
-            overallSuccess = false;
+               contentType.includes('application/ecmascript') ||
+               contentType.includes('application/x-typescript'));
+            
+            results[file] = {
+              status: response.status,
+              contentType: contentType,
+              isCorrect
+            };
+            
+            if (!isCorrect) {
+              allCorrect = false;
+            }
+          } catch (e) {
+            results[file] = {
+              error: e.message,
+              isCorrect: false
+            };
+            allCorrect = false;
           }
-        } catch (error) {
-          results[file] = `❌ Eroare: ${error.message}`;
-          overallSuccess = false;
         }
-      }
-      
-      if (overallSuccess) {
-        testElement.className = 'test-item success';
-        resultElement.textContent = `✅ Toate fișierele au tipurile MIME corecte!\n\n${formatResults(results)}`;
-      } else {
+        
+        if (allCorrect) {
+          testElement.className = 'test-item success';
+          resultElement.textContent = `✅ Toate tipurile MIME sunt configurate corect!\n\n${formatResults(results)}`;
+        } else {
+          testElement.className = 'test-item error';
+          resultElement.textContent = `⚠️ Unele fișiere nu au tipurile MIME corecte pentru module ES.\n\n${formatResults(results)}`;
+        }
+      } catch (error) {
         testElement.className = 'test-item error';
-        resultElement.textContent = `⚠️ Unele fișiere nu au tipurile MIME corecte pentru module ES.\n\n${formatResults(results)}`;
+        resultElement.textContent = `❌ Eroare la verificarea tipurilor MIME: ${error.message}`;
       }
     });
     
@@ -459,124 +473,98 @@
         }
       } catch (error) {
         testElement.className = 'test-item error';
-        resultElement.textContent = `❌ Eroare la testarea mediului React: ${error.message}\n\nStack: ${error.stack}`;
+        resultElement.textContent = `❌ Eroare la verificarea mediului React: ${error.message}`;
       }
     });
     
-    // Rulează toate testele
-    document.getElementById('run-all-tests').addEventListener('click', async () => {
-      // Rulăm fiecare test în ordine
+    // Rulăm toate testele
+    document.getElementById('run-all-tests').addEventListener('click', () => {
       document.getElementById('run-server-test').click();
-      
-      // Introducem un delay între teste pentru a evita supraîncărcarea
-      await delay(500);
       document.getElementById('run-endpoints-test').click();
-      
-      await delay(500);
       document.getElementById('run-js-module-test').click();
-      
-      await delay(500);
       document.getElementById('run-mime-test').click();
-      
-      await delay(500);
       document.getElementById('run-import-test').click();
-      
-      await delay(500);
       document.getElementById('run-react-test').click();
     });
     
-    // Descarcă raport
+    // Descărcăm raportul
     document.getElementById('download-report').addEventListener('click', () => {
-      // Obținem rezultatele fiecărui test
-      const serverResult = document.getElementById('server-result').textContent;
-      const endpointsResult = document.getElementById('endpoints-result').textContent;
-      const jsModuleResult = document.getElementById('js-module-result').textContent;
-      const mimeResult = document.getElementById('mime-result').textContent;
-      const importResult = document.getElementById('import-result').textContent;
-      const reactResult = document.getElementById('react-result').textContent;
+      const report = {
+        timestamp: new Date().toISOString(),
+        browser: {
+          userAgent: navigator.userAgent,
+          name: getBrowserInfo()
+        },
+        tests: {
+          server: document.getElementById('server-result').textContent,
+          endpoints: document.getElementById('endpoints-result').textContent,
+          jsModule: document.getElementById('js-module-result').textContent,
+          mimeTypes: document.getElementById('mime-result').textContent,
+          dynamicImport: document.getElementById('import-result').textContent,
+          reactEnv: document.getElementById('react-result').textContent
+        }
+      };
       
-      // Construim conținutul raportului
-      const reportContent = `
-RAPORT DIAGNOSTICARE FRONTEND DOXA
-Data: ${new Date().toLocaleString()}
-Url: ${window.location.href}
-Browser: ${getBrowserInfo()}
-User Agent: ${navigator.userAgent}
-
-==== TEST SERVER API ====
-${serverResult}
-
-==== TEST ENDPOINTS API ====
-${endpointsResult}
-
-==== TEST ÎNCĂRCARE MODUL JS ====
-${jsModuleResult}
-
-==== TEST TIPURI MIME ====
-${mimeResult}
-
-==== TEST IMPORTARE DINAMICĂ ====
-${importResult}
-
-==== TEST MEDIU REACT ====
-${reactResult}
-      `;
+      const reportBlob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(reportBlob);
       
-      // Creăm un blob și generăm URL-ul de descărcare
-      const blob = new Blob([reportContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      
-      // Creăm un link și simulăm click-ul pentru descărcare
       const a = document.createElement('a');
       a.href = url;
-      a.download = `doxa-diagnostic-${formatDate(new Date())}.txt`;
+      a.download = `doxa-diagnostic-${new Date().toISOString().replace(/:/g, '-')}.txt`;
       document.body.appendChild(a);
       a.click();
       
-      // Curățăm elementele create
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
     });
     
-    // Funcții utilitare
-    function getBrowserInfo() {
-      const userAgent = navigator.userAgent;
-      let browserName = "Necunoscut";
-      
-      if (userAgent.match(/chrome|chromium|crios/i)) {
-        browserName = "Chrome";
-      } else if (userAgent.match(/firefox|fxios/i)) {
-        browserName = "Firefox";
-      } else if (userAgent.match(/safari/i)) {
-        browserName = "Safari";
-      } else if (userAgent.match(/opr\//i)) {
-        browserName = "Opera";
-      } else if (userAgent.match(/edg/i)) {
-        browserName = "Edge";
-      }
-      
-      return browserName;
-    }
-    
+    // Funcție pentru afișarea rezultatelor
     function formatResults(results) {
       return Object.entries(results)
         .map(([key, value]) => `${key}: ${value}`)
         .join('\n');
     }
     
-    function formatDate(date) {
-      return date.toISOString().replace(/[:.]/g, '-').replace('T', '_').split('.')[0];
+    // Funcție pentru determinarea browserului
+    function getBrowserInfo() {
+      const ua = navigator.userAgent;
+      let browserName = "Browser necunoscut";
+      
+      if (ua.match(/chrome|chromium|crios/i)) {
+        browserName = "Chrome";
+      } else if (ua.match(/firefox|fxios/i)) {
+        browserName = "Firefox";
+      } else if (ua.match(/safari/i)) {
+        browserName = "Safari";
+      } else if (ua.match(/opr\//i)) {
+        browserName = "Opera";
+      } else if (ua.match(/edg/i)) {
+        browserName = "Edge";
+      }
+      
+      return browserName;
     }
     
-    function delay(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
+    // Verifică suportul JSX
     function checkJSXSupport() {
       try {
-        // Încercăm să evaluăm sintaxa JSX
-        const testFunc = new Function('return () => <div>Test</div>');
-        return true;
+        // Încercăm să evaluăm o expresie JSX simplă
+        // Aceasta va arunca o eroare dacă JSX nu este suportat
+        const testDiv = document.createElement('div');
+        testDiv.id = 'jsx-test-container';
+        document.body.appendChild(testDiv);
+        
+        try {
+          // Dacă suntea în CRA sau cu Babel, aceasta ar trebui să funcționeze
+          eval('const jsx = React.createElement("div", null, "test"); ReactDOM.render(jsx, document.getElementById("jsx-test-container"));');
+          return true;
+        } catch (e) {
+          return false;
+        } finally {
+          document.body.removeChild(testDiv);
+        }
       } catch (e) {
         return false;
       }
