@@ -108,6 +108,17 @@ export function DoxaAI({ userType = 'user' }: { userType?: UserType }) {
           timestamp: new Date(),
         }
       ]);
+      
+      // Verificăm dacă este un răspuns de rezervă (API OpenAI indisponibil)
+      if (data.fallback) {
+        console.log("Se folosește răspunsul de rezervă din cauza unei erori API");
+        toast({
+          title: 'Notificare',
+          description: 'Serviciul AI funcționează cu capacitate redusă în acest moment. Vă oferim un răspuns alternativ.',
+          variant: 'default',
+        });
+      }
+      
       setInput('');
     },
     onError: (error: Error) => {

@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
 
 // Setăm explicit mediul de dezvoltare în Replit
 if (process.env.REPL_ID) {
@@ -10,6 +11,9 @@ if (process.env.REPL_ID) {
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Servim fișierele statice din folderul public, care conține imagini și alte resurse
+app.use(express.static(path.resolve("public")));
 
 // Middleware pentru gestionarea timeout-urilor
 app.use((req, res, next) => {
