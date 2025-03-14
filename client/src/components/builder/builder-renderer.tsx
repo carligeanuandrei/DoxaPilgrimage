@@ -59,13 +59,19 @@ export const BuilderRenderer: React.FC<BuilderRendererProps> = ({ content, class
             {section.components.map((component) => (
               <div key={component.id} className="builder-component mb-4">
                 {component.type === 'heading' && (
-                  <h2 className={`text-3xl font-bold ${component.properties?.className || ''}`}>
+                  <h2 
+                    className={`text-3xl font-bold ${component.properties?.className || ''}`}
+                    id={component.properties?.id || undefined}
+                  >
                     {component.content}
                   </h2>
                 )}
                 
                 {component.type === 'text' && (
-                  <div className={`text-base ${component.properties?.className || ''}`}>
+                  <div 
+                    className={`text-base ${component.properties?.className || ''}`}
+                    id={component.properties?.id || undefined}
+                  >
                     {component.properties?.isHtml ? (
                       <div dangerouslySetInnerHTML={{ __html: component.content || '' }} />
                     ) : (
@@ -75,7 +81,10 @@ export const BuilderRenderer: React.FC<BuilderRendererProps> = ({ content, class
                 )}
                 
                 {component.type === 'image' && (
-                  <div className={`${component.properties?.className || ''}`}>
+                  <div 
+                    className={`${component.properties?.className || ''}`}
+                    id={component.properties?.id || undefined}
+                  >
                     <img 
                       src={component.content} 
                       alt={component.properties?.alt || ''} 
@@ -85,7 +94,11 @@ export const BuilderRenderer: React.FC<BuilderRendererProps> = ({ content, class
                 )}
                 
                 {component.type === 'spacer' && (
-                  <div style={{ height: component.properties?.height || '2rem' }} />
+                  <div 
+                    style={{ height: component.properties?.height || '2rem' }} 
+                    className={component.properties?.className || ''}
+                    id={component.properties?.id || undefined}
+                  />
                 )}
                 
                 {component.type === 'button' && (
@@ -93,6 +106,7 @@ export const BuilderRenderer: React.FC<BuilderRendererProps> = ({ content, class
                     variant={component.properties?.variant || 'default'}
                     size={component.properties?.size || 'default'}
                     className={component.properties?.className || ''}
+                    id={component.properties?.id || undefined}
                     onClick={() => component.properties?.url && navigate(component.properties.url)}
                   >
                     {component.content}
@@ -100,10 +114,13 @@ export const BuilderRenderer: React.FC<BuilderRendererProps> = ({ content, class
                 )}
                 
                 {component.type === 'cmsContent' && component.cmsKey && (
-                  <div className={component.properties?.className || ''}>
-                    {component.properties?.contentType === 'html' ? (
+                  <div 
+                    className={component.properties?.className || ''}
+                    id={component.properties?.id || undefined}
+                  >
+                    {component.properties?.type === 'html' ? (
                       <CmsHtml contentKey={component.cmsKey} fallback="" className="" />
-                    ) : component.properties?.contentType === 'image' ? (
+                    ) : component.properties?.type === 'image' ? (
                       <CmsImage
                         contentKey={component.cmsKey}
                         fallbackSrc=""
