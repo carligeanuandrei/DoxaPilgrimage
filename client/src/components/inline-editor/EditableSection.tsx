@@ -10,6 +10,7 @@ import { SelectColor } from './SelectColor';
 import { useAuth } from '@/hooks/use-auth';
 import PilgrimagesRenderer from './PilgrimagesRenderer';
 import { SpacingControls } from './SpacingControls';
+import { CssControls } from './CssControls';
 import { useLocation } from 'wouter';
 
 export type SectionType = 'text' | 'heading' | 'image' | 'hero' | 'cards' | 'features' | 'banners' | 'cta' | 'pilgrimages';
@@ -58,7 +59,6 @@ export function EditableSection({
   const [isHovered, setIsHovered] = useState(false);
   const [isEditable, setIsEditable] = useState(false);
   const [localContent, setLocalContent] = useState(content);
-  const sectionRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   
@@ -102,6 +102,10 @@ export function EditableSection({
   };
   
   // Drag-and-drop functionality for reordering
+  // Folosim useRef pentru a stoca elementul DOM
+  const dragDropRef = useRef(null); 
+  
+  // Simplificăm implementarea drag and drop
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'SECTION',
     item: { id, index },
@@ -114,9 +118,6 @@ export function EditableSection({
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'SECTION',
     hover(item: { id: string, index: number }, monitor) {
-      if (!sectionRef.current) {
-        return;
-      }
       const dragIndex = item.index;
       const hoverIndex = index;
       
@@ -126,16 +127,18 @@ export function EditableSection({
       }
       
       // Determine rectangle on screen
-      const hoverBoundingRect = sectionRef.current?.getBoundingClientRect();
+      if (!dragDropRef.current) return;
+      const hoverBoundingRect = (dragDropRef.current as any).getBoundingClientRect();
       
       // Get vertical middle
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) return;
       
       // Get pixels to the top
-      const hoverClientY = clientOffset!.y - hoverBoundingRect.top;
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
       
       // Move upward
       if (dragIndex > hoverIndex && hoverClientY < hoverMiddleY) {
@@ -154,11 +157,12 @@ export function EditableSection({
     }),
   }), [index, onMove]);
   
-  // Combine drag and drop refs
-  const dragDropRef = (el: HTMLDivElement) => {
-    drag(el);
-    drop(el);
-    sectionRef.current = el;
+  // Combinăm ref-urile într-un mod sigur
+  const setRefs = (element: any) => {
+    // Atribuim elementul la ambele ref-uri
+    dragDropRef.current = element;
+    drag(element);
+    drop(element);
   };
   
   // Custom styles based on state
@@ -255,6 +259,12 @@ export function EditableSection({
               onChange={setLocalContent}
             />
             
+            {/* Adăugare componenta de CSS Controls pentru heading */}
+            <CssControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
@@ -309,6 +319,12 @@ export function EditableSection({
             </div>
             
             <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
+            {/* Adăugare componenta de CSS Controls pentru text */}
+            <CssControls 
               content={localContent}
               onChange={setLocalContent}
             />
@@ -381,6 +397,12 @@ export function EditableSection({
             </div>
             
             <SpacingControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
+            {/* Adăugare componenta de CSS Controls pentru image */}
+            <CssControls 
               content={localContent}
               onChange={setLocalContent}
             />
@@ -1487,7 +1509,7 @@ export function EditableSection({
   
   return (
     <div
-      ref={dragDropRef}
+      ref={setRefs}
       className={`relative mb-8 pt-10 ${mobileSpacingClasses}`}
       style={sectionStyles}
       onMouseEnter={() => setIsHovered(true)}
