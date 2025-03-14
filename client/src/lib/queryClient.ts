@@ -1,3 +1,4 @@
+
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
@@ -7,60 +8,58 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// Funcție pentru reîncercarea operațiunilor de rețea cu strategie de backoff exponențial
-export async function fetchWithRetry(
-  url: string,
-  options: RequestInit = {},
-  maxRetries = 3,
-  delay = 500
+// Funcție îmbunătățită pentru reîncercarea operațiunilor de rețea cu strategie de backoff exponențial
+async function fetchWithRetry(
+  url: string, 
+  options: RequestInit, 
+  maxRetries = 3, 
+  initialDelay = 500
 ): Promise<Response> {
   let retries = 0;
-  let lastError: Error = new Error("Unknown fetch error");
+  let lastError: Error;
 
   // Funcția pentru a normaliza URL-ul (adaugă baza dacă lipsește)
-  const normalizedUrl = url.startsWith('/') ? `${window.location.origin}${url}` : url;
+  const normalizedUrl = url.startsWith('/') 
+    ? `${window.location.origin}${url}` 
+    : url;
 
-  while (retries < maxRetries) {
+  while (retries <= maxRetries) {
     try {
-      // Implementăm un timeout pentru a evita blocarea
-      let fetchPromise: Promise<Response>;
-
+      // Creare controller nou pentru fiecare încercare
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort(new DOMException('Timeout depășit', 'TimeoutError'));
-      }, 15000);
-
-      try {
-        fetchPromise = fetch(normalizedUrl, {
-          ...options,
-          credentials: 'include',
-          signal: controller.signal,
-          headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-          }
-        });
-
-        const response = await fetchPromise;
-        clearTimeout(timeoutId);
-        return response;
-      } catch (error: any) {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError' || error.name === 'TimeoutError') {
-          console.error(`Cererea a fost întreruptă: ${error.message || 'Timeout depășit'}`);
-          throw new Error(`Cererea a eșuat: ${error.message || 'Timeout depășit'}`);
+      const timeoutId = setTimeout(
+        () => controller.abort(new DOMException('Timeout depășit', 'TimeoutError')), 
+        15000
+      );
+      
+      const response = await fetch(normalizedUrl, {
+        ...options,
+        credentials: 'include',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
         }
-        console.error("Error in fetchWithRetry:", error);
+      });
+      
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error: any) {
+      lastError = error as Error;
+      
+      // Curăță timeout-ul în caz de eroare
+      
+      // Nu reîncerca în caz de eroare de abort intenționată
+      if (error.name === 'AbortError' && error.message !== 'Timeout depășit') {
         throw error;
       }
-    } catch (error) {
-      lastError = error as Error;
+      
       retries++;
-
-      if (retries >= maxRetries) break;
-
+      
+      if (retries > maxRetries) break;
+      
       // Așteptăm un timp exponențial între reîncercări
-      const waitTime = delay * Math.pow(2, retries - 1);
+      const waitTime = initialDelay * Math.pow(2, retries - 1);
       console.log(`Reîncercare ${retries}/${maxRetries} pentru ${url} în ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
