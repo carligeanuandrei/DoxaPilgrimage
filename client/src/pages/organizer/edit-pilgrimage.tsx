@@ -82,11 +82,16 @@ const transportOptions = [
 // Valute disponibile
 const currencyOptions = ["RON", "EUR", "USD"];
 
-export default function EditPilgrimagePage() {
+interface EditPilgrimagePageProps {
+  id?: string;
+}
+
+export default function EditPilgrimagePage({ id: propId }: EditPilgrimagePageProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const params = useParams<{ id: string }>();
-  const pilgrimageId = parseInt(params.id);
+  const paramId = params?.id;
+  const pilgrimageId = parseInt(propId || paramId || '0');
   const [, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);

@@ -66,48 +66,78 @@ function Router() {
       </Route>
       <Route path="/doxa-ai" component={DoxaAIPage} />
       <Route path="/profile">
-        <ProtectedRoute component={ProfilePage} path="/profile" />
+        <ProtectedRoute path="/profile">
+          <ProfilePage />
+        </ProtectedRoute>
       </Route>
       <Route path="/edit-profile">
-        <ProtectedRoute component={EditProfilePage} path="/edit-profile" />
+        <ProtectedRoute path="/edit-profile">
+          <EditProfilePage />
+        </ProtectedRoute>
       </Route>
       <Route path="/organizer/dashboard">
-        <ProtectedRoute component={OrganizerDashboard} path="/organizer/dashboard" />
+        <ProtectedRoute path="/organizer/dashboard">
+          <OrganizerDashboard />
+        </ProtectedRoute>
       </Route>
       <Route path="/organizer/create-pilgrimage">
-        <ProtectedRoute component={CreatePilgrimageNewPage} path="/organizer/create-pilgrimage" />
+        <ProtectedRoute path="/organizer/create-pilgrimage">
+          <CreatePilgrimageNewPage />
+        </ProtectedRoute>
       </Route>
       <Route path="/organizer/edit-pilgrimage/:id">
-        <ProtectedRoute component={EditPilgrimagePage} path="/organizer/edit-pilgrimage/:id" />
+        {(params) => (
+          <ProtectedRoute>
+            <EditPilgrimagePage id={params.id} />
+          </ProtectedRoute>
+        )}
       </Route>
       <Route path="/organizer/register" component={RegisterOrganizerPage} />
       {/* Admin routes */}
       <Route path="/admin/cms">
-        <ProtectedRoute component={CmsPage} path="/admin/cms" adminOnly={true} />
+        <ProtectedRoute path="/admin/cms" adminOnly={true}>
+          <CmsPage />
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/users">
-        <ProtectedRoute component={UsersPage} path="/admin/users" adminOnly={true} />
+        <ProtectedRoute path="/admin/users" adminOnly={true}>
+          <UsersPage />
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/pilgrimages">
-        <ProtectedRoute component={AdminPilgrimagesPage} path="/admin/pilgrimages" adminOnly={true} />
+        <ProtectedRoute path="/admin/pilgrimages" adminOnly={true}>
+          <AdminPilgrimagesPage />
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/organizer-stats">
-        <ProtectedRoute component={OrganizerStatsPage} path="/admin/organizer-stats" adminOnly={true} />
+        <ProtectedRoute path="/admin/organizer-stats" adminOnly={true}>
+          <OrganizerStatsPage />
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/builder">
-        <ProtectedRoute component={BuilderPage} path="/admin/builder" adminOnly={true} />
+        <ProtectedRoute path="/admin/builder" adminOnly={true}>
+          <BuilderPage />
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/monasteries">
-        <ProtectedRoute component={MonasteriesPageAdmin} path="/admin/monasteries" adminOnly={true} />
+        <ProtectedRoute path="/admin/monasteries" adminOnly={true}>
+          <MonasteriesPageAdmin />
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/fasting-recipes">
-        <ProtectedRoute component={FastingRecipesAdminPage} path="/admin/fasting-recipes" adminOnly={true} />
+        <ProtectedRoute path="/admin/fasting-recipes" adminOnly={true}>
+          <FastingRecipesAdminPage />
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/custom-css">
-        <ProtectedRoute component={CustomCssEditor} path="/admin/custom-css" adminOnly={true} />
+        <ProtectedRoute path="/admin/custom-css" adminOnly={true}>
+          <CustomCssEditor />
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/doxaai">
-        <ProtectedRoute component={DoxaAiDashboard} path="/admin/doxaai" adminOnly={true} />
+        <ProtectedRoute path="/admin/doxaai" adminOnly={true}>
+          <DoxaAiDashboard />
+        </ProtectedRoute>
       </Route>
       {/* Dynamic page route - matches custom pages created in the editor */}
       <Route path="/:slug">
