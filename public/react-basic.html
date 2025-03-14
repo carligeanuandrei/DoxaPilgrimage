@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test React Basic DOXA</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 20px;
+      padding: 20px;
+      background-color: #f5f5f7;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #3b5998;
+      margin-bottom: 20px;
+    }
+    .panel {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      border: 1px solid #e0e0e0;
+    }
+    .success {
+      background-color: #e6fffa;
+      border: 1px solid #00c9a7;
+    }
+    button {
+      padding: 8px 15px;
+      background-color: #3b5998;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    button:hover {
+      background-color: #2d4373;
+    }
+    .navigation {
+      margin-top: 20px;
+      text-align: center;
+    }
+    a {
+      color: #3b5998;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+  <!-- Încărcăm React și ReactDOM direct din CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Test React Basic DOXA</h1>
+    
+    <div class="panel">
+      <p>Această pagină testează funcționalitatea React fără a folosi JSX sau transformări Babel.</p>
+    </div>
+    
+    <div id="react-root"></div>
+    
+    <button id="test-button">Testează React</button>
+    
+    <div class="navigation">
+      <a href="/">Pagina Principală</a> | 
+      <a href="/test-react.html">Test React cu JSX</a>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Punem informații de verificare în consolă
+      console.log('DOM încărcat, verificăm React:', {
+        reactLoaded: typeof React !== 'undefined',
+        reactDOMLoaded: typeof ReactDOM !== 'undefined',
+        reactVersion: React ? React.version : 'nedefinit'
+      });
+      
+      // Funcție pentru crearea și afișarea componentei React
+      function testReact() {
+        try {
+          // Creăm un element React simplu folosind React.createElement
+          const message = "React funcționează corect! (Versiunea " + React.version + ")";
+          const counterId = "counter-" + Math.floor(Math.random() * 1000);
+          
+          // Element h2
+          const h2 = React.createElement('h2', null, 'Componenta React');
+          
+          // Element p cu mesaj
+          const p1 = React.createElement('p', null, message);
+          
+          // Element p cu contor
+          const p2 = React.createElement('p', null, [
+            'Contor: ',
+            React.createElement('strong', { id: counterId }, '0')
+          ]);
+          
+          // Buton pentru incrementare
+          const button = React.createElement('button', {
+            onClick: function() {
+              const counterElement = document.getElementById(counterId);
+              if (counterElement) {
+                counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
+              }
+            }
+          }, 'Incrementează');
+          
+          // Combinăm toate elementele într-un container div
+          const container = React.createElement('div', { className: 'panel success' }, [
+            h2, p1, p2, button
+          ]);
+          
+          // Obținem elementul root și renderăm componenta React
+          const rootElement = document.getElementById('react-root');
+          
+          // Curățăm elementul înainte de renderizare
+          rootElement.innerHTML = '';
+          
+          try {
+            // Încercăm întâi API-ul nou: createRoot (React 18+)
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(container);
+            console.log('React 18 createRoot a funcționat!');
+          } catch (error) {
+            console.warn('createRoot nu este disponibil, folosim ReactDOM.render (legacy):', error);
+            
+            // Fallback la API-ul vechi: ReactDOM.render
+            ReactDOM.render(container, rootElement);
+            console.log('ReactDOM.render a funcționat!');
+          }
+          
+          // Afișăm un mesaj de succes
+          console.log('Componenta React a fost renderizată cu succes!');
+        } catch (error) {
+          console.error('Eroare la testarea React:', error);
+          
+          // Afișăm eroarea în elementul root
+          document.getElementById('react-root').innerHTML = 
+            '<div class="panel" style="background-color: #fef2f2; border-color: #f87171;">' +
+            '<h2>Eroare React</h2>' +
+            '<p>A apărut o eroare la testarea React: ' + error.message + '</p>' +
+            '</div>';
+        }
+      }
+      
+      // Adăugăm event listener pentru buton
+      document.getElementById('test-button').addEventListener('click', testReact);
+      
+      // Executăm testul automat după 500ms
+      setTimeout(testReact, 500);
+    });
+  </script>
+</body>
+</html>
