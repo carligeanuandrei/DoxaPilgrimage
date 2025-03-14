@@ -2113,6 +2113,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerMonasteryRegionsRoutes(app);
   registerMonasteryRoutes(app);
   
+  // Înregistrăm rutele pentru încărcarea fișierelor
+  registerUploadRoutes(app);
+  
   const httpServer = createServer(app);
 
   return httpServer;
