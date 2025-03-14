@@ -18,6 +18,8 @@ export default function MonasteriesPage() {
   
   const { isLoading, data: monasteries = [], error } = useQuery<Monastery[]>({
     queryKey: ["/api/monasteries"],
+    staleTime: 60000, // Cache pentru 1 minut
+    refetchOnWindowFocus: false, // Nu refetches când focalizează fereastra
   });
   
   useEffect(() => {
