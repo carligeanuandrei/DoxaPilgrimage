@@ -58,7 +58,7 @@ export function MonasteryCard({ monastery }: MonasteryCardProps) {
           <span className="font-semibold">Hram:</span> {' '}
           {monastery.patronSaint || 'Nemenționat'}
         </p>
-        <Link href={`/monasteries/${monastery.slug}`}>
+        <Link to={`/monasteries/${monastery.slug}`}>
           <span className="text-sm text-primary hover:underline cursor-pointer">Detalii →</span>
         </Link>
       </CardFooter>

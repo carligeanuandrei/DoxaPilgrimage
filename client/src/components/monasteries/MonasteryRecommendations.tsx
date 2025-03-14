@@ -294,7 +294,7 @@ export default function MonasteryRecommendations() {
         
         <div className="mt-6 text-center">
           <Button variant="outline" asChild>
-            <Link href="/monasteries">
+            <Link to="/monasteries">
               Vezi toate mănăstirile
             </Link>
           </Button>
