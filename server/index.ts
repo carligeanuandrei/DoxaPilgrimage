@@ -45,8 +45,26 @@ if (process.env.NODE_ENV === "development") {
   });
   
   // Configurații standard pentru servirea fișierelor statice
-  app.use('/node_modules', express.static(path.resolve("node_modules")));
-  app.use('/client', express.static(path.resolve("client")));
+  app.use('/node_modules', express.static(path.resolve("node_modules"), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js') || filePath.endsWith('.mjs') || 
+          filePath.endsWith('.jsx') || filePath.endsWith('.ts') || 
+          filePath.endsWith('.tsx')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      }
+    }
+  }));
+  
+  app.use('/client', express.static(path.resolve("client"), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js') || filePath.endsWith('.mjs') || 
+          filePath.endsWith('.jsx') || filePath.endsWith('.ts') || 
+          filePath.endsWith('.tsx')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      }
+    }
+  }));
+  
   app.use('/src', express.static(path.resolve("client/src"), {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.js') || filePath.endsWith('.mjs') || 
