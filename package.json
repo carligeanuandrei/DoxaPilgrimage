@@ -51,6 +51,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/pg": "^8.11.11",
     "@types/react-helmet": "^6.1.11",
+    "@types/react-simple-maps": "^3.0.6",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/uuid": "^10.0.0",
     "axios": "^1.8.3",

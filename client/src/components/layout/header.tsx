@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate, Edit, Landmark, Utensils, Paintbrush } from "lucide-react";
+import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, LayoutTemplate, Edit, Landmark, Utensils, Paintbrush, Brain } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
