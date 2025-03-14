@@ -165,37 +165,43 @@ export function MultipleImageUploader({
 }: MultipleImageUploaderProps) {
   const [images, setImages] = useState<string[]>(existingImageUrls || []);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
+    // Convertim FileList la array pentru a putea itera
+    const fileArray = Array.from(files);
+    
     // Verifică dacă s-a atins numărul maxim de imagini
-    if (images.length >= maxImages) {
+    if (images.length + fileArray.length > maxImages) {
       toast({
-        title: "Număr maxim de imagini atins",
-        description: `Puteți încărca maximum ${maxImages} imagini.`,
+        title: "Prea multe imagini",
+        description: `Puteți încărca maximum ${maxImages} imagini în total. Ați selectat ${fileArray.length} imagini, dar mai aveți doar ${maxImages - images.length} sloturi disponibile.`,
         variant: "destructive",
       });
       return;
     }
 
-    // Validare tip fișier și dimensiune
-    if (!file.type.startsWith('image/')) {
+    // Validare fișiere
+    const invalidFiles = fileArray.filter(file => !file.type.startsWith('image/'));
+    if (invalidFiles.length > 0) {
       toast({
         title: "Tip fișier invalid",
-        description: "Vă rugăm să selectați o imagine (JPG, PNG, GIF, etc.)",
+        description: `${invalidFiles.length} fișier(e) nu sunt imagini. Vă rugăm să selectați doar imagini (JPG, PNG, GIF, etc.)`,
         variant: "destructive",
       });
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB max
+    const largeFiles = fileArray.filter(file => file.size > 5 * 1024 * 1024);
+    if (largeFiles.length > 0) {
       toast({
-        title: "Fișier prea mare",
-        description: "Imaginea trebuie să fie mai mică de 5MB",
+        title: "Fișier(e) prea mari",
+        description: `${largeFiles.length} imagine(i) depășesc limita de 5MB.`,
         variant: "destructive",
       });
       return;
@@ -203,42 +209,58 @@ export function MultipleImageUploader({
 
     try {
       setIsUploading(true);
+      setUploadProgress(0);
       
-      // Creare formData pentru upload
-      const formData = new FormData();
-      formData.append('image', file);
+      // Array pentru a stoca URL-urile imaginilor încărcate
+      const uploadedImageUrls: string[] = [];
       
-      // Apelare API de upload
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error('Eroare la încărcarea imaginii');
+      // Încarcă fiecare imagine pe rând
+      for (let i = 0; i < fileArray.length; i++) {
+        const file = fileArray[i];
+        
+        // Actualizare progres
+        setUploadProgress(Math.round((i / fileArray.length) * 100));
+        
+        // Creare formData pentru upload
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('folder', 'monasteries');
+        
+        // Apelare API de upload
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Eroare la încărcarea imaginii ${file.name}`);
+        }
+        
+        const data = await response.json();
+        uploadedImageUrls.push(data.url);
       }
       
-      const data = await response.json();
-      const imageUrl = data.url;
-      
-      // Adaugă noua imagine la lista existentă
-      const updatedImages = [...images, imageUrl];
+      // Adaugă toate imaginile noi la lista existentă
+      const updatedImages = [...images, ...uploadedImageUrls];
       setImages(updatedImages);
       onImagesChange(updatedImages);
       
       toast({
-        title: "Imagine încărcată cu succes",
+        title: fileArray.length > 1 
+          ? `${fileArray.length} imagini încărcate cu succes` 
+          : "Imagine încărcată cu succes",
         variant: "default",
       });
     } catch (error) {
-      console.error('Eroare la încărcarea imaginii:', error);
+      console.error('Eroare la încărcarea imaginilor:', error);
       toast({
         title: "Eroare la încărcare",
-        description: "Nu am putut încărca imaginea. Încercați din nou.",
+        description: "Nu am putut încărca una sau mai multe imagini. Încercați din nou.",
         variant: "destructive",
       });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -259,8 +281,24 @@ export function MultipleImageUploader({
         ref={fileInputRef}
         onChange={handleFileSelect}
         accept="image/*"
+        multiple={true}
         className="hidden"
       />
+      
+      {isUploading && (
+        <div className="mb-4">
+          <div className="text-sm mb-1 flex justify-between">
+            <span>Se încarcă imaginile...</span>
+            <span>{uploadProgress}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div 
+              className="bg-primary h-2.5 rounded-full transition-all duration-300" 
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
+        </div>
+      )}
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {images.map((imageUrl, index) => (
@@ -301,8 +339,9 @@ export function MultipleImageUploader({
             ) : (
               <div className="flex flex-col items-center justify-center">
                 <Image className="h-10 w-10 mb-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Adaugă imagine</span>
-                <span className="text-xs text-muted-foreground mt-1">JPG, PNG, GIF (max. 5MB)</span>
+                <span className="text-sm text-muted-foreground">Adaugă imagini</span>
+                <span className="text-xs text-muted-foreground mt-1">Selectați una sau mai multe imagini</span>
+                <span className="text-xs text-muted-foreground">JPG, PNG, GIF (max. 5MB/imagine)</span>
               </div>
             )}
           </Button>
