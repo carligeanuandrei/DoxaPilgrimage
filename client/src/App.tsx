@@ -27,6 +27,7 @@ import AdminPilgrimagesPage from "@/pages/admin/pilgrimages-page";
 import OrganizerStatsPage from "@/pages/admin/organizer-stats-page";
 import MonasteriesPageAdmin from "@/pages/admin/monasteries-page";
 import FastingRecipesAdminPage from "@/pages/admin/fasting-recipes";
+import CustomCssEditor from "@/pages/admin/custom-css-editor";
 import AdminLoginPage from "@/pages/admin/admin-login";
 import EditablePage from "@/pages/EditablePage";
 import MonasteriesPage from "@/pages/monasteries/index";
@@ -35,6 +36,7 @@ import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { useEffect } from "react";
+import CustomCssLoader from "@/components/shared/custom-css-loader";
 
 function Router() {
   return (
@@ -96,6 +98,9 @@ function Router() {
       <Route path="/admin/fasting-recipes">
         <ProtectedRoute component={FastingRecipesAdminPage} path="/admin/fasting-recipes" adminOnly={true} />
       </Route>
+      <Route path="/admin/custom-css">
+        <ProtectedRoute component={CustomCssEditor} path="/admin/custom-css" adminOnly={true} />
+      </Route>
       {/* Dynamic page route - matches custom pages created in the editor */}
       <Route path="/:slug">
         {(params) => <EditablePage slug={params.slug} />}
@@ -115,6 +120,7 @@ function App() {
   
   return (
     <div className="flex flex-col min-h-screen">
+      <CustomCssLoader />
       <Header />
       <main className="flex-grow">
         <Router />
