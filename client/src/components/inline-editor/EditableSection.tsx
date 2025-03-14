@@ -614,7 +614,8 @@ export function EditableSection({
           </div>
         ) : (
           <div 
-            className="w-full"
+            className={`w-full ${localContent.className || ''}`}
+            id={localContent.id_css || undefined}
             style={{
               height: `${localContent.height || 400}px`,
               backgroundImage: `url(${localContent.backgroundImage || '/placeholder-hero.jpg'})`,
@@ -630,6 +631,7 @@ export function EditableSection({
               padding: '2rem',
               marginLeft: '0',
               marginRight: '0',
+              ...(localContent.customCss ? parseCssString(localContent.customCss) : {})
             }}
           >
             {/* Overlay complet pentru întreaga secțiune */}
