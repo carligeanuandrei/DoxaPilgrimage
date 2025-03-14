@@ -33,7 +33,7 @@ import DoxaAiDashboard from "@/pages/admin/doxaai-dashboard";
 import AdminLoginPage from "@/pages/admin/admin-login";
 import EditablePage from "@/pages/EditablePage";
 import MonasteriesPage from "@/pages/monasteries/index";
-import MonasteryDetailsPage from "@/pages/monasteries/[slug]";
+import MonasteryDetailsPage from "@/pages/monasteries/MonasteryDetails";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
