@@ -99,7 +99,7 @@ export default function MonasteryDailyRecommendations() {
           </div>
           {monastery.patronSaint && (
             <div className="flex items-center text-sm text-neutral-500 mb-2">
-              <ChurchIcon className="h-3 w-3 mr-1" />
+              <Church className="h-3 w-3 mr-1" />
               <span>{monastery.patronSaint}</span>
             </div>
           )}
@@ -206,7 +206,7 @@ export default function MonasteryDailyRecommendations() {
         {/* Secțiunea pentru sărbătoarea zilei */}
         <div className="mb-4">
           <h3 className="font-semibold text-lg flex items-center gap-1">
-            <ChurchIcon className="h-4 w-4" />
+            <Church className="h-4 w-4" />
             Sărbătoarea zilei
           </h3>
           
@@ -232,7 +232,7 @@ export default function MonasteryDailyRecommendations() {
         {/* Secțiunea pentru recomandări de rugăciune */}
         <div>
           <h3 className="font-semibold text-lg flex items-center gap-1 mb-2">
-            <PrayIcon className="h-4 w-4" />
+            <Heart className="h-4 w-4" />
             Recomandări pentru rugăciune
           </h3>
           
