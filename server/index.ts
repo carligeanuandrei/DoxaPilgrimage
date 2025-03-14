@@ -30,17 +30,28 @@ if (process.env.NODE_ENV === "development") {
   
   // Configurăm MIME types corect pentru module ES
   express.static.mime.define({
-    'application/javascript': ['js', 'mjs'],
+    'application/javascript': ['js', 'mjs', 'jsx', 'tsx', 'ts'],
     'text/javascript': ['jsx', 'tsx', 'ts']
   });
   
+  // Middleware personalizat pentru a asigura Content-Type corect pentru module ES
+  app.use((req, res, next) => {
+    const url = req.url;
+    if (url.endsWith('.js') || url.endsWith('.mjs') || 
+        url.endsWith('.jsx') || url.endsWith('.ts') || url.endsWith('.tsx')) {
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    }
+    next();
+  });
+  
+  // Configurații standard pentru servirea fișierelor statice
   app.use('/node_modules', express.static(path.resolve("node_modules")));
   app.use('/client', express.static(path.resolve("client")));
   app.use('/src', express.static(path.resolve("client/src"), {
-    setHeaders: (res, path) => {
-      if (path.endsWith('.js') || path.endsWith('.mjs') || 
-          path.endsWith('.ts') || path.endsWith('.tsx') || 
-          path.endsWith('.jsx')) {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js') || filePath.endsWith('.mjs') || 
+          filePath.endsWith('.ts') || filePath.endsWith('.tsx') || 
+          filePath.endsWith('.jsx')) {
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
       }
     }
