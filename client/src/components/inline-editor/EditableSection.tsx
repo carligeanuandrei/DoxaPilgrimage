@@ -29,6 +29,25 @@ function getMobileTextSizeClass(size?: string): string {
   }
 }
 
+// Utilitate pentru a converti string CSS în obiect style pentru React
+function parseCssString(cssString: string): Record<string, string> {
+  if (!cssString) return {};
+  
+  const result: Record<string, string> = {};
+  const rules = cssString.split(';').filter(rule => rule.trim() !== '');
+  
+  for (const rule of rules) {
+    const [property, value] = rule.split(':').map(part => part.trim());
+    if (property && value) {
+      // Convertim proprietățile CSS cu liniuțe (kebab-case) în camelCase pentru React
+      const camelProperty = property.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+      result[camelProperty] = value;
+    }
+  }
+  
+  return result;
+}
+
 interface EditableSectionProps {
   id: string;
   type: SectionType;
@@ -272,12 +291,15 @@ export function EditableSection({
           </div>
         ) : (
           <h2 
+            className={localContent.className || ''}
+            id={localContent.id_css || undefined}
             style={{
               fontSize: `${localContent.size || 24}px`,
               color: localContent.color || '#000000',
               textAlign: localContent.alignment || 'left',
               marginBottom: `${localContent.marginBottom || 0}px`,
               marginTop: `${localContent.marginTop || 0}px`,
+              ...(localContent.customCss ? parseCssString(localContent.customCss) : {})
             }}
           >
             {localContent.text || 'Titlu secțiune'}
@@ -336,11 +358,14 @@ export function EditableSection({
           </div>
         ) : (
           <p 
+            className={localContent.className || ''}
+            id={localContent.id_css || undefined}
             style={{
               fontSize: `${localContent.size || 16}px`,
               color: localContent.color || '#000000',
               textAlign: localContent.alignment || 'left',
               lineHeight: localContent.lineHeight || '1.5',
+              ...(localContent.customCss ? parseCssString(localContent.customCss) : {})
             }}
           >
             {localContent.text || 'Text secțiune'}
@@ -414,9 +439,12 @@ export function EditableSection({
           </div>
         ) : (
           <div 
+            className={localContent.className || ''}
+            id={localContent.id_css || undefined}
             style={{
               textAlign: localContent.alignment || 'center',
               width: '100%',
+              ...(localContent.customCss ? parseCssString(localContent.customCss) : {})
             }}
           >
             <img 
