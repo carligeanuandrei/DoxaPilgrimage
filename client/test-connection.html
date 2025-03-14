@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Conexiune DOXA</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .status {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Conexiune DOXA</h1>
+  
+  <div class="status" id="server-status">Verificare conexiune la server...</div>
+  
+  <h2>Test Server API</h2>
+  <button onclick="testServerAPI()">Verifică API Server</button>
+  <div class="status" id="api-result">Apasă butonul pentru a testa API-ul</div>
+  
+  <script>
+    // Verifică conexiunea la server
+    fetch('/api/server-status')
+      .then(response => response.json())
+      .then(data => {
+        console.log("Server status:", data);
+        const statusElement = document.getElementById('server-status');
+        statusElement.innerHTML = `<strong>Conexiune reușită!</strong> Server activ pe portul ${data.port}`;
+        statusElement.className = 'status success';
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        const statusElement = document.getElementById('server-status');
+        statusElement.innerHTML = `<strong>Eroare de conexiune:</strong> ${error.message}`;
+        statusElement.className = 'status error';
+      });
+    
+    // Funcție pentru testarea API-ului
+    function testServerAPI() {
+      const resultElement = document.getElementById('api-result');
+      resultElement.innerHTML = 'Se trimite cerere...';
+      resultElement.className = 'status';
+      
+      fetch('/api/server-status')
+        .then(response => response.json())
+        .then(data => {
+          resultElement.innerHTML = `<strong>Răspuns primit:</strong> <pre>${JSON.stringify(data, null, 2)}</pre>`;
+          resultElement.className = 'status success';
+        })
+        .catch(error => {
+          resultElement.innerHTML = `<strong>Eroare:</strong> ${error.message}`;
+          resultElement.className = 'status error';
+        });
+    }
+  </script>
+</body>
+</html>
