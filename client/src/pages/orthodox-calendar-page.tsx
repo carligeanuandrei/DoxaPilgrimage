@@ -3,6 +3,8 @@ import CalendarDisplay from "@/components/orthodox-calendar/calendar-display";
 import UpcomingFeasts from "@/components/orthodox-calendar/upcoming-feasts";
 import FastingPeriods from "@/components/orthodox-calendar/fasting-periods";
 import PilgrimageRecommendations from "@/components/orthodox-calendar/pilgrimage-recommendations";
+import MonasteryDailyRecommendations from "@/components/orthodox-calendar/monastery-daily-recommendations";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function OrthodoxCalendarPage() {
   return (
@@ -19,7 +21,7 @@ export default function OrthodoxCalendarPage() {
             Calendar Ortodox
           </h1>
           <p className="text-neutral-600 mt-2">
-            Sărbători, zile de post și recomandări de pelerinaje pentru anul 2025
+            Sărbători, zile de post și recomandări de pelerinaje și mănăstiri pentru anul 2025
           </p>
         </div>
       </div>
@@ -35,7 +37,19 @@ export default function OrthodoxCalendarPage() {
         
         <div className="space-y-6">
           <UpcomingFeasts count={5} />
-          <PilgrimageRecommendations />
+          
+          <Tabs defaultValue="monasteries" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="pilgrimages">Pelerinaje</TabsTrigger>
+              <TabsTrigger value="monasteries">Mănăstiri</TabsTrigger>
+            </TabsList>
+            <TabsContent value="pilgrimages">
+              <PilgrimageRecommendations />
+            </TabsContent>
+            <TabsContent value="monasteries">
+              <MonasteryDailyRecommendations />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
       
@@ -54,8 +68,9 @@ export default function OrthodoxCalendarPage() {
             pelerinajelor la locuri sfinte, mănăstiri și biserici cu o semnificație deosebită pentru anumite sărbători.
           </p>
           <p>
-            Pentru fiecare sărbătoare majoră, Doxa vă recomandă pelerinaje relevante, permițându-vă să trăiți experiența 
-            spirituală a sărbătorii în locuri cu semnificație specială pentru aceasta.
+            Pentru fiecare sărbătoare din calendar, Doxa vă recomandă mănăstiri și pelerinaje relevante, permițându-vă să trăiți experiența 
+            spirituală a sărbătorii în locuri cu semnificație specială pentru aceasta. De asemenea, vă recomandăm zilnic anumite 
+            mănăstiri pentru rugăciune și meditație spirituală.
           </p>
         </div>
       </div>
