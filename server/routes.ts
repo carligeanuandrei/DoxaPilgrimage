@@ -126,31 +126,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Pentru fiecare organizator, obinem statisticile sale
       const organizerStatsPromises = organizerUsers.map(async (user) => {
-        // Obinem pelerinajele acestui organizator
+        // Obinem pelerinajele acestui organizator - optimizare pentru a obține toate datele într-un singur apel
         const pilgrimages = await storage.getPilgrimages({ organizerId: user.id });
         
         // Calculm cte pelerinaje promovate are
         const promotedPilgrimages = pilgrimages.filter(p => p.promoted);
         
-        // Obinem toate rezervrile pentru pelerinajele acestui organizator
+        // Optimizare: obținem toate rezervările și recenziile într-un singur loc
+        // În loc să facem apeluri în buclă, pregătim apelurile asincrone pentru toate pelerinajele
+        const bookingsPromises = pilgrimages.map(pilgrimage => 
+          storage.getBookingsByPilgrimageId(pilgrimage.id)
+        );
+        const reviewsPromises = pilgrimages.map(pilgrimage => 
+          storage.getReviews(pilgrimage.id)
+        );
+        
+        // Executăm toate apelurile în paralel
+        const allBookings = await Promise.all(bookingsPromises);
+        const allReviews = await Promise.all(reviewsPromises);
+        
+        // Inițializăm contoarele
         let totalBookings = 0;
         let totalRevenue = 0;
         let ratingsSum = 0;
         let ratingsCount = 0;
         
-        for (const pilgrimage of pilgrimages) {
-          // Obinem rezervrile pentru acest pelerinaj
-          const bookings = await storage.getBookingsByPilgrimageId(pilgrimage.id);
-          
-          // Adugm rezervrile confirmate
-          const confirmedBookings = bookings.filter(b => b.status === "confirmed");
+        // Procesăm datele obținute
+        for (let i = 0; i < pilgrimages.length; i++) {
+          // Procesăm rezervările
+          const confirmedBookings = allBookings[i].filter(b => b.status === "confirmed");
           totalBookings += confirmedBookings.length;
-          
-          // Calculm veniturile totale
           totalRevenue += confirmedBookings.reduce((sum, booking) => sum + booking.totalPrice, 0);
           
-          // Obinem recenziile pentru acest pelerinaj
-          const reviews = await storage.getReviews(pilgrimage.id);
+          // Procesăm recenziile
+          const reviews = allReviews[i];
           if (reviews.length > 0) {
             ratingsSum += reviews.reduce((sum, review) => sum + review.rating, 0);
             ratingsCount += reviews.length;
@@ -1662,14 +1671,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Numrm pelerinajele promovate - cu verificare dac proprietatea exist
           const promotedPilgrimages = pilgrimages.filter(p => p.promoted === true);
           
-          // Procesm fiecare pelerinaj pentru a calcula statisticile
-          for (const pilgrimage of pilgrimages) {
-            try {
-              // Obinem rezervrile pentru acest pelerinaj
-              const bookings = await storage.getBookingsByPilgrimageId(pilgrimage.id);
-              
-              // Obinem recenziile pentru acest pelerinaj
-              const reviews = await storage.getReviews(pilgrimage.id);
+          // Optimizare: obținem toate rezervările și recenziile într-un singur lot
+          // Pregătim apelurile asincrone pentru toate pelerinajele
+          const bookingsPromises = pilgrimages.map(pilgrimage => 
+            storage.getBookingsByPilgrimageId(pilgrimage.id)
+          );
+          const reviewsPromises = pilgrimages.map(pilgrimage => 
+            storage.getReviews(pilgrimage.id)
+          );
+          
+          try {
+            // Executăm toate apelurile în paralel
+            const allBookings = await Promise.all(bookingsPromises);
+            const allReviews = await Promise.all(reviewsPromises);
+            
+            // Procesăm fiecare pelerinaj cu datele obținute
+            for (let i = 0; i < pilgrimages.length; i++) {
+              const pilgrimage = pilgrimages[i];
+              const bookings = allBookings[i];
+              const reviews = allReviews[i];
               
               // Actualizm statisticile
               totalBookings += bookings.length;
@@ -1695,11 +1715,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   lastActivity = updatedDate;
                 }
               }
-            } catch (error) {
-              console.error(`Error processing pilgrimage ${pilgrimage.id}:`, error);
-              // Continum cu urmtorul pelerinaj n caz de eroare
-              continue;
             }
+          } catch (error) {
+            console.error(`Error processing pilgrimages for organizer ${organizer.id}:`, error);
           }
           
           // Calculm rating-ul mediu cu verificare mpotriva diviziunii cu zero
