@@ -368,7 +368,7 @@ export const insertMonasterySchema = createInsertSchema(monasteries, {
   })).optional(),
   images: z.array(z.string()).optional(),
   relics: z.array(z.string()).optional(),
-  patronSaintDate: z.union([z.string(), z.date()]).optional(),
+  patronSaintDate: z.union([z.string(), z.date(), z.null()]).optional(),
 }).omit({
   id: true,
   createdAt: true,
