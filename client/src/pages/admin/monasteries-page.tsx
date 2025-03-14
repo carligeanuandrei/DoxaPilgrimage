@@ -297,15 +297,28 @@ export default function MonasteriesPage() {
     // Pentru patronSaintDate, trimitem null dacă nu există valoare
     const patronSaintDate = data.patronSaintDate || null;
     
-    // Preprocesăm array-ul de imagini pentru a ne asigura că nu este undefined
-    const images = data.images || [];
+    // Preprocesăm array-ul de imagini pentru a ne asigura că nu este undefined și este un array
+    let images = data.images || [];
+    
+    // Ne asigurăm că imagesCopy este un array, chiar dacă primim un string
+    let imagesArray: string[];
+    if (typeof images === 'string') {
+      try {
+        imagesArray = JSON.parse(images);
+      } catch (error) {
+        console.error('Eroare la parsarea array-ului de imagini:', error);
+        imagesArray = [];
+      }
+    } else {
+      imagesArray = Array.isArray(images) ? images : [];
+    }
     
     // Creăm obiectul de date formatat
     const formattedData = {
       ...data,
       patronSaintDate,
       patronSaint: data.patronSaint || "",
-      images
+      images: imagesArray
     };
     
     console.log("Sending data to server:", formattedData);
