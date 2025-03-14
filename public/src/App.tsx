@@ -1,12 +1,35 @@
 /**
  * Componentă simplă App pentru varianta DOXA
- * 
- * Această implementare nu mai folosește Preact din cauza problemelor de configurare.
- * În schimb, folosește funcția h din main.tsx care creează elemente DOM în mod direct.
  */
+import React from "react";
 
+/**
+ * O componentă simplă de test care să ne ajute să diagnosticăm problemele
+ */
 export default function App() {
-  // Această funcție returnează un element DOM creat prin funcția h
-  // Implementarea funcției h se găsește în main.tsx
-  return null; // Temporar returnam null până când se ajustează arhitectura
+  // Efect la montare
+  React.useEffect(() => {
+    console.log("Componenta App React a fost montată cu succes!");
+  }, []);
+  
+  return (
+    <div className="app-container">
+      <header className="app-header">
+        <h1>DOXA - Versiunea React</h1>
+        <p>Aplicația React a fost încărcată cu succes!</p>
+      </header>
+      <main className="app-main">
+        <div className="card">
+          <h2>Diagnosticare completă</h2>
+          <p>Această pagină reprezintă o versiune simplificată a aplicației DOXA, 
+          folosită pentru a verifica funcționalitatea de bază React.</p>
+        </div>
+        
+        <div className="links-container">
+          <a href="/client/index.html" className="btn">Înapoi la aplicația completă</a>
+          <a href="/api/server-status" className="btn">Verificare API</a>
+        </div>
+      </main>
+    </div>
+  );
 }
