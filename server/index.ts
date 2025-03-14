@@ -6,19 +6,30 @@ import path from "path";
 // Setăm explicit mediul de dezvoltare în Replit
 if (process.env.REPL_ID) {
   process.env.NODE_ENV = "development";
+  console.log("Mediu de dezvoltare Replit detectat");
 }
+
+console.log(`Directoare disponibile:
+- root: ${path.resolve(".")}
+- public: ${path.resolve("public")}
+- client: ${path.resolve("client")}
+- node_modules: ${path.resolve("node_modules")}
+`);
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Servim fișierele statice din folderul public, care conține imagini și alte resurse
+app.use('/public', express.static(path.resolve("public")));
 app.use(express.static(path.resolve("public")));
 
 // Servim și folderul node_modules și client în modul de dezvoltare
 if (process.env.NODE_ENV === "development") {
+  console.log("Servim fișiere statice din node_modules și client");
   app.use('/node_modules', express.static(path.resolve("node_modules")));
   app.use('/client', express.static(path.resolve("client")));
+  app.use('/src', express.static(path.resolve("client/src")));
 }
 
 // Middleware pentru gestionarea timeout-urilor
