@@ -9,6 +9,7 @@ import fs from 'fs';
 import { getCompanyInfoByCUI, validateRomanianCUI } from "./anaf";
 import { registerMonasteryRoutes } from './routes/monasteries';
 import { registerMonasteryRegionsRoutes } from './routes/monastery-regions';
+import { registerUploadRoutes } from './routes/upload';
 import { 
   insertPilgrimageSchema, 
   insertReviewSchema, 
