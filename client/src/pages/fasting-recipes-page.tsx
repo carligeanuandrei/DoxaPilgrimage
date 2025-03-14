@@ -60,11 +60,11 @@ const RecipeFilters = ({ onFilterChange }) => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mb-2 sm:mb-0">
           <label className="block text-sm font-medium mb-1">Tip de post</label>
           <Select value={recipeType} onValueChange={setRecipeType}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Toate rețetele" />
             </SelectTrigger>
             <SelectContent>
@@ -79,10 +79,10 @@ const RecipeFilters = ({ onFilterChange }) => {
           </Select>
         </div>
 
-        <div>
+        <div className="mb-2 sm:mb-0">
           <label className="block text-sm font-medium mb-1">Categorie</label>
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Toate categoriile" />
             </SelectTrigger>
             <SelectContent>
@@ -100,10 +100,10 @@ const RecipeFilters = ({ onFilterChange }) => {
           </Select>
         </div>
 
-        <div>
+        <div className="mb-2 sm:mb-0">
           <label className="block text-sm font-medium mb-1">Dificultate</label>
           <Select value={difficulty} onValueChange={setDifficulty}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Orice dificultate" />
             </SelectTrigger>
             <SelectContent>
@@ -115,10 +115,10 @@ const RecipeFilters = ({ onFilterChange }) => {
           </Select>
         </div>
 
-        <div>
+        <div className="mb-2 sm:mb-0">
           <label className="block text-sm font-medium mb-1">Zi recomandată</label>
           <Select value={dayOfWeek} onValueChange={setDayOfWeek}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Orice zi" />
             </SelectTrigger>
             <SelectContent>
@@ -206,10 +206,12 @@ const RecipeCard = ({ recipe }: { recipe: FastingRecipe }) => {
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg">{recipe.title}</CardTitle>
         </div>
-        <CardDescription className="flex items-center gap-2 mt-1">
+        <CardDescription className="mt-1">
+        <div className="flex items-center gap-2">
           <Badge variant="outline">{getRecipeTypeLabel(recipe.recipeType)}</Badge>
           <Badge variant="outline">{getCategoryLabel(recipe.category)}</Badge>
-        </CardDescription>
+        </div>
+      </CardDescription>
       </CardHeader>
       <CardContent className="pb-2 flex-grow">
         <p className="text-sm text-gray-500 line-clamp-2 mb-2">{recipe.description}</p>
@@ -581,7 +583,7 @@ export default function FastingRecipesPage() {
             <MixerHorizontalIcon className="h-5 w-5" />
             Filtrează după categorie
           </h3>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
             <CategoryIcon
               category="all"
               onClick={() => handleCategoryFilterChange('')}
