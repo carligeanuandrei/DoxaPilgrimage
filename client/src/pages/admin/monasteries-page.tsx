@@ -258,6 +258,15 @@ export default function MonasteriesPage() {
       }
     }
     
+    // Valorile pentru imagini
+    const coverImage = monastery.coverImage || "";
+    const images = Array.isArray(monastery.images) ? monastery.images : [];
+    
+    console.log("Preluare imagini:", {
+      coverImage,
+      images
+    });
+    
     form.reset({
       id: monastery.id,
       name: monastery.name,
@@ -273,7 +282,9 @@ export default function MonasteriesPage() {
       contactEmail: monastery.contactEmail || "",
       contactPhone: monastery.contactPhone || "",
       website: monastery.website || "",
-      verification: !!monastery.verification
+      verification: !!monastery.verification,
+      coverImage,
+      images
     });
     
     setEditDialogOpen(true);
