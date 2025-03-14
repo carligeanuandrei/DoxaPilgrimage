@@ -907,6 +907,11 @@ export function EditableSection({
               onChange={setLocalContent}
             />
             
+            <CssControls 
+              content={localContent}
+              onChange={setLocalContent}
+            />
+            
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={handleCancel}>Anulează</Button>
               <Button onClick={handleSave}>Salvează</Button>
