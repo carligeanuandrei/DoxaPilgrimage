@@ -90,8 +90,8 @@
       </div>
       
       <div class="links">
-        <a href="https://${window.location.hostname}/client/check-frontend.html">Verificare Frontend</a>
-        <a href="https://${window.location.hostname}/api/server-status" target="_blank">Verificare Server</a>
+        <a href="/client/check-frontend.html">Verificare Frontend</a>
+        <a href="/api/server-status" target="_blank">Verificare Server</a>
       </div>
       
       <div class="status">
@@ -100,12 +100,12 @@
     </div>
     
     <div id="root"></div>
-    <script type="module" src="https://${window.location.hostname}/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
     <script>
       document.getElementById('timestamp').textContent = new Date().toLocaleString('ro-RO');
       
       // Verifică manual conectarea la server
-      fetch('https://' + window.location.hostname + '/api/server-status')
+      fetch('/api/server-status')
         .then(response => response.json())
         .then(data => {
           console.log('Server status:', data);
@@ -121,7 +121,7 @@
             <ul>
               <li>Reîmprospătați pagina</li>
               <li>Verificați dacă serverul rulează</li>
-              <li>Accesați <a href="https://${window.location.hostname}/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
+              <li>Accesați <a href="/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
             </ul>
           `;
         });
@@ -137,8 +137,8 @@
             <ul>
               <li>Verificați conexiunea la internet</li>
               <li>Verificați consola pentru eventuale erori</li>
-              <li>Accesați <a href="https://${window.location.hostname}/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
-              <li>Accesați direct <a href="https://${window.location.hostname}/">pagina principală</a></li>
+              <li>Accesați <a href="/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
+              <li>Accesați direct <a href="/">pagina principală</a></li>
             </ul>
           `;
         }

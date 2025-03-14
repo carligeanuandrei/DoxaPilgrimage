@@ -81,3 +81,228 @@
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Conexiune DOXA</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #3b5998;
+      text-align: center;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+    .test-section h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    .status {
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .success {
+      background-color: #e6ffed;
+      border: 1px solid #34d058;
+    }
+    .failure {
+      background-color: #ffeef0;
+      border: 1px solid #d73a49;
+    }
+    .pending {
+      background-color: #f6f8fa;
+      border: 1px solid #d1d5da;
+    }
+    button {
+      background-color: #3b5998;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    code {
+      display: block;
+      background-color: #f6f8fa;
+      padding: 8px;
+      border-radius: 4px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      margin-top: 10px;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Test Conexiune DOXA</h1>
+    
+    <div class="test-section">
+      <h2>1. Verificare Server API</h2>
+      <button id="testApi">Testează API</button>
+      <div id="apiStatus" class="status pending">În așteptare...</div>
+      <code id="apiResponse"></code>
+    </div>
+    
+    <div class="test-section">
+      <h2>2. Verificare Vite Dev Server</h2>
+      <button id="testVite">Testează Vite Server</button>
+      <div id="viteStatus" class="status pending">În așteptare...</div>
+      <code id="viteResponse"></code>
+    </div>
+    
+    <div class="test-section">
+      <h2>3. Informații Browser</h2>
+      <code id="browserInfo"></code>
+    </div>
+    
+    <div class="test-section">
+      <h2>4. Încărcare React App</h2>
+      <button id="testReact">Verifică React App</button>
+      <div id="reactStatus" class="status pending">În așteptare...</div>
+    </div>
+    
+    <a href="/" class="back-link">Înapoi la pagina principală</a>
+  </div>
+
+  <script>
+    // Browser info
+    document.getElementById('browserInfo').textContent = `
+User Agent: ${navigator.userAgent}
+Window Size: ${window.innerWidth}x${window.innerHeight}
+Cookies Enabled: ${navigator.cookieEnabled}
+Referrer: ${document.referrer || 'N/A'}
+Hostname: ${window.location.hostname}
+Protocol: ${window.location.protocol}
+    `;
+    
+    // API Test
+    document.getElementById('testApi').addEventListener('click', async () => {
+      const apiStatusEl = document.getElementById('apiStatus');
+      const apiResponseEl = document.getElementById('apiResponse');
+      
+      apiStatusEl.className = 'status pending';
+      apiStatusEl.textContent = 'Testare în curs...';
+      
+      try {
+        const response = await fetch('/api/server-status');
+        const data = await response.json();
+        
+        apiResponseEl.textContent = JSON.stringify(data, null, 2);
+        
+        if (response.ok && data.status === 'ok') {
+          apiStatusEl.className = 'status success';
+          apiStatusEl.textContent = 'Succes! API-ul funcționează corect.';
+        } else {
+          apiStatusEl.className = 'status failure';
+          apiStatusEl.textContent = `Eroare: Răspuns neașteptat (${response.status})`;
+        }
+      } catch (error) {
+        apiStatusEl.className = 'status failure';
+        apiStatusEl.textContent = `Eroare: ${error.message}`;
+        apiResponseEl.textContent = error.stack;
+      }
+    });
+    
+    // Vite Test
+    document.getElementById('testVite').addEventListener('click', async () => {
+      const viteStatusEl = document.getElementById('viteStatus');
+      const viteResponseEl = document.getElementById('viteResponse');
+      
+      viteStatusEl.className = 'status pending';
+      viteStatusEl.textContent = 'Testare în curs...';
+      
+      try {
+        // Attempting to fetch a Vite-specific endpoint
+        const response = await fetch('/@vite/client');
+        const text = await response.text();
+        
+        viteResponseEl.textContent = text.length > 500 
+          ? text.substring(0, 500) + '...' 
+          : text;
+        
+        if (response.ok) {
+          viteStatusEl.className = 'status success';
+          viteStatusEl.textContent = 'Succes! Vite Dev Server funcționează.';
+        } else {
+          viteStatusEl.className = 'status failure';
+          viteStatusEl.textContent = `Eroare: Răspuns neașteptat (${response.status})`;
+        }
+      } catch (error) {
+        viteStatusEl.className = 'status failure';
+        viteStatusEl.textContent = `Eroare: ${error.message}`;
+        viteResponseEl.textContent = error.stack;
+      }
+    });
+    
+    // React Test
+    document.getElementById('testReact').addEventListener('click', () => {
+      const reactStatusEl = document.getElementById('reactStatus');
+      
+      reactStatusEl.className = 'status pending';
+      reactStatusEl.textContent = 'Verificare în curs...';
+      
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = '/';
+      
+      let timeout = setTimeout(() => {
+        reactStatusEl.className = 'status failure';
+        reactStatusEl.textContent = 'Timeout: React App nu s-a încărcat în 5 secunde';
+        document.body.removeChild(iframe);
+      }, 5000);
+      
+      iframe.onload = () => {
+        try {
+          const rootEl = iframe.contentDocument.getElementById('root');
+          
+          if (rootEl && rootEl.children.length > 0) {
+            reactStatusEl.className = 'status success';
+            reactStatusEl.textContent = 'Succes! React App s-a încărcat.';
+          } else {
+            reactStatusEl.className = 'status failure';
+            reactStatusEl.textContent = 'Eroare: Root element gol sau lipsă';
+          }
+        } catch (error) {
+          reactStatusEl.className = 'status failure';
+          reactStatusEl.textContent = `Eroare: ${error.message}`;
+        }
+        
+        clearTimeout(timeout);
+        document.body.removeChild(iframe);
+      };
+      
+      document.body.appendChild(iframe);
+    });
+    
+    // Auto-run API test on page load
+    window.addEventListener('load', () => {
+      document.getElementById('testApi').click();
+    });
+  </script>
+</body>
+</html>
