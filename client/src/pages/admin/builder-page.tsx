@@ -42,6 +42,9 @@ type BuilderSection = {
   id: string;
   title: string;
   components: BuilderComponent[];
+  className?: string;  // Clase CSS pentru secțiune
+  id_css?: string;     // ID CSS pentru secțiune (folosim id_css pentru a evita conflictul cu id)
+  styles?: Record<string, string>; // Stiluri CSS inline suplimentare
 };
 
 type BuilderPage = {
@@ -141,8 +144,11 @@ const BuilderSection = ({ section, onUpdateSection }: {
 }) => {
   const [editedTitle, setEditedTitle] = useState(section.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingStyles, setIsEditingStyles] = useState(false);
   const [components, setComponents] = useState<BuilderComponent[]>(section.components);
   const [editingComponent, setEditingComponent] = useState<BuilderComponent | null>(null);
+  const [sectionClassName, setSectionClassName] = useState<string>(section.className || '');
+  const [sectionCssId, setSectionCssId] = useState<string>(section.id_css || '');
   const cmsContent = useCmsContent();
   
   // Convertim contenturile CMS într-un obiect cmsData pentru ușurință în utilizare
