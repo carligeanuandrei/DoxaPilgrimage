@@ -1424,10 +1424,13 @@ export function EditableSection({
     );
   };
   
+  // Generăm clasele pentru spațiere mobilă
+  const mobileSpacingClasses = generateMobileSpacingClasses();
+  
   return (
     <div
       ref={dragDropRef}
-      className="relative mb-8 pt-10"
+      className={`relative mb-8 pt-10 ${mobileSpacingClasses}`}
       style={sectionStyles}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
