@@ -113,6 +113,10 @@ export default function Header() {
               <Calendar className="h-4 w-4 mr-1" />
               Calendar Ortodox
             </Link>
+            <Link href="/fasting-recipes" className={`font-medium flex items-center ${isActiveLink('/fasting-recipes') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              <Utensils className="h-4 w-4 mr-1" />
+              Rețete de Post
+            </Link>
             <Link href="/about" className={`font-medium ${isActiveLink('/about') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
               Despre Noi
             </Link>
@@ -253,6 +257,10 @@ export default function Header() {
               <Link href="/orthodox-calendar" className={`px-4 font-medium flex items-center ${isActiveLink('/orthodox-calendar') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
                 <Calendar className="h-4 w-4 mr-1" />
                 Calendar Ortodox
+              </Link>
+              <Link href="/fasting-recipes" className={`px-4 font-medium flex items-center ${isActiveLink('/fasting-recipes') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                <Utensils className="h-4 w-4 mr-1" />
+                Rețete de Post
               </Link>
               <Link href="/about" className={`px-4 font-medium ${isActiveLink('/about') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
                 Despre Noi
