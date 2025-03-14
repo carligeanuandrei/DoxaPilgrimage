@@ -1,0 +1,75 @@
+
+RAPORT DIAGNOSTICARE FRONTEND DOXA
+Data: 14.03.2025, 22:18:23
+Url: https://3465d494-39a1-4482-9ab0-942fe9316e6a-00-3rinfx19mbdxt.spock.replit.dev/client/check-frontend.html
+Browser: Chrome
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+
+==== TEST SERVER API ====
+✅ Conectare reușită la server!
+
+Răspuns API: {
+  "status": "ok",
+  "timestamp": "2025-03-14T20:18:02.148Z",
+  "environment": "development",
+  "message": "Conectarea la API a reușit!",
+  "tests": {
+    "serverRunning": true,
+    "apiAccessible": true,
+    "dbConnection": true,
+    "mimeTypes": {
+      "js": "application/javascript",
+      "mjs": "application/javascript",
+      "jsx": "text/javascript",
+      "tsx": "text/javascript",
+      "ts": "text/javascript"
+    }
+  },
+  "version": "1.0.0"
+}
+
+==== TEST ENDPOINTS API ====
+✅ Toate endpoint-urile funcționează corect!
+
+/api/status: ✅ OK (200)
+/api/server-status: ✅ OK (200)
+/api/openai-status: ✅ OK (200)
+
+==== TEST ÎNCĂRCARE MODUL JS ====
+✅ Modul încărcat cu succes!
+
+Messaj: Modulul de test a fost încărcat cu succes!
+Tip: function
+Module: {
+  "name": "TestModule",
+  "version": "1.0.0"
+}
+
+==== TEST TIPURI MIME ====
+✅ Toate fișierele au tipurile MIME corecte!
+
+/client/test-module.js: ✅ OK (application/javascript; charset=utf-8)
+/public/static/test.js: ✅ OK (application/javascript; charset=UTF-8)
+/client/src/main.tsx: ✅ OK (application/javascript; charset=utf-8)
+/client/src/App.tsx: ✅ OK (application/javascript; charset=utf-8)
+
+==== TEST IMPORTARE DINAMICĂ ====
+✅ Import dinamic reușit!
+
+Resultat: {
+  "success": true,
+  "timestamp": "2025-03-14T20:18:10.879Z",
+  "message": "Import dinamic funcțional!"
+}
+Tipul modulului: object
+
+==== TEST MEDIU REACT ====
+❌ Mediul React nu este configurat corect.
+
+React global: ❌ Indisponibil
+ReactDOM global: ❌ Indisponibil
+Import React: ❌ Eșuat
+Import ReactDOM: ❌ Eșuat
+Versiune React: nedisponibil
+Suport JSX: ❌ Indisponibil
+      
