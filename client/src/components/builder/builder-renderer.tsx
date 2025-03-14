@@ -37,6 +37,9 @@ type BuilderSection = {
   id: string;
   title: string;
   components: BuilderComponent[];
+  className?: string;  // Clase CSS pentru secțiune
+  id_css?: string;     // ID CSS pentru secțiune
+  styles?: Record<string, string>; // Stiluri CSS inline
 };
 
 interface BuilderRendererProps {
@@ -62,7 +65,12 @@ export const BuilderRenderer: React.FC<BuilderRendererProps> = ({ content, class
   return (
     <div className={`builder-content ${className}`}>
       {sections.map((section) => (
-        <div key={section.id} className="builder-section mb-10">
+        <div 
+          key={section.id} 
+          className={`builder-section mb-10 ${section.className || ''}`}
+          id={section.id_css || undefined}
+          style={section.styles || {}}
+        >
           {/* Aici putem adăuga antetul secțiunii dacă dorim să-l afișăm */}
           <div className="builder-section-content">
             {section.components.map((component) => (

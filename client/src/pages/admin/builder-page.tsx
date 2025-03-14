@@ -22,7 +22,8 @@ import {
   Edit,
   FileUp,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Palette
 } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -270,6 +271,17 @@ const BuilderSection = ({ section, onUpdateSection }: {
     });
     setIsEditingTitle(false);
   };
+  
+  // Funcție pentru a salva modificările la stilurile CSS ale secțiunii
+  const saveStyleChanges = () => {
+    onUpdateSection(section.id, {
+      ...section,
+      className: sectionClassName,
+      id_css: sectionCssId,
+      components: components
+    });
+    setIsEditingStyles(false);
+  };
 
   return (
     <Card className="mb-6">
@@ -286,11 +298,63 @@ const BuilderSection = ({ section, onUpdateSection }: {
         ) : (
           <CardTitle className="flex items-center justify-between">
             {section.title}
-            <Button variant="ghost" size="sm" onClick={() => setIsEditingTitle(true)}>
-              <Edit className="h-4 w-4 mr-1" />
-              Editează titlul
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={() => setIsEditingStyles(true)}>
+                <Palette className="h-4 w-4 mr-1" />
+                CSS
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setIsEditingTitle(true)}>
+                <Edit className="h-4 w-4 mr-1" />
+                Titlu
+              </Button>
+            </div>
           </CardTitle>
+        )}
+        
+        {/* Modal pentru editarea stilurilor CSS ale secțiunii */}
+        {isEditingStyles && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle>Stilizare CSS secțiune</CardTitle>
+                <CardDescription>Adaugă clase și ID-uri CSS pentru secțiune</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-secondary/20 p-3 rounded-md">
+                  <h3 className="font-medium text-base mb-2 text-primary">Proprietăți CSS</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="section-css-class" className="text-sm font-medium">Clase CSS</Label>
+                      <Input 
+                        id="section-css-class" 
+                        value={sectionClassName} 
+                        onChange={(e) => setSectionClassName(e.target.value)}
+                        placeholder="my-section custom-spacing"
+                        className="text-sm mt-1"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Clasele CSS pentru această secțiune (separate prin spații).</p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="section-css-id" className="text-sm font-medium">ID CSS</Label>
+                      <Input 
+                        id="section-css-id" 
+                        value={sectionCssId} 
+                        onChange={(e) => setSectionCssId(e.target.value)}
+                        placeholder="unique-section-id"
+                        className="text-sm mt-1"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">ID-ul CSS pentru această secțiune (trebuie să fie unic în pagină).</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline" onClick={() => setIsEditingStyles(false)}>Anulează</Button>
+                <Button onClick={saveStyleChanges}>Salvează</Button>
+              </CardFooter>
+            </Card>
+          </div>
         )}
       </CardHeader>
       <CardContent>
