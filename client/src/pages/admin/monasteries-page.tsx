@@ -177,7 +177,10 @@ export default function MonasteriesPage() {
     contactEmail: z.string().email().nullable().optional(),
     contactPhone: z.string().nullable().optional(),
     website: z.string().url().nullable().optional(),
-    verification: z.boolean().default(true)
+    verification: z.boolean().default(true),
+    // Adăugăm câmpurile pentru imagini
+    coverImage: z.string().nullable().optional(),
+    images: z.array(z.string()).nullable().optional()
   });
 
   type MonasteryFormValues = z.infer<typeof editMonasterySchema>;
@@ -200,7 +203,9 @@ export default function MonasteriesPage() {
       contactEmail: "",
       contactPhone: "",
       website: "",
-      verification: true
+      verification: true,
+      coverImage: "",
+      images: []
     }
   });
 
@@ -276,13 +281,28 @@ export default function MonasteriesPage() {
 
   // Funcție pentru a trimite datele de editare a mănăstirii
   const onSubmitEdit = (data: MonasteryFormValues) => {
-    // Asigurăm că valorile sunt în formatul corect înainte de a le trimite
+    // Procesăm datele pentru a le formata corect înainte de a le trimite la server
+    let patronSaintDate = null;
+    
+    // Convertim patronSaintDate la formatul corect pentru server
+    if (data.patronSaintDate) {
+      // Dacă există o dată, o păstrăm în formatul ISO
+      patronSaintDate = data.patronSaintDate;
+      console.log("Sending patron saint date:", patronSaintDate);
+    }
+    
+    // Preprocesăm array-ul de imagini pentru a ne asigura că nu este undefined
+    const images = data.images || [];
+    
+    // Creăm obiectul de date formatat
     const formattedData = {
       ...data,
-      // Convertim patronSaintDate la string ISO sau null
-      patronSaintDate: data.patronSaintDate ? data.patronSaintDate : null
+      patronSaintDate,
+      patronSaint: data.patronSaint || null,
+      images
     };
     
+    console.log("Sending data to server:", formattedData);
     updateMonasteryMutation.mutate(formattedData);
   };
 
@@ -831,6 +851,99 @@ export default function MonasteriesPage() {
                           value={field.value || ""}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="col-span-full">
+                <FormField
+                  control={form.control}
+                  name="coverImage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imagine de copertă</FormLabel>
+                      <div className="space-y-3">
+                        <FormControl>
+                          <Input {...field} placeholder="URL imagine copertă" value={field.value || ""} />
+                        </FormControl>
+                        {field.value && (
+                          <div className="mt-2">
+                            <img 
+                              src={field.value} 
+                              alt="Imagine copertă" 
+                              className="w-full max-w-md h-auto rounded-md border" 
+                              onError={(e) => (e.target as HTMLImageElement).src = "/images/default-monastery.svg"}
+                            />
+                          </div>
+                        )}
+                        <FormDescription>
+                          Introduceți URL-ul imaginii de copertă
+                        </FormDescription>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="col-span-full">
+                <FormLabel className="block mb-2">Imagini galerie</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                        {(field.value || []).map((imageUrl, index) => (
+                          <div key={index} className="relative rounded-md overflow-hidden border">
+                            <img 
+                              src={imageUrl} 
+                              alt={`Imagine ${index + 1}`} 
+                              className="w-full h-48 object-cover" 
+                              onError={(e) => (e.target as HTMLImageElement).src = "/images/default-monastery.svg"}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-2 right-2 p-1 h-8 w-8"
+                              onClick={() => {
+                                const newImages = [...(field.value || [])];
+                                newImages.splice(index, 1);
+                                field.onChange(newImages);
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <div className="border border-dashed rounded-md flex items-center justify-center h-48">
+                          <div className="text-center p-4">
+                            <Plus className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                            <Input 
+                              type="text" 
+                              placeholder="Adaugă URL imagine" 
+                              className="mb-2" 
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const input = e.currentTarget;
+                                  const url = input.value.trim();
+                                  if (url) {
+                                    field.onChange([...(field.value || []), url]);
+                                    input.value = '';
+                                  }
+                                }
+                              }}
+                            />
+                            <FormDescription>
+                              Introduceți URL și apăsați Enter
+                            </FormDescription>
+                          </div>
+                        </div>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
