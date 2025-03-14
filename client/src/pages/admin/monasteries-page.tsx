@@ -294,14 +294,13 @@ export default function MonasteriesPage() {
   // Funcție pentru a trimite datele de editare a mănăstirii
   const onSubmitEdit = (data: MonasteryFormValues) => {
     // Procesăm datele pentru a le formata corect înainte de a le trimite la server
-    // Convertim patronSaintDate la formatul corect pentru server și tratăm valoarea null corect
-    let patronSaintDate = data.patronSaintDate ? data.patronSaintDate : "";
+    // Pentru patronSaintDate, trimitem null dacă nu există valoare
+    const patronSaintDate = data.patronSaintDate || null;
     
     // Preprocesăm array-ul de imagini pentru a ne asigura că nu este undefined
     const images = data.images || [];
     
-    // Creăm obiectul de date formatat, asigurându-ne că valorile null sunt transformate în string gol
-    // pentru a evita erorile de validare
+    // Creăm obiectul de date formatat
     const formattedData = {
       ...data,
       patronSaintDate,
