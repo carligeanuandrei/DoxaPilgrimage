@@ -1,0 +1,42 @@
+FUNCȚII PRINCIPALE ALE DOXA AI
+🔹 Pentru utilizatori autentificați:
+✅ Oferă informații despre pachete și organizatori
+✅ Ajută la rezervări și verifică disponibilitatea locurilor
+✅ Solicită și verifică documente (CI sau pașaport) prin upload direct
+✅ Ghidează utilizatorii în procesul de plată
+✅ Oferă suport tehnic și ajutor pentru cont
+
+🔹 Pentru organizatori:
+✅ Oferă un rezumat al rezervărilor efectuate
+✅ Permite gestionarea listelor de participanți
+✅ Notifică organizatorii despre plățile efectuate sau documentele lipsă
+✅ Ajută la actualizarea pachetelor disponibile
+✅ Suport tehnic pentru administrarea contului
+
+🔹 Pentru administrator:
+✅ Analizează zilnic interacțiunile utilizatorilor și organizatorilor
+✅ Trimite un raport automat cu sugestii de îmbunătățire
+✅ Identifică probleme recurente și propune soluții
+✅ Detectează blocaje în procesul de rezervare și le raportează
+
+🔹 EXEMPLE DE INTERACȚIUNE – RAPORT ZILNIC CĂTRE ADMINISTRATOR
+📅 Raport Zilnic – 14 Martie 2025
+
+👥 Statistici utilizatori:
+🔹 132 utilizatori activi azi
+🔹 47 rezervări noi efectuate
+🔹 12 rezervări incomplete din cauza documentelor lipsă
+
+📩 Feedback Utilizatori:
+📌 8 utilizatori au întrebat cum pot contacta direct organizatorii. Sugestie: Adăugarea unei funcții de chat rapid în platformă.
+📌 5 utilizatori s-au plâns că nu au primit confirmarea rezervării pe email. Sugestie: Verificarea serverului de email și adăugarea unei notificări în aplicație.
+📌 3 utilizatori nu au înțeles procesul de plată prin transfer bancar. Sugestie: Adăugarea unui ghid pas cu pas pentru această metodă de plată.
+
+📋 Feedback Organizatori:
+📌 2 organizatori au raportat că nu pot actualiza lista de participanți în timp real. Sugestie: Oferirea unei funcții de editare live a listelor.
+📌 1 organizator a menționat că nu poate descărca toate documentele utilizatorilor simultan. Sugestie: Adăugarea unui buton „Descarcă toate documentele” pentru fiecare pachet.
+
+🚀 Recomandări de îmbunătățire:
+✅ Integrarea unui sistem de chat între utilizatori și organizatori
+✅ Optimizarea notificărilor prin email pentru confirmarea rezervărilor
+✅ Crearea unui tutorial video despre metodele de plată
