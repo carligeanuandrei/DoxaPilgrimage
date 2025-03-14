@@ -103,6 +103,28 @@
     <script>
       document.getElementById('timestamp').textContent = new Date().toLocaleString('ro-RO');
       
+      // Verificare server
+      fetch('/api/server-status')
+        .then(response => response.json())
+        .then(data => {
+          console.log('Server status:', data);
+          if (data && data.status === 'ok') {
+            console.log('Server funcționează corect!');
+          }
+        })
+        .catch(error => {
+          console.error('Eroare la verificarea serverului:', error);
+          document.querySelector('.info-box').innerHTML = `
+            <h2>Problemă de conexiune</h2>
+            <p>Nu s-a putut stabili conexiunea cu serverul. Vă recomandăm să:</p>
+            <ul>
+              <li>Reîmprospătați pagina</li>
+              <li>Verificați dacă serverul rulează (npm run dev)</li>
+              <li>Accesați <a href="/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
+            </ul>
+          `;
+        });
+      
       // Verificăm dacă aplicația React s-a încărcat corect
       setTimeout(() => {
         const root = document.getElementById('root');
@@ -115,6 +137,7 @@
               <li>Verificați conexiunea la internet</li>
               <li>Verificați consola pentru eventuale erori</li>
               <li>Accesați <a href="/client/check-frontend.html">pagina de verificare</a> pentru diagnosticare</li>
+              <li>Accesați direct <a href="/client/">pagina principală</a></li>
             </ul>
           `;
         }
