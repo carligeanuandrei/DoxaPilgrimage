@@ -3,201 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Conexiune DOXA</title>
+  <title>Test Conexiune Server DOXA</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
+      margin: 20px;
       padding: 20px;
-      background-color: #f5f5f5;
+      background-color: #f0f2f5;
+      color: #333;
     }
     .container {
       max-width: 800px;
       margin: 0 auto;
-      background: white;
+      background-color: white;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
     h1 {
       color: #3b5998;
-      text-align: center;
-    }
-    .test-card {
-      margin-bottom: 20px;
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 4px;
-    }
-    .test-card h2 {
       margin-top: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
-    button {
-      background: #3b5998;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #2d4373;
-    }
-    .status {
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 4px;
-    }
-    .pending {
-      background: #f8f9fa;
-      border: 1px dashed #ccc;
+    .status-box {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
     }
     .success {
-      background: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
+      background-color: #e6fffa;
+      border: 1px solid #00c9a7;
+      color: #047857;
     }
-    .failure {
-      background: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
+    .error {
+      background-color: #fef2f2;
+      border: 1px solid #f87171;
+      color: #b91c1c;
+    }
+    .loading {
+      background-color: #f3f4f6;
+      border: 1px solid #d1d5db;
+      color: #6b7280;
     }
     pre {
-      background: #f8f9fa;
+      background-color: #f5f5f5;
       padding: 10px;
       border-radius: 4px;
       overflow-x: auto;
+      white-space: pre-wrap;
     }
-    .url-display {
-      font-weight: bold;
-      color: #3b5998;
-      word-break: break-all;
+    button {
+      background-color: #3b5998;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
     }
-    .links {
+    button:hover {
+      background-color: #2d4373;
+    }
+    button.secondary {
+      background-color: #6b7280;
+    }
+    button.secondary:hover {
+      background-color: #4b5563;
+    }
+    .button-group {
       margin-top: 20px;
-      text-align: center;
-    }
-    .links a {
-      display: inline-block;
-      margin: 0 10px;
-      color: #3b5998;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Test Conexiune DOXA</h1>
-
-    <div class="test-card">
-      <h2>
-        Test Server API
-        <button id="testApi">Rulează Testul</button>
-      </h2>
-      <div id="apiStatus" class="status pending">Apăsați butonul pentru a testa conexiunea API</div>
-      <pre id="apiResponse"></pre>
+    <h1>Test Conexiune Server DOXA</h1>
+    <p>Această pagină verifică dacă serverul Express funcționează corect și poate procesa cereri API.</p>
+    
+    <div id="server-status" class="status-box loading">
+      <p>Verificare stare server...</p>
     </div>
-
-    <div class="test-card">
-      <h2>
-        Test Încărcare React App
-        <button id="testReact">Rulează Testul</button>
-      </h2>
-      <div id="reactStatus" class="status pending">Apăsați butonul pentru a testa încărcarea aplicației React</div>
-    </div>
-
-    <div class="test-card">
-      <h2>
-        Teste Webview
-      </h2>
-      <div>
-        <p>URL curent: <span id="currentUrl" class="url-display"></span></p>
-        <p>Porturi disponibile:</p>
-        <ul>
-          <li>5000 - Server principal: <a href="http://localhost:5000" target="_blank">Deschide</a></li>
-          <li>5001 - Port alternativ: <a href="http://localhost:5001" target="_blank">Deschide</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="links">
-      <a href="/">Pagina Principală</a>
-      <a href="/api/server-status" target="_blank">Verificare Server API</a>
+    
+    <div id="response-data"></div>
+    
+    <div class="button-group">
+      <button id="check-server">Verifică Server</button>
+      <button id="go-home" class="secondary">Înapoi la DOXA</button>
     </div>
   </div>
 
   <script>
-    // Afișare URL curent
-    document.getElementById('currentUrl').textContent = window.location.href;
-
-    // Test API
-    document.getElementById('testApi').addEventListener('click', async () => {
-      const apiStatusEl = document.getElementById('apiStatus');
-      const apiResponseEl = document.getElementById('apiResponse');
-
-      apiStatusEl.className = 'status pending';
-      apiStatusEl.textContent = 'Se testează conexiunea la API...';
-
+    const serverStatusEl = document.getElementById('server-status');
+    const responseDataEl = document.getElementById('response-data');
+    
+    async function checkServerStatus() {
+      serverStatusEl.className = 'status-box loading';
+      serverStatusEl.innerHTML = '<p>Se verifică conexiunea la server...</p>';
+      responseDataEl.innerHTML = '';
+      
       try {
         const response = await fetch('/api/server-status');
-        const data = await response.json();
-
-        apiStatusEl.className = 'status success';
-        apiStatusEl.textContent = 'Conexiune API reușită!';
-        apiResponseEl.textContent = JSON.stringify(data, null, 2);
-      } catch (error) {
-        apiStatusEl.className = 'status failure';
-        apiStatusEl.textContent = `Eroare la conectarea la API: ${error.message}`;
-        apiResponseEl.textContent = '';
-      }
-    });
-
-    // Test React App Loading
-    document.getElementById('testReact').addEventListener('click', () => {
-      const reactStatusEl = document.getElementById('reactStatus');
-
-      reactStatusEl.className = 'status pending';
-      reactStatusEl.textContent = 'Se testează încărcarea aplicației React...';
-
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = '/';
-
-      let timeout = setTimeout(() => {
-        reactStatusEl.className = 'status failure';
-        reactStatusEl.textContent = 'Timeout: React App nu s-a încărcat în 5 secunde';
-        document.body.removeChild(iframe);
-      }, 5000);
-
-      iframe.onload = () => {
-        try {
-          const rootEl = iframe.contentDocument.getElementById('root');
-
-          if (rootEl && rootEl.children.length > 0) {
-            reactStatusEl.className = 'status success';
-            reactStatusEl.textContent = 'Succes! React App s-a încărcat.';
-          } else {
-            reactStatusEl.className = 'status failure';
-            reactStatusEl.textContent = 'Eroare: Root element gol sau lipsă';
-          }
-        } catch (error) {
-          reactStatusEl.className = 'status failure';
-          reactStatusEl.textContent = `Eroare: ${error.message}`;
+        
+        if (!response.ok) {
+          throw new Error(`Eroare HTTP: ${response.status}`);
         }
-
-        clearTimeout(timeout);
-        document.body.removeChild(iframe);
-      };
-
-      document.body.appendChild(iframe);
+        
+        const data = await response.json();
+        
+        // Afișăm rezultatul
+        serverStatusEl.className = 'status-box success';
+        serverStatusEl.innerHTML = `
+          <p>✅ Serverul funcționează corect!</p>
+          <p>Status: ${data.status}</p>
+          <p>Timestamp: ${data.timestamp}</p>
+          <p>Mediu: ${data.environment}</p>
+        `;
+        
+        responseDataEl.innerHTML = `
+          <h3>Răspuns detaliat:</h3>
+          <pre>${JSON.stringify(data, null, 2)}</pre>
+        `;
+        
+        console.log('Server response:', data);
+      } catch (error) {
+        serverStatusEl.className = 'status-box error';
+        serverStatusEl.innerHTML = `
+          <p>❌ Eroare la conexiunea cu serverul:</p>
+          <p>${error.message}</p>
+          <p>Verificați consola browserului pentru detalii.</p>
+        `;
+        console.error('Server connection error:', error);
+      }
+    }
+    
+    // Event listeners
+    document.getElementById('check-server').addEventListener('click', checkServerStatus);
+    document.getElementById('go-home').addEventListener('click', () => {
+      window.location.href = '/';
     });
-
-    // Auto-run API test on page load
-    window.addEventListener('load', () => {
-      document.getElementById('testApi').click();
-    });
+    
+    // Verificăm automat la încărcarea paginii
+    checkServerStatus();
   </script>
 </body>
 </html>
