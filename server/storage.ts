@@ -1501,6 +1501,202 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
   }
+
+  // Fasting Recipe operations
+  async getRecipe(id: number): Promise<FastingRecipe | undefined> {
+    try {
+      const recipes = await db.select().from(fastingRecipes).where(eq(fastingRecipes.id, id)).execute();
+      return recipes[0];
+    } catch (error) {
+      console.error('Error getting recipe:', error);
+      return undefined;
+    }
+  }
+  
+  async getRecipeBySlug(slug: string): Promise<FastingRecipe | undefined> {
+    try {
+      const recipes = await db.select().from(fastingRecipes).where(eq(fastingRecipes.slug, slug)).execute();
+      return recipes[0];
+    } catch (error) {
+      console.error('Error getting recipe by slug:', error);
+      return undefined;
+    }
+  }
+  
+  async getRecipes(filters?: Partial<FastingRecipe>): Promise<FastingRecipe[]> {
+    try {
+      if (!filters) {
+        return await db.select().from(fastingRecipes).execute();
+      }
+
+      let query = db.select().from(fastingRecipes);
+      
+      // Aplicăm filtrele furnizate
+      if (filters.recipeType) {
+        query = query.where(eq(fastingRecipes.recipeType, filters.recipeType));
+      }
+      
+      if (filters.category) {
+        query = query.where(eq(fastingRecipes.category, filters.category));
+      }
+      
+      if (filters.difficulty) {
+        query = query.where(eq(fastingRecipes.difficulty, filters.difficulty));
+      }
+      
+      if (filters.isFeatured !== undefined) {
+        query = query.where(eq(fastingRecipes.isFeatured, filters.isFeatured));
+      }
+      
+      if (filters.isVerified !== undefined) {
+        query = query.where(eq(fastingRecipes.isVerified, filters.isVerified));
+      }
+      
+      if (filters.monasteryId !== undefined) {
+        query = query.where(eq(fastingRecipes.monasteryId, filters.monasteryId));
+      }
+      
+      return await query.execute();
+    } catch (error) {
+      console.error('Error getting recipes with filters:', error);
+      return [];
+    }
+  }
+  
+  async getRecipesByType(recipeType: string): Promise<FastingRecipe[]> {
+    try {
+      return await db.select().from(fastingRecipes).where(eq(fastingRecipes.recipeType, recipeType as any)).execute();
+    } catch (error) {
+      console.error('Error getting recipes by type:', error);
+      return [];
+    }
+  }
+  
+  async getRecipesByCategory(category: string): Promise<FastingRecipe[]> {
+    try {
+      return await db.select().from(fastingRecipes).where(eq(fastingRecipes.category, category as any)).execute();
+    } catch (error) {
+      console.error('Error getting recipes by category:', error);
+      return [];
+    }
+  }
+  
+  async getRecipesForDay(dayOfWeek: string): Promise<FastingRecipe[]> {
+    try {
+      // Pentru a căuta rețete recomandate pentru o anumită zi a săptămânii
+      // De exemplu: "monday", "wednesday", "friday"
+      return await db.select()
+        .from(fastingRecipes)
+        .where(sql`${fastingRecipes.recommendedForDays} @> ARRAY[${dayOfWeek}]::text[]`)
+        .execute();
+    } catch (error) {
+      console.error('Error getting recipes for day:', error);
+      return [];
+    }
+  }
+  
+  async getMonasteryRecipes(monasteryId: number): Promise<FastingRecipe[]> {
+    try {
+      return await db.select().from(fastingRecipes).where(eq(fastingRecipes.monasteryId, monasteryId)).execute();
+    } catch (error) {
+      console.error('Error getting monastery recipes:', error);
+      return [];
+    }
+  }
+  
+  async getFeaturedRecipes(limit: number = 10): Promise<FastingRecipe[]> {
+    try {
+      return await db.select()
+        .from(fastingRecipes)
+        .where(eq(fastingRecipes.isFeatured, true))
+        .limit(limit)
+        .execute();
+    } catch (error) {
+      console.error('Error getting featured recipes:', error);
+      return [];
+    }
+  }
+  
+  async getRecipeComments(recipeId: number): Promise<RecipeComment[]> {
+    try {
+      return await db.select()
+        .from(recipeComments)
+        .where(eq(recipeComments.recipeId, recipeId))
+        .execute();
+    } catch (error) {
+      console.error('Error getting recipe comments:', error);
+      return [];
+    }
+  }
+  
+  async createRecipe(recipe: InsertFastingRecipe): Promise<FastingRecipe> {
+    try {
+      const now = new Date();
+      const newRecipe = {
+        ...recipe,
+        createdAt: now,
+        updatedAt: now
+      };
+      
+      const result = await db.insert(fastingRecipes).values(newRecipe).returning().execute();
+      return result[0];
+    } catch (error) {
+      console.error('Error creating recipe:', error);
+      throw error;
+    }
+  }
+  
+  async updateRecipe(id: number, recipe: Partial<FastingRecipe>): Promise<FastingRecipe | undefined> {
+    try {
+      const existingRecipe = await this.getRecipe(id);
+      if (!existingRecipe) return undefined;
+      
+      const now = new Date();
+      const updatedRecipe = await db.update(fastingRecipes)
+        .set({
+          ...recipe,
+          updatedAt: now
+        })
+        .where(eq(fastingRecipes.id, id))
+        .returning()
+        .execute();
+      
+      return updatedRecipe[0];
+    } catch (error) {
+      console.error('Error updating recipe:', error);
+      return undefined;
+    }
+  }
+  
+  async deleteRecipe(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(fastingRecipes).where(eq(fastingRecipes.id, id)).execute();
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      return false;
+    }
+  }
+  
+  async createRecipeComment(comment: InsertRecipeComment): Promise<RecipeComment> {
+    try {
+      const result = await db.insert(recipeComments).values(comment).returning().execute();
+      return result[0];
+    } catch (error) {
+      console.error('Error creating recipe comment:', error);
+      throw error;
+    }
+  }
+  
+  async deleteRecipeComment(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(recipeComments).where(eq(recipeComments.id, id)).execute();
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error('Error deleting recipe comment:', error);
+      return false;
+    }
+  }
 }
 
 // Folosim DatabaseStorage în loc de MemStorage

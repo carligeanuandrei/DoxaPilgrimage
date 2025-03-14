@@ -11,6 +11,7 @@ import { registerMonasteryRoutes } from './routes/monasteries';
 import { registerMonasteryRegionsRoutes } from './routes/monastery-regions';
 import { registerMonasteryRecommendationsRoutes } from './routes/monastery-recommendations';
 import { registerUploadRoutes } from './routes/upload';
+import { registerFastingRecipesRoutes } from './routes/fasting-recipes';
 import { 
   insertPilgrimageSchema, 
   insertReviewSchema, 
@@ -2117,6 +2118,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Înregistrăm rutele pentru încărcarea fișierelor
   registerUploadRoutes(app);
+  
+  // Înregistrăm rutele pentru rețetele de post
+  registerFastingRecipesRoutes(app);
   
   const httpServer = createServer(app);
 
