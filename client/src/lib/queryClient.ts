@@ -1,4 +1,3 @@
-
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
@@ -25,10 +24,10 @@ async function fetchWithRetry(
     try {
       // Implementăm un timeout pentru a evita blocarea
       let fetchPromise: Promise<Response>;
-      
+
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
+      const timeoutId = setTimeout(() => controller.abort(new DOMException('Timeout depășit', 'TimeoutError')), 15000);
+
       try {
         fetchPromise = fetch(normalizedUrl, {
           ...options,
@@ -39,7 +38,7 @@ async function fetchWithRetry(
             ...(options.headers || {})
           }
         });
-        
+
         const response = await fetchPromise;
         clearTimeout(timeoutId);
         return response;
