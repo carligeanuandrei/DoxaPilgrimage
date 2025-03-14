@@ -345,7 +345,9 @@ export function registerMonasteryRoutes(app: Express) {
         
         // Apoi facem update direct pentru images folosind SQL raw
         // Conversia array-ului de imagini pentru a fi compatibil cu tipul text[] din PostgreSQL
-        await db.execute(sql`UPDATE monasteries SET images = ${sql.array(images)}::text[] WHERE id = ${monasteryId}`);
+        // Formatăm array-ul manual pentru PostgreSQL
+        const imagesArrayString = `{${images.map(img => `"${img.replace(/"/g, '\\"')}"`).join(',')}}`;
+        await db.execute(sql`UPDATE monasteries SET images = ${imagesArrayString}::text[] WHERE id = ${monasteryId}`);
       } else {
         // Dacă nu avem images, facem update normal
         await db.update(monasteries)
