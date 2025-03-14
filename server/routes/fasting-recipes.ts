@@ -73,6 +73,60 @@ export function registerFastingRecipesRoutes(app: Express) {
       res.status(500).json({ error: 'Eroare la obținerea rețetelor de post recomandate' });
     }
   });
+  
+  /**
+   * GET /api/fasting-recipes/recipe-of-the-day
+   * Returnează rețeta zilei - aceasta este selectată din rețetele recomandate pentru ziua curentă sau dintre featuredRecipes
+   */
+  app.get('/api/fasting-recipes/recipe-of-the-day', async (req: Request, res: Response) => {
+    try {
+      // Obținem ziua curentă a săptămânii în format lowercase (monday, tuesday, etc.)
+      const today = new Date();
+      const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const currentDay = weekdays[today.getDay()];
+      
+      // Încercăm să obținem o rețetă recomandată pentru ziua curentă
+      let dayRecipes = await storage.getRecipesForDay(currentDay);
+      
+      // Dacă nu avem nicio rețetă pentru ziua curentă, folosim una din rețetele recomandate
+      if (!dayRecipes || dayRecipes.length === 0) {
+        const featuredRecipes = await storage.getFeaturedRecipes(5);
+        
+        if (featuredRecipes && featuredRecipes.length > 0) {
+          // Alegem o rețetă aleatoare dintre cele recomandate
+          const randomIndex = Math.floor(Math.random() * featuredRecipes.length);
+          return res.json({
+            recipe: featuredRecipes[randomIndex],
+            source: 'featured'
+          });
+        } else {
+          // Dacă nu avem nici rețete recomandate, obținem toate rețetele și alegem una aleator
+          const allRecipes = await storage.getRecipes({});
+          
+          if (allRecipes && allRecipes.length > 0) {
+            const randomIndex = Math.floor(Math.random() * allRecipes.length);
+            return res.json({
+              recipe: allRecipes[randomIndex],
+              source: 'all'
+            });
+          } else {
+            return res.status(404).json({ error: 'Nu există rețete disponibile' });
+          }
+        }
+      } else {
+        // Dacă avem rețete pentru ziua curentă, alegem una aleator
+        const randomIndex = Math.floor(Math.random() * dayRecipes.length);
+        return res.json({
+          recipe: dayRecipes[randomIndex],
+          source: 'day',
+          day: currentDay
+        });
+      }
+    } catch (error) {
+      console.error('Eroare la obținerea rețetei zilei:', error);
+      res.status(500).json({ error: 'Eroare la obținerea rețetei zilei' });
+    }
+  });
 
   /**
    * GET /api/fasting-recipes/type/:type

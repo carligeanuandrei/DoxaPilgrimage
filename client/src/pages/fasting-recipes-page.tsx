@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { Loader2, Filter, Search } from 'lucide-react';
+import { 
+  Loader2, Filter, Search, Utensils, Clock, ChefHat, 
+  BookOpen, Coffee, Flame, Award, Calendar, Info, X,
+  Archive
+} from 'lucide-react';
 import { FastingRecipe } from '../../shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +14,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { 
+  PieChartIcon, MixerHorizontalIcon, CookieIcon, 
+  RocketIcon, TimerIcon, MagnifyingGlassIcon
+} from '@radix-ui/react-icons';
 
 // Componenta pentru filtrele de rețete
 const RecipeFilters = ({ onFilterChange }) => {
@@ -213,11 +227,262 @@ const RecipeCard = ({ recipe }: { recipe: FastingRecipe }) => {
   );
 };
 
+// Componenta pentru categoria cu pictogramă
+const CategoryIcon = ({ category, onClick, isActive = false }) => {
+  // Mapare categorii la pictograme și etichete
+  const categoryInfo = {
+    'supe_si_ciorbe': { icon: <Coffee className="h-5 w-5" />, label: 'Supe și ciorbe' },
+    'aperitive': { icon: <PieChartIcon className="h-5 w-5" />, label: 'Aperitive' },
+    'feluri_principale': { icon: <Utensils className="h-5 w-5" />, label: 'Feluri principale' },
+    'garnituri': { icon: <MixerHorizontalIcon className="h-5 w-5" />, label: 'Garnituri' },
+    'salate': { icon: <BookOpen className="h-5 w-5" />, label: 'Salate' },
+    'deserturi': { icon: <CookieIcon className="h-5 w-5" />, label: 'Deserturi' },
+    'conserve': { icon: <Archive className="h-5 w-5" />, label: 'Conserve' },
+    'bauturi': { icon: <Coffee className="h-5 w-5" />, label: 'Băuturi' },
+    'paine_si_panificatie': { icon: <Flame className="h-5 w-5" />, label: 'Pâine' },
+    'all': { icon: <MagnifyingGlassIcon className="h-5 w-5" />, label: 'Toate' }
+  };
+
+  const info = categoryInfo[category] || { icon: <Utensils className="h-5 w-5" />, label: category };
+
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <Button 
+            variant={isActive ? "default" : "outline"} 
+            className={`h-14 w-14 rounded-full p-0 ${isActive ? 'bg-primary text-primary-foreground' : ''}`}
+            onClick={() => onClick(category === 'all' ? '' : category)}
+          >
+            {info.icon}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{info.label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
+// Componenta pentru sfaturile rapide de post
+const QuickTips = () => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  const tips = [
+    {
+      title: "Substituție pentru ouă",
+      content: "În rețetele de post, ouăle pot fi înlocuite cu: 1 lingură de semințe de in + 3 linguri de apă (pt. legare) sau 1/4 cană de piure de mere (pt. umiditate)."
+    },
+    {
+      title: "Înlocuitor pentru lapte",
+      content: "Laptele animal poate fi înlocuit cu lapte de migdale, ovăz, cocos sau soia, în aceeași cantitate."
+    },
+    {
+      title: "Gust savuros fără carne",
+      content: "Pentru un gust savuros, folosiți ciuperci uscate rehidratate, pastă de roșii sau sos de soia pentru a adăuga umami."
+    }
+  ];
+
+  const randomTip = tips[Math.floor(Math.random() * tips.length)];
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 relative">
+      <div className="flex gap-3">
+        <div className="flex-shrink-0 pt-1">
+          <RocketIcon className="h-6 w-6 text-amber-600" />
+        </div>
+        <div>
+          <h3 className="font-medium text-amber-900">{randomTip.title}</h3>
+          <p className="text-sm text-amber-800 mt-1">{randomTip.content}</p>
+        </div>
+      </div>
+      <button 
+        className="absolute top-2 right-2 text-amber-400 hover:text-amber-600"
+        onClick={() => setIsVisible(false)}
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+};
+
+// Componenta pentru Rețeta Zilei
+const RecipeOfTheDay = () => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['/api/fasting-recipes/recipe-of-the-day'],
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40 bg-gray-50 rounded-lg mb-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !data || !data.recipe) {
+    return null;
+  }
+
+  const recipe = data.recipe;
+  const sourceBadge = {
+    'day': { label: `Recomandată pentru ${data.day === 'wednesday' ? 'miercuri' : data.day === 'friday' ? 'vineri' : 'astăzi'}`, color: 'bg-green-500' },
+    'featured': { label: 'Recomandare specială', color: 'bg-amber-500' },
+    'all': { label: 'Rețeta zilei', color: 'bg-blue-500' }
+  };
+
+  return (
+    <div className="mb-8 bg-gray-50 rounded-lg overflow-hidden">
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-1/3">
+          {recipe.imageUrl ? (
+            <img 
+              src={recipe.imageUrl} 
+              alt={recipe.title} 
+              className="w-full h-full object-cover"
+              style={{ maxHeight: '300px' }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center" style={{ minHeight: '200px' }}>
+              <Utensils className="h-16 w-16 text-gray-400" />
+            </div>
+          )}
+        </div>
+        <div className="md:w-2/3 p-6">
+          <div className="flex items-center mb-3">
+            <Calendar className="mr-2 h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Rețeta zilei</h2>
+            <Badge className={`ml-3 ${sourceBadge[data.source].color} text-white`}>
+              {sourceBadge[data.source].label}
+            </Badge>
+          </div>
+          
+          <h3 className="text-2xl font-bold mb-2">{recipe.title}</h3>
+          <p className="text-gray-600 mb-4 line-clamp-2">{recipe.description}</p>
+          
+          <div className="flex flex-wrap gap-3 mb-4">
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Clock className="h-3 w-3" /> 
+              {recipe.preparationMinutes + recipe.cookingMinutes} min
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <ChefHat className="h-3 w-3" /> 
+              {recipe.difficulty === 'incepator' ? 'Începător' : 
+                recipe.difficulty === 'mediu' ? 'Mediu' : 'Avansat'}
+            </Badge>
+          </div>
+          
+          <Link to={`/retete-de-post/${recipe.slug}`}>
+            <Button className="mt-2">Vezi rețeta completă</Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Componenta pentru căutare cu autocompletare
+const AutocompleteSearch = ({ value, onChange, recipes, isLoading }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef(null);
+  const autocompleteRef = useRef(null);
+
+  // Filtrez sugestiile de autocompletare pe baza textului introdus
+  const suggestions = React.useMemo(() => {
+    if (!value || value.length < 2 || !recipes) return [];
+    
+    return recipes
+      .filter(recipe => 
+        recipe.title.toLowerCase().includes(value.toLowerCase())
+      )
+      .slice(0, 5);  // Limitez la 5 sugestii
+  }, [value, recipes]);
+
+  // Gestionarea click-urilor în afara zonei de autocompletare
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        autocompleteRef.current && 
+        !autocompleteRef.current.contains(e.target) &&
+        inputRef.current && 
+        !inputRef.current.contains(e.target)
+      ) {
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <Input
+          ref={inputRef}
+          type="text"
+          placeholder="Caută rețete..."
+          value={value}
+          onChange={(e) => onChange(e)}
+          onFocus={() => setIsFocused(true)}
+          className="pl-10"
+        />
+        {value && (
+          <button 
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onClick={() => onChange({ target: { value: '' } })}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      
+      {isFocused && suggestions.length > 0 && (
+        <div 
+          ref={autocompleteRef}
+          className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+        >
+          {suggestions.map((recipe) => (
+            <Link 
+              key={recipe.id} 
+              to={`/retete-de-post/${recipe.slug}`}
+              className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                {recipe.imageUrl ? (
+                  <img 
+                    src={recipe.imageUrl} 
+                    alt={recipe.title} 
+                    className="w-10 h-10 object-cover rounded"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
+                    <Utensils className="h-5 w-5 text-gray-400" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium">{recipe.title}</p>
+                  <p className="text-xs text-gray-500 truncate">{recipe.description}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Pagina principală pentru rețete de post
 export default function FastingRecipesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('toate');
   const [filters, setFilters] = useState({});
+  const [visualCategoryFilter, setVisualCategoryFilter] = useState('');
 
   // Obținem toate rețetele de post
   const { data: recipes, isLoading, error } = useQuery({
@@ -231,15 +496,27 @@ export default function FastingRecipesPage() {
     enabled: activeTab === 'recomandate'
   });
 
-  // Filtrare după query-ul de căutare
+  // Filtrare după query-ul de căutare și categoria vizuală
   const filteredRecipes = React.useMemo(() => {
     if (!recipes) return [];
     
-    return recipes.filter(recipe => 
-      recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [recipes, searchQuery]);
+    let result = recipes;
+    
+    // Filtrare după căutare
+    if (searchQuery) {
+      result = result.filter(recipe => 
+        recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        recipe.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Filtrare după categoria vizuală
+    if (visualCategoryFilter) {
+      result = result.filter(recipe => recipe.category === visualCategoryFilter);
+    }
+    
+    return result;
+  }, [recipes, searchQuery, visualCategoryFilter]);
 
   // Gestionarea schimbării filtrelor
   const handleFilterChange = (newFilters) => {
@@ -253,6 +530,17 @@ export default function FastingRecipesPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+  
+  // Gestionarea filtrării vizuale după categorie
+  const handleCategoryFilterChange = (category) => {
+    setVisualCategoryFilter(category);
+    if (category) {
+      setFilters(prev => ({ ...prev, category }));
+    } else {
+      const { category, ...rest } = filters;
+      setFilters(rest);
+    }
+  };
 
   // Decidem ce rețete să afișăm în funcție de tabul activ
   const recipesToShow = activeTab === 'recomandate' 
@@ -262,22 +550,82 @@ export default function FastingRecipesPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold text-center mb-2">Rețete de Post</h1>
-      <p className="text-gray-600 text-center mb-8">
+      <p className="text-gray-600 text-center mb-6">
         Descoperiți rețete delicioase pentru perioadele de post ortodox
       </p>
 
+      {/* Sfaturi rapide */}
+      <QuickTips />
+
+      {/* Căutare cu autocompletare */}
       <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Caută rețete..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="pl-10"
-          />
-        </div>
+        <AutocompleteSearch
+          value={searchQuery}
+          onChange={handleSearchChange}
+          recipes={recipes}
+          isLoading={isLoading}
+        />
       </div>
+
+      {/* Rețeta zilei */}
+      {activeTab === 'toate' && <RecipeOfTheDay />}
+
+      {/* Filtrare vizuală după categorii */}
+      {activeTab === 'toate' && (
+        <div className="mb-8">
+          <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+            <MixerHorizontalIcon className="h-5 w-5" />
+            Filtrează după categorie
+          </h3>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <CategoryIcon
+              category="all"
+              onClick={() => handleCategoryFilterChange('')}
+              isActive={visualCategoryFilter === ''}
+            />
+            <CategoryIcon
+              category="supe_si_ciorbe"
+              onClick={handleCategoryFilterChange}
+              isActive={visualCategoryFilter === 'supe_si_ciorbe'}
+            />
+            <CategoryIcon
+              category="feluri_principale"
+              onClick={handleCategoryFilterChange}
+              isActive={visualCategoryFilter === 'feluri_principale'}
+            />
+            <CategoryIcon
+              category="deserturi"
+              onClick={handleCategoryFilterChange}
+              isActive={visualCategoryFilter === 'deserturi'}
+            />
+            <CategoryIcon
+              category="salate"
+              onClick={handleCategoryFilterChange}
+              isActive={visualCategoryFilter === 'salate'}
+            />
+            <CategoryIcon
+              category="aperitive"
+              onClick={handleCategoryFilterChange}
+              isActive={visualCategoryFilter === 'aperitive'}
+            />
+            <CategoryIcon
+              category="paine_si_panificatie"
+              onClick={handleCategoryFilterChange}
+              isActive={visualCategoryFilter === 'paine_si_panificatie'}
+            />
+          </div>
+          {visualCategoryFilter && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleCategoryFilterChange('')}
+              className="mt-2 mx-auto block"
+            >
+              <X className="mr-1 h-4 w-4" /> Resetează filtrul de categorie
+            </Button>
+          )}
+        </div>
+      )}
 
       <Tabs defaultValue="toate" value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="grid w-full grid-cols-3">
@@ -287,7 +635,7 @@ export default function FastingRecipesPage() {
         </TabsList>
 
         <TabsContent value="toate">
-          {/* Nu afișăm filtrele, doar lista cu toate rețetele */}
+          {/* Filtrele vizuale sunt deja afișate mai sus */}
         </TabsContent>
 
         <TabsContent value="recomandate">
@@ -323,9 +671,12 @@ export default function FastingRecipesPage() {
       )}
 
       {/* Secțiunea pentru rețetele recomandate pentru zilele de miercuri și vineri */}
-      {activeTab === 'toate' && recipes?.length > 0 && (
+      {activeTab === 'toate' && recipes?.length > 0 && !visualCategoryFilter && (
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">Recomandate pentru zile de post</h2>
+          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <Calendar className="h-6 w-6 text-primary" />
+            Recomandate pentru zile de post
+          </h2>
           <p className="text-gray-600 mb-6">
             Rețete speciale pentru zilele de miercuri și vineri
           </p>
@@ -353,12 +704,15 @@ export default function FastingRecipesPage() {
 
       {/* Afișarea tuturor rețetelor */}
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-6">
+        <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
           {activeTab === 'recomandate' 
-            ? 'Rețete recomandate'
+            ? <><Award className="h-6 w-6 text-primary" /> Rețete recomandate</>
             : activeTab === 'filtrate' && Object.values(filters).some(v => v)
-              ? 'Rețete filtrate'
-              : 'Toate rețetele de post'}
+              ? <><Filter className="h-6 w-6 text-primary" /> Rețete filtrate</>
+              : visualCategoryFilter
+                ? <><Utensils className="h-6 w-6 text-primary" /> {getCategoryLabel(visualCategoryFilter)}</>
+                : <><Utensils className="h-6 w-6 text-primary" /> Toate rețetele de post</>
+          }
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -370,7 +724,10 @@ export default function FastingRecipesPage() {
 
       {/* Secțiunea de informații despre post */}
       <div className="mt-12 bg-gray-50 p-6 rounded-lg">
-        <h2 className="text-2xl font-semibold mb-4">Despre postul ortodox</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <Info className="h-6 w-6 text-primary" />
+          Despre postul ortodox
+        </h2>
         <p className="mb-4">
           În tradiția ortodoxă, postul reprezintă o perioadă de abstinență de la anumite alimente de origine 
           animală și de intensificare a vieții spirituale. Principalele perioade de post sunt:
@@ -389,4 +746,20 @@ export default function FastingRecipesPage() {
       </div>
     </div>
   );
+  
+  // Funcție pentru a traduce categoriile în română
+  function getCategoryLabel(category: string) {
+    const categoryMap = {
+      'supe_si_ciorbe': 'Supe și ciorbe',
+      'aperitive': 'Aperitive',
+      'feluri_principale': 'Feluri principale',
+      'garnituri': 'Garnituri',
+      'salate': 'Salate',
+      'deserturi': 'Deserturi',
+      'conserve': 'Conserve',
+      'bauturi': 'Băuturi',
+      'paine_si_panificatie': 'Pâine și panificație'
+    };
+    return categoryMap[category] || category;
+  }
 }
