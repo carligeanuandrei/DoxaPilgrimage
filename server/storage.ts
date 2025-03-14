@@ -1,7 +1,7 @@
 import { 
   users, pilgrimages, reviews, bookings, messages,
   products, orders, orderItems, productReviews, cmsContent,
-  builderPages
+  builderPages, fastingRecipes, recipeComments
 } from "@shared/schema";
 import type { 
   User, InsertUser, Pilgrimage, InsertPilgrimage, 
@@ -9,12 +9,13 @@ import type {
   Message, InsertMessage, VerificationData,
   Product, InsertProduct, Order, InsertOrder,
   OrderItem, InsertOrderItem, ProductReview, InsertProductReview,
-  CmsContent, InsertCmsContent, BuilderPage, InsertBuilderPage
+  CmsContent, InsertCmsContent, BuilderPage, InsertBuilderPage,
+  FastingRecipe, InsertFastingRecipe, RecipeComment, InsertRecipeComment
 } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
-import { eq, and, like, ilike, or, desc } from "drizzle-orm";
+import { eq, and, like, ilike, or, desc, sql } from "drizzle-orm";
 import * as crypto from "crypto";
 import connectPgSimple from "connect-pg-simple";
 import pg from "pg";
