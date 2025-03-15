@@ -8,7 +8,8 @@ import {
   MailIcon, 
   InfoIcon, 
   ShieldIcon, 
-  CookieIcon
+  CookieIcon,
+  LayoutIcon
 } from 'lucide-react';
 
 // Tipul de date pentru elementele CMS
@@ -425,6 +426,84 @@ export const HomeInitializer: React.FC<{refetch: () => Promise<any>}> = ({ refet
 };
 
 // Export componenta principală care include toți inițializatorii
+// Componenta pentru inițializarea conținutului footer
+export const FooterInitializer: React.FC<{refetch: () => Promise<any>}> = ({ refetch }) => {
+  const { toast } = useToast();
+  
+  const footerItems: CmsItem[] = [
+    // Brand/Logo
+    { key: 'footer_brand_name', contentType: 'text', value: 'DOXA Pelerinaje' },
+    { key: 'footer_brand_icon', contentType: 'text', value: '/images/logo.svg' },
+    { key: 'footer_description', contentType: 'text', value: 'Platformă dedicată pelerinajelor și turismului religios, cu focus pe patrimoniul cultural și spiritual ortodox.' },
+    { key: 'footer_copyright', contentType: 'text', value: '© 2025 DOXA Pelerinaje. Toate drepturile rezervate.' },
+    
+    // Linkuri rapide (Quicklinks)
+    { key: 'footer_quicklinks_title', contentType: 'text', value: 'Linkuri Rapide' },
+    { key: 'footer_link_home', contentType: 'text', value: 'Acasă' },
+    { key: 'footer_link_home_url', contentType: 'text', value: '/' },
+    { key: 'footer_link_pilgrimages', contentType: 'text', value: 'Pelerinaje' },
+    { key: 'footer_link_pilgrimages_url', contentType: 'text', value: '/pilgrimages' },
+    { key: 'footer_link_monasteries', contentType: 'text', value: 'Mănăstiri' },
+    { key: 'footer_link_monasteries_url', contentType: 'text', value: '/monasteries' },
+    { key: 'footer_link_about', contentType: 'text', value: 'Despre noi' },
+    { key: 'footer_link_about_url', contentType: 'text', value: '/about' },
+    { key: 'footer_link_contact', contentType: 'text', value: 'Contact' },
+    { key: 'footer_link_contact_url', contentType: 'text', value: '/contact' },
+    { key: 'footer_link_auth', contentType: 'text', value: 'Autentificare' },
+    { key: 'footer_link_auth_url', contentType: 'text', value: '/auth' },
+    
+    // Destinații
+    { key: 'footer_destinations_title', contentType: 'text', value: 'Destinații populare' },
+    { key: 'footer_destination_moldova', contentType: 'text', value: 'Moldova' },
+    { key: 'footer_destination_moldova_url', contentType: 'text', value: '/pilgrimages?region=moldova' },
+    { key: 'footer_destination_athos', contentType: 'text', value: 'Muntele Athos' },
+    { key: 'footer_destination_athos_url', contentType: 'text', value: '/pilgrimages?destination=athos' },
+    { key: 'footer_destination_israel', contentType: 'text', value: 'Israel' },
+    { key: 'footer_destination_israel_url', contentType: 'text', value: '/pilgrimages?destination=israel' },
+    { key: 'footer_destination_vatican', contentType: 'text', value: 'Vatican' },
+    { key: 'footer_destination_vatican_url', contentType: 'text', value: '/pilgrimages?destination=vatican' },
+    { key: 'footer_destination_lourdes', contentType: 'text', value: 'Lourdes' },
+    { key: 'footer_destination_lourdes_url', contentType: 'text', value: '/pilgrimages?destination=lourdes' },
+    
+    // Informații de contact
+    { key: 'footer_contact_title', contentType: 'text', value: 'Contact' },
+    { key: 'footer_contact_address', contentType: 'text', value: 'Str. Bisericii, Nr. 10, București, România' },
+    { key: 'footer_contact_address_icon', contentType: 'text', value: 'map-pin' },
+    { key: 'footer_contact_phone', contentType: 'text', value: '+40 700 000 001' },
+    { key: 'footer_contact_phone_icon', contentType: 'text', value: 'phone' },
+    { key: 'footer_contact_email', contentType: 'text', value: 'contact@doxapelerinaje.ro' },
+    { key: 'footer_contact_email_icon', contentType: 'text', value: 'mail' },
+    
+    // Social media
+    { key: 'footer_social_facebook', contentType: 'text', value: 'Facebook' },
+    { key: 'footer_social_facebook_url', contentType: 'text', value: 'https://facebook.com/doxapelerinaje' },
+    { key: 'footer_social_instagram', contentType: 'text', value: 'Instagram' },
+    { key: 'footer_social_instagram_url', contentType: 'text', value: 'https://instagram.com/doxapelerinaje' },
+    { key: 'footer_social_youtube', contentType: 'text', value: 'YouTube' },
+    { key: 'footer_social_youtube_url', contentType: 'text', value: 'https://youtube.com/doxapelerinaje' },
+    
+    // Pagini legale
+    { key: 'footer_terms', contentType: 'text', value: 'Termeni și condiții' },
+    { key: 'footer_terms_url', contentType: 'text', value: '/termeni-si-conditii' },
+    { key: 'footer_privacy', contentType: 'text', value: 'Politica de confidențialitate' },
+    { key: 'footer_privacy_url', contentType: 'text', value: '/politica-de-confidentialitate' },
+    { key: 'footer_cookies', contentType: 'text', value: 'Politica de cookies' },
+    { key: 'footer_cookies_url', contentType: 'text', value: '/cookies' },
+  ];
+  
+  return (
+    <Button 
+      variant="outline" 
+      size="sm"
+      className="bg-purple-50 hover:bg-purple-100"
+      onClick={() => initializeCmsContent(footerItems, 'Footer', toast, refetch)}
+    >
+      <LayoutIcon className="h-4 w-4 mr-1" />
+      Inițializează CMS Footer
+    </Button>
+  );
+};
+
 export const CmsInitializers: React.FC<{refetch: () => Promise<any>}> = ({ refetch }) => {
   return (
     <div className="flex flex-wrap gap-2 mt-4">
@@ -433,6 +512,7 @@ export const CmsInitializers: React.FC<{refetch: () => Promise<any>}> = ({ refet
       <AboutInitializer refetch={refetch} />
       <TermsInitializer refetch={refetch} />
       <PrivacyInitializer refetch={refetch} />
+      <FooterInitializer refetch={refetch} />
       <CookiesInitializer refetch={refetch} />
       <FooterLinksInitializer refetch={refetch} />
     </div>

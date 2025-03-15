@@ -315,3 +315,61 @@ export const insertCmsContentSchema = createInsertSchema(cmsContent).omit({
 
 export type InsertCmsContent = z.infer<typeof insertCmsContentSchema>;
 export type CmsContent = typeof cmsContent.$inferSelect;
+
+// Enum pentru regiunile mănăstirilor
+export const regionEnum = pgEnum('monastery_region', [
+  'moldova', 'bucovina', 'muntenia', 'oltenia', 'transilvania', 
+  'maramures', 'banat', 'dobrogea', 'crisana'
+]);
+
+// Mănăstiri schema
+export const monasteries = pgTable("monasteries", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description").notNull(),
+  shortDescription: text("short_description"),
+  address: text("address"),
+  region: regionEnum("region").notNull(),
+  city: text("city").notNull(),
+  county: text("county").notNull(),
+  access: text("access"),
+  patronSaint: text("patron_saint"),
+  patronSaintDate: timestamp("patron_saint_date"),
+  foundedYear: integer("founded_year"),
+  history: text("history"),
+  specialFeatures: text("special_features"),
+  relics: text("relics").array(),
+  type: text("type", { enum: ["monastery", "hermitage", "church"] }).notNull(),
+  images: text("images").array(),
+  coverImage: text("cover_image"),
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  website: text("website"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  verification: boolean("verification").default(false),
+  administratorId: integer("administrator_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at")
+});
+
+// Relații pentru mănăstiri
+export const monasteriesRelations = relations(monasteries, ({ one }) => ({
+  administrator: one(users, { fields: [monasteries.administratorId], references: [users.id] })
+}));
+
+// Schema pentru inserarea mănăstirilor
+export const insertMonasterySchema = createInsertSchema(monasteries, {
+  relics: z.array(z.string()).optional(),
+  images: z.array(z.string()).optional()
+}).omit({
+  id: true,
+  verification: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+// Tipuri pentru mănăstiri
+export type InsertMonastery = z.infer<typeof insertMonasterySchema>;
+export type Monastery = typeof monasteries.$inferSelect;
