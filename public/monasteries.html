@@ -3,275 +3,236 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <title>Mănăstiri Ortodoxe - DOXA</title>
-  <link rel="stylesheet" href="/src/index.css">
+  <title>DOXA - Platformă de Pelerinaje Ortodoxe</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    .map-section {
-      height: 400px;
-      background-color: #e9ecef;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #666;
-      text-align: center;
-    }
-
-    .filters-container {
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
       background-color: #f8f9fa;
-      padding: 1.5rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
-
-    .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
+    .navbar {
+      background-color: #343a40;
     }
-
-    .filter-group {
-      margin-bottom: 1rem;
+    .navbar-brand {
+      font-weight: bold;
+      color: #fff;
     }
-
-    .filter-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
+    .content {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
-
-    .filter-group select {
-      width: 100%;
-      padding: 0.5rem;
+    .monastery-card {
       border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    .regions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 3rem;
-    }
-
-    .region-card {
-      background-color: #fff;
       border-radius: 8px;
-      box-shadow: var(--shadow);
       overflow: hidden;
-      transition: var(--transition);
-    }
-
-    .region-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .region-image {
-      height: 150px;
-      overflow: hidden;
-    }
-
-    .region-image img {
-      width: 100%;
+      margin-bottom: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       height: 100%;
+    }
+    .monastery-image {
+      width: 100%;
+      height: 200px;
       object-fit: cover;
     }
-
-    .region-content {
-      padding: 1.5rem;
+    .monastery-details {
+      padding: 15px;
     }
-
-    .region-title {
-      font-size: 1.25rem;
-      color: var(--primary-color);
-      margin-bottom: 0.5rem;
+    .monastery-name {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: #343a40;
     }
-
-    .region-count {
-      color: var(--light-text);
-      margin-bottom: 1rem;
+    .monastery-location {
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
     }
-
-    .empty-state {
+    .monastery-year {
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    .monastery-description {
+      color: #212529;
+      margin-bottom: 15px;
+    }
+    .loading-container {
       text-align: center;
-      padding: 3rem;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      margin: 2rem 0;
+      margin-top: 50px;
     }
-
-    @media (max-width: 768px) {
-      .filters-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .regions-grid {
-        grid-template-columns: 1fr;
-      }
+    .notice-box {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .footer {
+      background-color: #343a40;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
-  <div id="root">
-    <div class="loading-container">
-      <div class="loading-box">
-        <h1>DOXA</h1>
-        <p>Platformă de Pelerinaje Ortodoxe</p>
-        <div class="spinner"></div>
-        <p>Se încarcă mănăstirile...</p>
-      </div>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/">DOXA</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Acasă</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="/monasteries.html">Mănăstiri</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/pilgrimages.html">Pelerinaje</a>
+        </li>
+      </ul>
     </div>
   </div>
+</nav>
 
-  <script>
-  // Funcție pentru a afișa notificarea de eroare
+<div class="content">
+  <div id="connection-notice" class="notice-box">
+    <strong>⚠️ Notificare</strong>
+    <p>Nu s-a putut conecta la serverul de date. Se afișează informații demonstrative.</p>
+    <p>Datele afișate sunt demonstrative și nu reflectă informațiile reale din baza de date.</p>
+  </div>
+
+  <h1 class="mb-4 text-center">DOXA</h1>
+  <h2 class="mb-4 text-center">Platformă de Pelerinaje Ortodoxe</h2>
+
+  <div id="loading" class="loading-container">
+    <p>Se încarcă mănăstirile...</p>
+  </div>
+
+  <div id="monasteries-container" class="row"></div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2025 DOXA - Platformă de Pelerinaje Ortodoxe</p>
+  </div>
+</footer>
+
+<script>
+  // Funcție pentru afișarea erorilor de conexiune
   function showConnectionError() {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'connection-error';
-    errorDiv.innerHTML = `
-      <div class="alert alert-warning" role="alert">
-        <h4><i class="fas fa-exclamation-triangle"></i> ⚠️ Notificare</h4>
-        <p>Nu s-a putut conecta la serverul de date. Se afișează informații demonstrative.</p>
-        <p>Datele afișate sunt demonstrative și nu reflectă informațiile reale din baza de date.</p>
-      </div>
-    `;
-
-    // Verificăm dacă există elementul main, iar dacă nu, adăugăm la root
-    const targetElement = document.querySelector('main') || document.getElementById('root');
-    if (targetElement) {
-      targetElement.prepend(errorDiv);
-    } else {
-      // Dacă nici root nu există, adăugăm la body
-      document.body.prepend(errorDiv);
+    const noticeElement = document.getElementById('connection-notice');
+    if (noticeElement) {
+      noticeElement.style.display = 'block';
     }
   }
 
-  // Funcție pentru a încărca mănăstirile
+  // Funcție pentru încărcarea mănăstirilor
   async function loadMonasteries() {
+    const container = document.getElementById('monasteries-container');
+    const loading = document.getElementById('loading');
+
     try {
-      // Încercăm să obținem datele de la API
+      // Încercăm să încărcăm datele de la API
       const response = await fetch('/api/monasteries');
 
-      // Verificăm dacă API-ul a răspuns cu succes
+      // Verificăm dacă răspunsul este OK și dacă este în format JSON
       if (response.ok) {
-        const monasteries = await response.json();
-        displayMonasteries(monasteries);
+        try {
+          const monasteries = await response.json();
+          renderMonasteries(monasteries);
+        } catch (error) {
+          console.error('Eroare la parsarea răspunsului JSON:', error);
+          // Încercăm să folosim datele de rezervă
+          await loadFallbackData();
+        }
       } else {
-        throw new Error('Eroare la comunicarea cu serverul');
+        // Răspunsul nu este OK, folosim datele de rezervă
+        await loadFallbackData();
       }
     } catch (error) {
-      console.error("Eroare la încărcarea mănăstirilor:", error);
-
-      // Dacă API-ul eșuează, încărcăm datele de rezervă
-      console.log("Folosim date de rezervă pentru mănăstiri");
-      showConnectionError();
-
-      try {
-        const fallbackResponse = await fetch('/fallback-data/monasteries.json');
-        const fallbackData = await fallbackResponse.json();
-        displayMonasteries(fallbackData);
-      } catch (fallbackError) {
-        console.error("Eroare la încărcarea datelor de rezervă:", fallbackError);
-
-        // Folosim date hardcoded ca ultimă soluție
-        const backupData = [
-          {
-            id: 1,
-            name: "Mănăstirea Putna",
-            description: "Mănăstirea Putna, ctitorie a lui Ștefan cel Mare (1466-1469), este unul dintre cele mai importante centre spirituale și culturale ale Ortodoxiei românești.",
-            location: "Putna, Suceava",
-            yearFounded: 1466,
-            image: "/images/monastery-placeholder.jpg",
-            region: "moldova"
-          },
-          {
-            id: 2,
-            name: "Mănăstirea Voroneț",
-            description: "Mănăstirea Voroneț, cunoscută pentru „albastrul de Voroneț" - culoarea unică a frescelor exterioare, este una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare.",
-            location: "Gura Humorului, Suceava",
-            yearFounded: 1488,
-            image: "/images/monastery-placeholder.jpg",
-            region: "bucovina"
-          },
-          {
-            id: 3,
-            name: "Mănăstirea Neamț",
-            description: "Mănăstirea Neamț, cunoscută și ca „Lavra Neamțului", este una dintre cele mai vechi și mai importante mănăstiri din Moldova.",
-            location: "Târgu Neamț, Neamț",
-            yearFounded: 1407,
-            image: "/images/monastery-placeholder.jpg",
-            region: "moldova"
-          }
-        ];
-        displayMonasteries(backupData);
+      console.error('Eroare la comunicarea cu serverul:', error);
+      // Încercăm să folosim datele de rezervă
+      await loadFallbackData();
+    } finally {
+      if (loading) {
+        loading.style.display = 'none';
       }
     }
   }
 
-  // Funcție pentru a afișa mănăstirile
-  function displayMonasteries(monasteries) {
-    let container = document.getElementById('monasteries-container');
-
-    // Dacă containerul nu există, îl creăm
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'monasteries-container';
-      container.className = 'row mt-4';
-
-      // Adăugăm structura de bază dacă nu există
-      const mainContent = document.createElement('main');
-      mainContent.className = 'container py-4';
-      mainContent.innerHTML = `
-        <h1 class="mb-4">Mănăstiri Ortodoxe</h1>
-        <div class="row">
-          <div class="col-12 mb-4">
-            <div class="filters-container">
-              <h2 class="h5 mb-3">Filtrează mănăstirile</h2>
-              <div class="filters-grid">
-                <!-- Filtrele vor fi adăugate ulterior -->
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-
-      mainContent.appendChild(container);
-      document.getElementById('root').appendChild(mainContent);
+  // Funcție pentru încărcarea datelor de rezervă
+  async function loadFallbackData() {
+    try {
+      console.log('Folosim date de rezervă pentru mănăstiri');
+      const response = await fetch('/fallback-data/monasteries.json');
+      if (response.ok) {
+        const fallbackData = await response.json();
+        renderMonasteries(fallbackData);
+        showConnectionError();
+      } else {
+        throw new Error('Nu s-au putut încărca datele de rezervă');
+      }
+    } catch (error) {
+      console.error('Eroare la încărcarea datelor de rezervă:', error);
+      // Afișăm un mesaj de eroare în container
+      const container = document.getElementById('monasteries-container');
+      if (container) {
+        container.innerHTML = '<div class="col-12 text-center"><p>Nu s-au putut încărca informațiile despre mănăstiri. Vă rugăm încercați mai târziu.</p></div>';
+      }
+      showConnectionError();
     }
+  }
+
+  // Funcție pentru afișarea mănăstirilor
+  function renderMonasteries(monasteries) {
+    const container = document.getElementById('monasteries-container');
+    if (!container) return;
 
     container.innerHTML = '';
+
+    if (!monasteries || monasteries.length === 0) {
+      container.innerHTML = '<div class="col-12 text-center"><p>Nu există mănăstiri disponibile.</p></div>';
+      return;
+    }
 
     monasteries.forEach(monastery => {
       const card = document.createElement('div');
       card.className = 'col-md-4 mb-4';
+
+      const imageSrc = monastery.image || '/images/monastery-placeholder.jpg';
+
       card.innerHTML = `
-        <div class="card h-100 monastery-card">
-          <img src="${monastery.image || '/images/monastery-placeholder.jpg'}" 
-               class="card-img-top" alt="${monastery.name}"
-               onerror="this.src='/images/monastery-placeholder.jpg'">
-          <div class="card-body">
-            <h5 class="card-title">${monastery.name}</h5>
-            <p class="card-text">
-              <small class="text-muted"><i class="fas fa-map-marker-alt"></i> ${monastery.location || 'Locație necunoscută'}</small>
-            </p>
-            <p class="card-text"><i class="fas fa-calendar-alt"></i> An fondare: ${monastery.yearFounded || 'Necunoscut'}</p>
-            <p class="card-text">${monastery.description || 'Fără descriere'}</p>
-          </div>
-          <div class="card-footer">
-            <a href="#" class="btn btn-primary view-details" data-id="${monastery.id}">
-              Vezi detalii <i class="fas fa-arrow-right"></i>
-            </a>
+        <div class="monastery-card">
+          <img src="${imageSrc}" class="monastery-image" alt="${monastery.name}" onerror="this.src='/images/monastery-placeholder.jpg'">
+          <div class="monastery-details">
+            <h3 class="monastery-name">${monastery.name}</h3>
+            <p class="monastery-location"><strong>Locație:</strong> ${monastery.location}</p>
+            <p class="monastery-year"><strong>An înființare:</strong> ${monastery.yearFounded || 'Necunoscut'}</p>
+            <p class="monastery-description">${monastery.description || 'Fără descriere disponibilă.'}</p>
           </div>
         </div>
       `;
+
       container.appendChild(card);
     });
   }
 
-  // Încărcăm mănăstirile când pagina se încarcă
+  // Încărcăm mănăstirile la încărcarea documentului
   document.addEventListener('DOMContentLoaded', loadMonasteries);
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
