@@ -132,6 +132,7 @@
       monasteries: [],
       filteredMonasteries: [],
       regions: [],
+      error: null, // Adăugăm un câmp pentru mesajele de eroare
       filters: {
         region: '',
         type: '',
@@ -275,6 +276,26 @@
         return createElement('div', { className: 'container', style: { textAlign: 'center', padding: '3rem 0' } },
           createElement('div', { className: 'spinner', style: { margin: '0 auto' } }),
           createElement('p', null, 'Se încarcă regiunile...')
+        );
+      }
+      
+      // Afișăm notificarea de eroare dacă există
+      if (pageState.error) {
+        return createElement('div', { className: 'container', style: { padding: '2rem 0' } },
+          createElement('div', { 
+            style: { 
+              padding: '1rem', 
+              backgroundColor: '#fff3cd', 
+              color: '#856404', 
+              borderRadius: '8px',
+              marginBottom: '2rem',
+              border: '1px solid #ffeeba'
+            } 
+          }, 
+            createElement('p', { style: { fontWeight: 'bold' } }, '⚠️ Notificare'),
+            createElement('p', null, pageState.error),
+            createElement('p', null, 'Datele afișate sunt demonstrative și nu reflectă informațiile reale din baza de date.')
+          )
         );
       }
       
@@ -478,17 +499,68 @@
       pageState.loading = true;
       renderPage();
       
+      // Date de test pentru cazul când API-ul nu răspunde
+      const testMonasteries = [
+        {
+          id: 1,
+          name: "Mănăstirea Putna",
+          description: "Mănăstirea Putna este o mănăstire ortodoxă de călugări din România, construită între anii 1466–1469 și ctitorită de domnitorul Ștefan cel Mare.",
+          shortDescription: "Ctitorie a lui Ștefan cel Mare, un important centru religios și cultural.",
+          city: "Putna",
+          county: "Suceava",
+          region: "moldova",
+          type: "monastery",
+          coverImage: "/static/images/monasteries/putna.jpg",
+          relics: ["Moaștele Sfântului Ghenadie"]
+        },
+        {
+          id: 2,
+          name: "Mănăstirea Voroneț",
+          description: "Mănăstirea Voroneț, cunoscută pentru albastrul său unic, a fost construită în 1488 de Ștefan cel Mare și este parte din patrimoniul UNESCO.",
+          shortDescription: "Cunoscută pentru 'Albastrul de Voroneț', una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare.",
+          city: "Gura Humorului",
+          county: "Suceava",
+          region: "bucovina",
+          type: "monastery",
+          coverImage: "/static/images/monasteries/voronet.jpg"
+        },
+        {
+          id: 3,
+          name: "Mănăstirea Sâmbăta de Sus",
+          description: "Mănăstirea Sâmbăta de Sus, cunoscută și ca 'Catedrala din Munți', a fost construită de Constantin Brâncoveanu în 1696.",
+          shortDescription: "Cunoscută și ca 'Catedrala din Munți', un important centru spiritual din Transilvania.",
+          city: "Sâmbăta de Sus",
+          county: "Brașov",
+          region: "transilvania",
+          type: "monastery",
+          coverImage: "/static/images/monasteries/sambata.jpg"
+        }
+      ];
+      
       fetch('/api/monasteries')
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Răspuns invalid de la server: ${response.status} ${response.statusText}`);
+          }
+          return response.json();
+        })
         .then(data => {
+          console.log("Mănăstiri primite de la server:", data.length);
           pageState.monasteries = Array.isArray(data) ? data : [];
           pageState.loading = false;
           renderPage();
         })
         .catch(error => {
-          console.error('Eroare la încărcarea mănăstirilor:', error);
-          pageState.monasteries = [];
+          console.error('Eroare la comunicarea cu serverul:', error);
+          
+          // Folosim date de test în caz de eroare
+          console.log('Folosim date de rezervă pentru mănăstiri');
+          pageState.monasteries = testMonasteries;
           pageState.loading = false;
+          
+          // Adăugăm o notificare pentru utilizator despre utilizarea datelor locale
+          pageState.error = "Nu s-a putut conecta la serverul de date. Se afișează informații demonstrative.";
+          
           renderPage();
         });
     }
