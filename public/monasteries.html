@@ -137,7 +137,15 @@
         <p>Datele afișate sunt demonstrative și nu reflectă informațiile reale din baza de date.</p>
       </div>
     `;
-    document.querySelector('main').prepend(errorDiv);
+    
+    // Verificăm dacă există elementul main, iar dacă nu, adăugăm la root
+    const targetElement = document.querySelector('main') || document.getElementById('root');
+    if (targetElement) {
+      targetElement.prepend(errorDiv);
+    } else {
+      // Dacă nici root nu există, adăugăm la body
+      document.body.prepend(errorDiv);
+    }
   }
 
   // Funcție pentru a încărca mănăstirile
@@ -172,7 +180,35 @@
 
   // Funcție pentru a afișa mănăstirile
   function displayMonasteries(monasteries) {
-    const container = document.getElementById('monasteries-container');
+    let container = document.getElementById('monasteries-container');
+    
+    // Dacă containerul nu există, îl creăm
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'monasteries-container';
+      container.className = 'row mt-4';
+      
+      // Adăugăm structura de bază dacă nu există
+      const mainContent = document.createElement('main');
+      mainContent.className = 'container py-4';
+      mainContent.innerHTML = `
+        <h1 class="mb-4">Mănăstiri Ortodoxe</h1>
+        <div class="row">
+          <div class="col-12 mb-4">
+            <div class="filters-container">
+              <h2 class="h5 mb-3">Filtrează mănăstirile</h2>
+              <div class="filters-grid">
+                <!-- Filtrele vor fi adăugate ulterior -->
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      mainContent.appendChild(container);
+      document.getElementById('root').appendChild(mainContent);
+    }
+    
     container.innerHTML = '';
     
     monasteries.forEach(monastery => {

@@ -84,3 +84,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node doxa-ai-run.js"
+
+[[workflows.workflow]]
+name = "Verifică API și Fallback Data"
+author = 40326232
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node check-api-and-fallback.js"
