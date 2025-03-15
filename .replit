@@ -24,7 +24,7 @@ localPort = 5001
 externalPort = 3001
 
 [workflows]
-runButton = "Repară DOXA"
+runButton = "Repară Tailwind Typography"
 
 [[workflows.workflow]]
 name = "Run DOXA"
@@ -142,3 +142,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd DoxaPilgrimage && npm install @tailwindcss/typography --save-dev"
+
+[[workflows.workflow]]
+name = "Recuperare versiune funcțională"
+author = 40326232
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node recover-doxa-prev-version.js"
