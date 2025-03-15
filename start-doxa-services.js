@@ -118,12 +118,81 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-// Afișăm informații utile
-setTimeout(() => {
-  console.log('\n✅ Serviciile DOXA sunt active:');
-  console.log('   - Platformă DOXA: http://localhost:5001');
-  console.log('   - Aplicație DOXA Pilgrimage: http://localhost:3000');
-  console.log('\n📊 Status: verificați cu ./run_doxa_info.sh');
-  console.log('📝 Loguri: doxa_platform.log și doxa_pilgrimage.log');
-  console.log('\n📌 Pentru a opri serviciile, apăsați Ctrl+C');
+// Verificăm conexiunea la baza de date
+setTimeout(async () => {
+  console.log('\n🔍 Verificare conexiune la baza de date...');
+  
+  try {
+    // Creem un script temporar pentru a testa conexiunea
+    fs.writeFileSync('temp-db-check.js', `
+    async function run() {
+      try {
+        const { testConnection } = require('./server/db');
+        const result = await testConnection();
+        console.log(result ? '✅ Conexiune reușită la baza de date!' : '❌ Conexiunea la baza de date a eșuat');
+        process.exit(result ? 0 : 1);
+      } catch (error) {
+        console.error('❌ Eroare la testarea conexiunii:', error.message);
+        process.exit(1);
+      }
+    }
+    run();
+    `);
+    
+    const dbCheckProcess = spawn('node', ['temp-db-check.js']);
+    
+    let dbOutput = '';
+    dbCheckProcess.stdout.on('data', (data) => {
+      dbOutput += data.toString();
+    });
+    
+    dbCheckProcess.stderr.on('data', (data) => {
+      dbOutput += data.toString();
+    });
+    
+    dbCheckProcess.on('close', (code) => {
+      try {
+        fs.unlinkSync('temp-db-check.js');
+      } catch (e) {
+        // Ignorăm erorile la ștergere
+      }
+      
+      if (code !== 0) {
+        console.log('⚠️ Conexiunea la baza de date a eșuat, se vor folosi date demonstrative');
+        console.log('🔄 Rulați node fix-database.js pentru a diagnostica și repara conexiunea');
+        
+        // Creăm datele de rezervă dacă nu există deja
+        const fallbackDataDir = path.join(__dirname, 'public', 'fallback-data');
+        if (!fs.existsSync(fallbackDataDir)) {
+          try {
+            // Rulăm scriptul de reparare
+            spawn('node', ['fix-database.js'], {
+              detached: true,
+              stdio: 'inherit'
+            });
+          } catch (e) {
+            console.error('❌ Eroare la rularea scriptului de reparare:', e.message);
+          }
+        }
+      }
+      
+      // Afișăm informații utile
+      console.log('\n✅ Serviciile DOXA sunt active:');
+      console.log('   - Platformă DOXA: http://localhost:5001');
+      console.log('   - Aplicație DOXA Pilgrimage: http://localhost:3000');
+      console.log('\n📊 Status: verificați cu ./run_doxa_info.sh');
+      console.log('📝 Loguri: doxa_platform.log și doxa_pilgrimage.log');
+      console.log('\n📌 Pentru a opri serviciile, apăsați Ctrl+C');
+    });
+  } catch (e) {
+    console.error('❌ Eroare la verificarea conexiunii la baza de date:', e.message);
+    
+    // Afișăm informații utile chiar și în caz de eroare
+    console.log('\n✅ Serviciile DOXA sunt active:');
+    console.log('   - Platformă DOXA: http://localhost:5001');
+    console.log('   - Aplicație DOXA Pilgrimage: http://localhost:3000');
+    console.log('\n📊 Status: verificați cu ./run_doxa_info.sh');
+    console.log('📝 Loguri: doxa_platform.log și doxa_pilgrimage.log');
+    console.log('\n📌 Pentru a opri serviciile, apăsați Ctrl+C');
+  }
 }, 3000);

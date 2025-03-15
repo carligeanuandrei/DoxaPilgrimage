@@ -66,3 +66,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node recover-app.js"
+
+[[workflows.workflow]]
+name = "Repară Conexiune DB"
+author = 40326232
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node fix-database.js"
