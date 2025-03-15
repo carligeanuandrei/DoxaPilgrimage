@@ -1642,6 +1642,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * GET /api/monasteries
+   * Returnează lista de mănăstiri, cu posibilitatea filtrării
+   */
+  app.get('/api/monasteries', async (req, res) => {
+    try {
+      const { region } = req.query;
+      
+      // Filtrăm după regiune dacă este specificată
+      const filters: any = {};
+      if (region) {
+        filters.region = region;
+      }
+      
+      const monasteries = await storage.getMonasteries(filters);
+      res.json(monasteries);
+    } catch (error) {
+      console.error('Eroare la obținerea mănăstirilor:', error);
+      res.status(500).json({ message: 'Eroare la obținerea mănăstirilor', details: error });
+    }
+  });
+  
+  /**
+   * GET /api/monasteries/:id
+   * Returnează o mănăstire după ID
+   */
+  app.get('/api/monasteries/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: 'ID-ul mănăstirii trebuie să fie un număr' });
+      }
+      
+      const monastery = await storage.getMonastery(id);
+      if (!monastery) {
+        return res.status(404).json({ message: 'Mănăstirea nu a fost găsită' });
+      }
+      
+      res.json(monastery);
+    } catch (error) {
+      console.error('Eroare la obținerea mănăstirii:', error);
+      res.status(500).json({ message: 'Eroare la obținerea mănăstirii', details: error });
+    }
+  });
+  
+  /**
+   * GET /api/monasteries/slug/:slug
+   * Returnează o mănăstire după slug
+   */
+  app.get('/api/monasteries/slug/:slug', async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      
+      const monastery = await storage.getMonasteryBySlug(slug);
+      if (!monastery) {
+        return res.status(404).json({ message: 'Mănăstirea nu a fost găsită' });
+      }
+      
+      res.json(monastery);
+    } catch (error) {
+      console.error('Eroare la obținerea mănăstirii după slug:', error);
+      res.status(500).json({ message: 'Eroare la obținerea mănăstirii', details: error });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
