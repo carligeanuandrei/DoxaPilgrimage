@@ -133,3 +133,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node fix-tailwind-typography.js"
+
+[[workflows.workflow]]
+name = "Reinstalează Tailwind Typography"
+author = 40326232
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd DoxaPilgrimage && npm install @tailwindcss/typography --save-dev"
