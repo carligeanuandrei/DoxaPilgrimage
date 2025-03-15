@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "title": "Pelerinaj la Mănăstirile din Bucovina",
+    "description": "Vizitarea celor mai importante mănăstiri din Bucovina",
+    "startDate": "2025-06-01",
+    "endDate": "2025-06-07",
+    "price": 1200,
+    "locations": "Voroneț, Putna, Moldovița, Sucevița",
+    "image": "/public/images/pilgrimages/bucovina.jpg",
+    "promoted": true
+  },
+  {
+    "id": 2,
+    "title": "Pelerinaj la Muntele Athos",
+    "description": "Călătorie spirituală pe Muntele Athos",
+    "startDate": "2025-07-10",
+    "endDate": "2025-07-20",
+    "price": 3500,
+    "locations": "Muntele Athos, Grecia",
+    "image": "/public/images/pilgrimages/athos.jpg",
+    "promoted": true
+  },
+  {
+    "id": 3,
+    "title": "Pelerinaj în Țara Sfântă",
+    "description": "Călătorie pe urmele Mântuitorului",
+    "startDate": "2025-08-15",
+    "endDate": "2025-08-25",
+    "price": 4000,
+    "locations": "Ierusalim, Betleem, Nazaret",
+    "image": "/public/images/pilgrimages/israel.jpg",
+    "promoted": false
+  }
+]

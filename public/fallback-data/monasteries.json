@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "Mănăstirea Voroneț",
+    "location": "Voroneț, Suceava",
+    "yearFounded": 1488,
+    "description": "Celebră pentru albastrul de Voroneț",
+    "image": "/public/images/monasteries/voronet.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Mănăstirea Putna",
+    "location": "Putna, Suceava",
+    "yearFounded": 1469,
+    "description": "Necropola lui Ștefan cel Mare",
+    "image": "/public/images/monasteries/putna.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Mănăstirea Moldovița",
+    "location": "Moldovița, Suceava",
+    "yearFounded": 1532,
+    "description": "Monument istoric UNESCO",
+    "image": "/public/images/monasteries/moldovita.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Mănăstirea Humor",
+    "location": "Gura Humorului, Suceava",
+    "yearFounded": 1530,
+    "description": "Monument istoric UNESCO",
+    "image": "/public/images/monasteries/humor.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Mănăstirea Sucevița",
+    "location": "Sucevița, Suceava",
+    "yearFounded": 1585,
+    "description": "Monument istoric UNESCO",
+    "image": "/public/images/monasteries/sucevita.jpg"
+  }
+]

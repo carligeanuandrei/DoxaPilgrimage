@@ -126,477 +126,84 @@
   </div>
 
   <script>
-    // Stare pentru pagina de mănăstiri
-    const pageState = {
-      loading: true,
-      monasteries: [],
-      filteredMonasteries: [],
-      regions: [],
-      error: null, // Adăugăm un câmp pentru mesajele de eroare
-      filters: {
-        region: '',
-        type: '',
-        hasRelics: false
-      }
-    };
-    
-    // Funcție helper pentru crearea elementelor DOM
-    function createElement(tag, props, ...children) {
-      const element = document.createElement(tag);
-      
-      if (props) {
-        Object.entries(props).forEach(([key, value]) => {
-          if (key === 'className') {
-            element.className = value;
-          } else if (key === 'style' && typeof value === 'object') {
-            Object.assign(element.style, value);
-          } else if (key.startsWith('on') && typeof value === 'function') {
-            const eventName = key.substring(2).toLowerCase();
-            element.addEventListener(eventName, value);
-          } else {
-            element.setAttribute(key, value);
-          }
-        });
-      }
-      
-      children.flat().forEach(child => {
-        if (child === null || child === undefined) return;
-        
-        const node = 
-          typeof child === 'string' || typeof child === 'number'
-            ? document.createTextNode(child.toString())
-            : child;
-            
-        element.appendChild(node);
-      });
-      
-      return element;
-    }
-    
-    // Componente pentru pagina de mănăstiri
-    function createNavbar() {
-      return createElement('nav', { className: 'navbar' },
-        createElement('div', { className: 'container navbar-content' },
-          createElement('a', { href: '/', className: 'navbar-brand' },
-            'DOXA'
-          ),
-          createElement('div', { className: 'navbar-links' },
-            createElement('a', { href: '/pilgrimages' }, 'Pelerinaje'),
-            createElement('a', { href: '/monasteries', className: 'active' }, 'Mănăstiri'),
-            createElement('a', { href: '/calendar' }, 'Calendar Ortodox'),
-            createElement('a', { href: '/fasting-recipes' }, 'Rețete de Post'),
-            createElement('a', { href: '/doxa-ai' }, 'DOXA AI')
-          ),
-          createElement('div', { className: 'navbar-auth' },
-            createElement('a', { href: '/auth', className: 'btn btn-outline' }, 'Autentificare'),
-            createElement('a', { href: '/auth?mode=register', className: 'btn btn-primary' }, 'Înregistrare')
-          )
-        )
-      );
-    }
-    
-    function createPageHeader() {
-      return createElement('section', { className: 'container', style: { padding: '2rem 0' } },
-        createElement('h1', { style: { marginBottom: '1rem', color: 'var(--primary-color)' } }, 'Mănăstiri Ortodoxe'),
-        createElement('p', null, 'Descoperă mănăstirile ortodoxe din România și întreaga lume. Explorează istoria, arhitectura și spiritualitatea acestor locuri sfinte.')
-      );
-    }
-    
-    function createMap() {
-      // Placerholder pentru o viitoare hartă interactivă
-      return createElement('div', { className: 'container' },
-        createElement('div', { className: 'map-section' },
-          createElement('div', null,
-            createElement('h3', null, 'Hartă interactivă'),
-            createElement('p', null, 'Harta mănăstirilor ortodoxe va fi disponibilă în curând!')
-          )
-        )
-      );
-    }
-    
-    function createFilters() {
-      const regions = ['Toate regiunile', 'Moldova', 'Bucovina', 'Muntenia', 'Oltenia', 'Transilvania', 'Maramureș', 'Banat', 'Dobrogea'];
-      const types = ['Toate tipurile', 'Mănăstire', 'Schit', 'Biserică'];
+  // Funcție pentru a afișa notificarea de eroare
+  function showConnectionError() {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'connection-error';
+    errorDiv.innerHTML = `
+      <div class="alert alert-warning" role="alert">
+        <h4><i class="fas fa-exclamation-triangle"></i> ⚠️ Notificare</h4>
+        <p>Nu s-a putut conecta la serverul de date. Se afișează informații demonstrative.</p>
+        <p>Datele afișate sunt demonstrative și nu reflectă informațiile reale din baza de date.</p>
+      </div>
+    `;
+    document.querySelector('main').prepend(errorDiv);
+  }
 
-      return createElement('div', { className: 'container' },
-        createElement('div', { className: 'filters-container' },
-          createElement('h2', { style: { marginBottom: '1rem' } }, 'Filtrează mănăstirile'),
-          createElement('div', { className: 'filters-grid' },
-            // Filtru regiune
-            createElement('div', { className: 'filter-group' },
-              createElement('label', { htmlFor: 'region-filter' }, 'Regiune'),
-              createElement('select', { 
-                id: 'region-filter',
-                onChange: (e) => {
-                  pageState.filters.region = e.target.value.toLowerCase();
-                  applyFilters();
-                }
-              }, ...regions.map((region) => 
-                createElement('option', { value: region === 'Toate regiunile' ? '' : region.toLowerCase() }, region)
-              ))
-            ),
-            
-            // Filtru tip
-            createElement('div', { className: 'filter-group' },
-              createElement('label', { htmlFor: 'type-filter' }, 'Tip lăcaș'),
-              createElement('select', { 
-                id: 'type-filter',
-                onChange: (e) => {
-                  pageState.filters.type = e.target.value.toLowerCase();
-                  applyFilters();
-                }
-              }, ...types.map((type) => 
-                createElement('option', { value: type === 'Toate tipurile' ? '' : type.toLowerCase() }, type)
-              ))
-            ),
-            
-            // Filtru relicve (moaște)
-            createElement('div', { className: 'filter-group' },
-              createElement('label', { htmlFor: 'relics-filter' }, 'Relicve'),
-              createElement('div', { style: { display: 'flex', alignItems: 'center', marginTop: '0.5rem' } },
-                createElement('input', { 
-                  type: 'checkbox', 
-                  id: 'relics-filter',
-                  style: { marginRight: '0.5rem' },
-                  onChange: (e) => {
-                    pageState.filters.hasRelics = e.target.checked;
-                    applyFilters();
-                  }
-                }),
-                createElement('span', null, 'Doar mănăstiri cu moaște sfinte')
-              )
-            )
-          )
-        )
-      );
-    }
-    
-    function createRegionsSection() {
-      if (pageState.loading) {
-        return createElement('div', { className: 'container', style: { textAlign: 'center', padding: '3rem 0' } },
-          createElement('div', { className: 'spinner', style: { margin: '0 auto' } }),
-          createElement('p', null, 'Se încarcă regiunile...')
-        );
+  // Funcție pentru a încărca mănăstirile
+  async function loadMonasteries() {
+    try {
+      // Încercăm să obținem datele de la API
+      const response = await fetch('/api/monasteries');
+      
+      // Verificăm dacă API-ul a răspuns cu succes
+      if (response.ok) {
+        const monasteries = await response.json();
+        displayMonasteries(monasteries);
+      } else {
+        throw new Error('Eroare la comunicarea cu serverul');
       }
+    } catch (error) {
+      console.error("Eroare la încărcarea mănăstirilor:", error);
       
-      // Afișăm notificarea de eroare dacă există
-      if (pageState.error) {
-        return createElement('div', { className: 'container', style: { padding: '2rem 0' } },
-          createElement('div', { 
-            style: { 
-              padding: '1rem', 
-              backgroundColor: '#fff3cd', 
-              color: '#856404', 
-              borderRadius: '8px',
-              marginBottom: '2rem',
-              border: '1px solid #ffeeba'
-            } 
-          }, 
-            createElement('p', { style: { fontWeight: 'bold' } }, '⚠️ Notificare'),
-            createElement('p', null, pageState.error),
-            createElement('p', null, 'Datele afișate sunt demonstrative și nu reflectă informațiile reale din baza de date.')
-          )
-        );
-      }
+      // Dacă API-ul eșuează, încărcăm datele de rezervă
+      console.log("Folosim date de rezervă pentru mănăstiri");
+      showConnectionError();
       
-      // Grupăm mănăstirile pe regiuni și numărăm câte sunt în fiecare regiune
-      const regionMap = new Map();
-      
-      pageState.monasteries.forEach(monastery => {
-        const region = monastery.region.charAt(0).toUpperCase() + monastery.region.slice(1);
-        if (!regionMap.has(region)) {
-          regionMap.set(region, {
-            name: region,
-            count: 0,
-            image: `/images/regions/${monastery.region}.jpg`
-          });
-        }
-        
-        const regionData = regionMap.get(region);
-        regionData.count++;
-      });
-      
-      const regions = Array.from(regionMap.values());
-      
-      if (regions.length === 0) {
-        return createElement('div', { className: 'container empty-state' },
-          createElement('h3', null, 'Nu am găsit regiuni'),
-          createElement('p', null, 'Nu există regiuni înregistrate în baza de date. Încercați să reveniți mai târziu.')
-        );
-      }
-      
-      const regionCards = regions.map(region => {
-        return createElement('div', { className: 'region-card' },
-          createElement('div', { className: 'region-image' },
-            createElement('img', { src: region.image || '/images/default-region.jpg', alt: region.name })
-          ),
-          createElement('div', { className: 'region-content' },
-            createElement('h3', { className: 'region-title' }, region.name),
-            createElement('p', { className: 'region-count' }, `${region.count} mănăstiri`),
-            createElement('a', { 
-              href: `/monasteries?region=${region.name.toLowerCase()}`, 
-              className: 'btn btn-primary'
-            }, 'Explorează')
-          )
-        );
-      });
-      
-      return createElement('div', { className: 'container', style: { padding: '2rem 0' } },
-        createElement('div', { className: 'section-title' },
-          createElement('h2', null, 'Regiuni de pelerinaj'),
-          createElement('p', null, 'Explorează mănăstirile și schiturile din diferite regiuni istorice')
-        ),
-        createElement('div', { className: 'regions-grid' }, ...regionCards)
-      );
-    }
-    
-    function createMonasteriesList() {
-      if (pageState.loading) {
-        return createElement('div', { className: 'container', style: { textAlign: 'center', padding: '3rem 0' } },
-          createElement('div', { className: 'spinner', style: { margin: '0 auto' } }),
-          createElement('p', null, 'Se încarcă mănăstirile...')
-        );
-      }
-      
-      const monasteries = pageState.filteredMonasteries.length > 0 ? pageState.filteredMonasteries : pageState.monasteries;
-      
-      if (monasteries.length === 0) {
-        return createElement('div', { className: 'container empty-state' },
-          createElement('h3', null, 'Nu am găsit mănăstiri'),
-          createElement('p', null, 'Nu există mănăstiri care să corespundă criteriilor selectate. Încercați să modificați filtrele sau să reveniți mai târziu.')
-        );
-      }
-      
-      const monasteryCards = monasteries.map(monastery => {
-        return createElement('div', { className: 'monastery-card' },
-          createElement('div', { className: 'monastery-image' },
-            createElement('img', { src: monastery.coverImage || '/images/default-monastery.jpg', alt: monastery.name })
-          ),
-          createElement('div', { className: 'monastery-content' },
-            createElement('h3', { className: 'monastery-title' }, monastery.name),
-            createElement('div', { className: 'monastery-location' },
-              createElement('span', null, `${monastery.city}, ${monastery.county}`)
-            ),
-            createElement('p', { className: 'monastery-description' }, monastery.shortDescription || monastery.description.substring(0, 100) + '...'),
-            createElement('a', { href: `/monasteries/${monastery.slug || monastery.id}`, className: 'btn btn-outline' }, 'Vizitează')
-          )
-        );
-      });
-      
-      return createElement('div', { className: 'container', style: { padding: '2rem 0' } },
-        createElement('div', { className: 'section-title' },
-          createElement('h2', null, 'Mănăstiri populare'),
-          createElement('p', null, 'Descoperă cele mai frumoase și vizitate mănăstiri ortodoxe')
-        ),
-        createElement('div', { className: 'monasteries-grid' }, ...monasteryCards)
-      );
-    }
-    
-    function createFooter() {
-      return createElement('footer', { className: 'footer' },
-        createElement('div', { className: 'container' },
-          createElement('div', { className: 'footer-grid' },
-            // Coloana brand
-            createElement('div', { className: 'footer-brand' },
-              createElement('a', { href: '/' }, 'DOXA'),
-              createElement('p', null, 'Platformă dedicată călătoriilor spirituale și tradițiilor ortodoxe, oferind acces la pelerinaje, mănăstiri și resurse spirituale.'),
-              createElement('div', { className: 'footer-social' },
-                createElement('a', { href: '#', 'aria-label': 'Facebook' }, '📱'),
-                createElement('a', { href: '#', 'aria-label': 'Instagram' }, '📷'),
-                createElement('a', { href: '#', 'aria-label': 'YouTube' }, '📺')
-              )
-            ),
-            
-            // Coloana pelerinaje
-            createElement('div', { className: 'footer-links' },
-              createElement('h3', null, 'Pelerinaje'),
-              createElement('ul', null,
-                createElement('li', null, createElement('a', { href: '/pilgrimages' }, 'Toate pelerinajele')),
-                createElement('li', null, createElement('a', { href: '/pilgrimages?featured=true' }, 'Pelerinaje promovate')),
-                createElement('li', null, createElement('a', { href: '/pilgrimages?upcoming=true' }, 'Pelerinaje viitoare')),
-                createElement('li', null, createElement('a', { href: '/organizer/register' }, 'Devino organizator'))
-              )
-            ),
-            
-            // Coloana mănăstiri
-            createElement('div', { className: 'footer-links' },
-              createElement('h3', null, 'Mănăstiri'),
-              createElement('ul', null,
-                createElement('li', null, createElement('a', { href: '/monasteries' }, 'Toate mănăstirile')),
-                createElement('li', null, createElement('a', { href: '/monasteries?region=moldova' }, 'Mănăstiri din Moldova')),
-                createElement('li', null, createElement('a', { href: '/monasteries?region=muntenia' }, 'Mănăstiri din Muntenia')),
-                createElement('li', null, createElement('a', { href: '/monasteries?region=transilvania' }, 'Mănăstiri din Transilvania'))
-              )
-            ),
-            
-            // Coloana resurse
-            createElement('div', { className: 'footer-links' },
-              createElement('h3', null, 'Resurse'),
-              createElement('ul', null,
-                createElement('li', null, createElement('a', { href: '/calendar' }, 'Calendar ortodox')),
-                createElement('li', null, createElement('a', { href: '/fasting-recipes' }, 'Rețete de post')),
-                createElement('li', null, createElement('a', { href: '/doxa-ai' }, 'Asistent DOXA AI')),
-                createElement('li', null, createElement('a', { href: '/about' }, 'Despre noi'))
-              )
-            )
-          ),
-          
-          createElement('div', { className: 'footer-bottom' },
-            createElement('p', null, '© 2025 DOXA. Toate drepturile rezervate.'),
-            createElement('p', null,
-              createElement('a', { href: '/terms' }, 'Termeni și condiții'),
-              ' | ',
-              createElement('a', { href: '/privacy' }, 'Politica de confidențialitate'),
-              ' | ',
-              createElement('a', { href: '/cookies' }, 'Politica de cookies')
-            )
-          )
-        )
-      );
-    }
-    
-    // Funcție pentru a construi pagina de mănăstiri
-    function createMonasteriesPage() {
-      return createElement('div', { className: 'app-container' },
-        createNavbar(),
-        createPageHeader(),
-        createMap(),
-        createFilters(),
-        createRegionsSection(),
-        createMonasteriesList(),
-        createFooter()
-      );
-    }
-    
-    // Funcție pentru aplicarea filtrelor
-    function applyFilters() {
-      const { region, type, hasRelics } = pageState.filters;
-      
-      pageState.filteredMonasteries = pageState.monasteries.filter(monastery => {
-        // Filtrare după regiune
-        if (region && monastery.region !== region) {
-          return false;
-        }
-        
-        // Filtrare după tip
-        if (type && monastery.type !== type) {
-          return false;
-        }
-        
-        // Filtrare după relicve (moaște)
-        if (hasRelics && (!monastery.relics || monastery.relics.length === 0)) {
-          return false;
-        }
-        
-        return true;
-      });
-      
-      renderPage();
-    }
-    
-    // Funcție pentru încărcarea mănăstirilor
-    function loadMonasteries() {
-      pageState.loading = true;
-      renderPage();
-      
-      // Date de test pentru cazul când API-ul nu răspunde
-      const testMonasteries = [
-        {
-          id: 1,
-          name: "Mănăstirea Putna",
-          description: "Mănăstirea Putna este o mănăstire ortodoxă de călugări din România, construită între anii 1466–1469 și ctitorită de domnitorul Ștefan cel Mare.",
-          shortDescription: "Ctitorie a lui Ștefan cel Mare, un important centru religios și cultural.",
-          city: "Putna",
-          county: "Suceava",
-          region: "moldova",
-          type: "monastery",
-          coverImage: "/static/images/monasteries/putna.jpg",
-          relics: ["Moaștele Sfântului Ghenadie"]
-        },
-        {
-          id: 2,
-          name: "Mănăstirea Voroneț",
-          description: "Mănăstirea Voroneț, cunoscută pentru albastrul său unic, a fost construită în 1488 de Ștefan cel Mare și este parte din patrimoniul UNESCO.",
-          shortDescription: "Cunoscută pentru 'Albastrul de Voroneț', una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare.",
-          city: "Gura Humorului",
-          county: "Suceava",
-          region: "bucovina",
-          type: "monastery",
-          coverImage: "/static/images/monasteries/voronet.jpg"
-        },
-        {
-          id: 3,
-          name: "Mănăstirea Sâmbăta de Sus",
-          description: "Mănăstirea Sâmbăta de Sus, cunoscută și ca 'Catedrala din Munți', a fost construită de Constantin Brâncoveanu în 1696.",
-          shortDescription: "Cunoscută și ca 'Catedrala din Munți', un important centru spiritual din Transilvania.",
-          city: "Sâmbăta de Sus",
-          county: "Brașov",
-          region: "transilvania",
-          type: "monastery",
-          coverImage: "/static/images/monasteries/sambata.jpg"
-        }
-      ];
-      
-      fetch('/api/monasteries')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Răspuns invalid de la server: ${response.status} ${response.statusText}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log("Mănăstiri primite de la server:", data.length);
-          pageState.monasteries = Array.isArray(data) ? data : [];
-          pageState.loading = false;
-          renderPage();
-        })
-        .catch(error => {
-          console.error('Eroare la comunicarea cu serverul:', error);
-          
-          // Folosim date de test în caz de eroare
-          console.log('Folosim date de rezervă pentru mănăstiri');
-          pageState.monasteries = testMonasteries;
-          pageState.loading = false;
-          
-          // Adăugăm o notificare pentru utilizator despre utilizarea datelor locale
-          pageState.error = "Nu s-a putut conecta la serverul de date. Se afișează informații demonstrative.";
-          
-          renderPage();
-        });
-    }
-    
-    // Funcție pentru randarea paginii
-    function renderPage() {
-      const container = document.getElementById('root');
-      if (container) {
-        container.innerHTML = '';
-        container.appendChild(createMonasteriesPage());
-      }
-    }
-    
-    // Inițializare pagină
-    document.addEventListener('DOMContentLoaded', () => {
       try {
-        // Încărcăm mănăstirile
-        loadMonasteries();
-      } catch (error) {
-        console.error('Eroare la inițializarea paginii de mănăstiri:', error);
-        
-        const rootElement = document.getElementById("root");
-        if (rootElement) {
-          rootElement.innerHTML = `
-            <div class="card" style="max-width: 800px; margin: 50px auto;">
-              <h2 style="color: #e74c3c;">Eroare la inițializarea paginii</h2>
-              <p>A apărut o eroare la încărcarea paginii de mănăstiri. Detalii în consola browser-ului.</p>
-              <p>Eroare: ${error.message}</p>
-              <div style="margin-top: 20px;">
-                <button onclick="location.reload()" class="btn">Reîncarcă pagina</button>
-              </div>
-            </div>
-          `;
-        }
+        const fallbackResponse = await fetch('/public/fallback-data/monasteries.json');
+        const fallbackData = await fallbackResponse.json();
+        displayMonasteries(fallbackData);
+      } catch (fallbackError) {
+        console.error("Eroare la încărcarea datelor de rezervă:", fallbackError);
       }
+    }
+  }
+
+  // Funcție pentru a afișa mănăstirile
+  function displayMonasteries(monasteries) {
+    const container = document.getElementById('monasteries-container');
+    container.innerHTML = '';
+    
+    monasteries.forEach(monastery => {
+      const card = document.createElement('div');
+      card.className = 'col-md-4 mb-4';
+      card.innerHTML = `
+        <div class="card h-100 monastery-card">
+          <img src="${monastery.image || '/public/images/monastery-placeholder.jpg'}" 
+               class="card-img-top" alt="${monastery.name}"
+               onerror="this.src='/public/images/monastery-placeholder.jpg'">
+          <div class="card-body">
+            <h5 class="card-title">${monastery.name}</h5>
+            <p class="card-text">
+              <small class="text-muted"><i class="fas fa-map-marker-alt"></i> ${monastery.location || 'Locație necunoscută'}</small>
+            </p>
+            <p class="card-text"><i class="fas fa-calendar-alt"></i> An fondare: ${monastery.yearFounded || 'Necunoscut'}</p>
+            <p class="card-text">${monastery.description || 'Fără descriere'}</p>
+          </div>
+          <div class="card-footer">
+            <a href="#" class="btn btn-primary view-details" data-id="${monastery.id}">
+              Vezi detalii <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
     });
-  </script>
+  }
+
+  // Încărcăm mănăstirile când pagina se încarcă
+  document.addEventListener('DOMContentLoaded', loadMonasteries);
+</script>
 </body>
 </html>
