@@ -1575,6 +1575,167 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+  
+  // Monastery operations
+  async getMonastery(id: number): Promise<Monastery | undefined> {
+    try {
+      console.log('Getting monastery with ID:', id);
+      
+      const monastery = await db.query.monasteries.findFirst({
+        where: (monasteries, { eq }) => eq(monasteries.id, id)
+      });
+      
+      if (!monastery) {
+        console.log(`No monastery found with ID ${id}`);
+        return undefined;
+      }
+      
+      console.log(`Found monastery: ${monastery.name}`);
+      return monastery;
+    } catch (error) {
+      console.error(`Error fetching monastery with ID ${id}:`, error);
+      throw error;
+    }
+  }
+  
+  async getMonasteryBySlug(slug: string): Promise<Monastery | undefined> {
+    try {
+      console.log('Getting monastery by slug:', slug);
+      
+      const monastery = await db.query.monasteries.findFirst({
+        where: (monasteries, { eq }) => eq(monasteries.slug, slug)
+      });
+      
+      if (!monastery) {
+        console.log(`No monastery found with slug ${slug}`);
+        return undefined;
+      }
+      
+      console.log(`Found monastery by slug: ${monastery.name}`);
+      return monastery;
+    } catch (error) {
+      console.error(`Error fetching monastery with slug ${slug}:`, error);
+      throw error;
+    }
+  }
+  
+  async getMonasteries(filters?: Partial<Monastery>): Promise<Monastery[]> {
+    try {
+      console.log('Getting monasteries with filters:', filters);
+      
+      let query = db.select().from(monasteries);
+      
+      // Apply filters if provided
+      if (filters) {
+        if (filters.region) {
+          query = query.where(eq(monasteries.region, filters.region as any));
+        }
+        
+        if (filters.county) {
+          query = query.where(eq(monasteries.county, filters.county));
+        }
+        
+        if (filters.type) {
+          query = query.where(eq(monasteries.type, filters.type as any));
+        }
+        
+        if (filters.verification) {
+          query = query.where(eq(monasteries.verification, filters.verification));
+        }
+        
+        // Filter by name (using partial match)
+        if (filters.name) {
+          query = query.where(ilike(monasteries.name, `%${filters.name}%`));
+        }
+      }
+      
+      const results = await query;
+      console.log(`Found ${results.length} monasteries matching filters`);
+      
+      return results;
+    } catch (error) {
+      console.error('Error fetching monasteries:', error);
+      throw error;
+    }
+  }
+  
+  async createMonastery(insertMonastery: InsertMonastery): Promise<Monastery> {
+    try {
+      console.log('Creating new monastery:', insertMonastery.name);
+      
+      // Handle array fields properly
+      const relicsArray = insertMonastery.relics || [];
+      const imagesArray = insertMonastery.images || [];
+      
+      // Create monastery with proper data formatting
+      const [newMonastery] = await db.insert(monasteries).values({
+        name: insertMonastery.name,
+        slug: insertMonastery.slug,
+        description: insertMonastery.description,
+        shortDescription: insertMonastery.shortDescription || null,
+        address: insertMonastery.address,
+        region: insertMonastery.region,
+        city: insertMonastery.city,
+        county: insertMonastery.county,
+        patronSaint: insertMonastery.patronSaint || null,
+        patronSaintDate: insertMonastery.patronSaintDate ? new Date(insertMonastery.patronSaintDate) : null,
+        foundedYear: insertMonastery.foundedYear || null,
+        history: insertMonastery.history || null,
+        specialFeatures: insertMonastery.specialFeatures || null,
+        relics: relicsArray.length > 0 ? relicsArray : null,
+        type: insertMonastery.type,
+        images: imagesArray.length > 0 ? imagesArray : null,
+        coverImage: insertMonastery.coverImage || null,
+        contactEmail: insertMonastery.contactEmail || null,
+        contactPhone: insertMonastery.contactPhone || null,
+        website: insertMonastery.website || null,
+        access: insertMonastery.access || null,
+        country: insertMonastery.country || "România",
+        latitude: insertMonastery.latitude || null,
+        longitude: insertMonastery.longitude || null,
+        verification: false, // Default to false, admin verification required
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
+      
+      console.log(`Monastery created with ID: ${newMonastery.id}`);
+      return newMonastery;
+    } catch (error) {
+      console.error('Error creating monastery:', error);
+      throw error;
+    }
+  }
+  
+  async updateMonastery(id: number, monasteryData: Partial<Monastery>): Promise<Monastery | undefined> {
+    try {
+      console.log(`Updating monastery with ID ${id}`);
+      
+      // Check if monastery exists
+      const existingMonastery = await this.getMonastery(id);
+      if (!existingMonastery) {
+        console.log(`No monastery found with ID ${id} to update`);
+        return undefined;
+      }
+      
+      // Add updatedAt timestamp
+      const updateData = {
+        ...monasteryData,
+        updatedAt: new Date()
+      };
+      
+      // Update monastery in the database
+      const [updatedMonastery] = await db.update(monasteries)
+        .set(updateData)
+        .where(eq(monasteries.id, id))
+        .returning();
+      
+      console.log(`Monastery updated: ${updatedMonastery.name}`);
+      return updatedMonastery;
+    } catch (error) {
+      console.error(`Error updating monastery with ID ${id}:`, error);
+      throw error;
+    }
+  }
 }
 
 // Folosim DatabaseStorage în loc de MemStorage
