@@ -21,7 +21,7 @@ export default function MonasteryDetailsPage({ slug: propSlug }: MonasteryDetail
 
   // Încărcăm datele mănăstirii
   const { isLoading, data: monastery } = useQuery<Monastery>({
-    queryKey: [`/api/monasteries/${slug}`],
+    queryKey: [`/api/monasteries/slug/${slug}`],
     enabled: !!slug,
     retry: 1,
     retryDelay: 1000

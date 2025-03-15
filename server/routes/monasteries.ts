@@ -128,6 +128,43 @@ export function registerMonasteryRoutes(app: Express) {
     }
   });
 
+  // GET /api/monasteries/slug/:slug - Obține detalii despre o mănăstire folosind slug (pentru frontend)
+  app.get('/api/monasteries/slug/:slug', async (req, res) => {
+    try {
+      const { slug } = req.params;
+      
+      // Căutăm mănăstirea după slug
+      const monastery = await db.query.monasteries.findFirst({
+        where: eq(monasteries.slug, slug)
+      });
+      
+      if (!monastery) {
+        return res.status(404).json({ message: 'Mănăstirea nu a fost găsită' });
+      }
+      
+      // Formatăm datele pentru a ne asigura că sunt complete
+      const formattedMonastery = {
+        ...monastery,
+        // Convertim explicit câmpurile de date pentru a ne asigura că sunt formatate corect
+        patronSaintDate: monastery.patronSaintDate instanceof Date 
+          ? monastery.patronSaintDate 
+          : monastery.patronSaintDate ? new Date(monastery.patronSaintDate) : null,
+        // Asigurăm că valorile pentru arrays sunt definite
+        images: monastery.images || [],
+        relics: monastery.relics || [],
+        iconDescriptions: monastery.iconDescriptions || []
+      };
+      
+      res.json(formattedMonastery);
+    } catch (error) {
+      console.error('Error fetching monastery details by slug:', error);
+      res.status(500).json({ 
+        message: 'Eroare la preluarea detaliilor mănăstirii', 
+        error: String(error) 
+      });
+    }
+  });
+  
   // GET /api/monasteries/:slug - Obține detalii despre o mănăstire
   app.get('/api/monasteries/:slug', async (req, res) => {
     try {
