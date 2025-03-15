@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3 } from "lucide-react";
+import { Menu, X, User, LogOut, Calendar, Church, Settings, BarChart3, Building, Utensils } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -69,6 +69,10 @@ export default function Header() {
             </Link>
             <Link href="/pilgrimages" className={`font-medium ${isActiveLink('/pilgrimages') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
               Pelerinaje
+            </Link>
+            <Link href="/monasteries" className={`font-medium flex items-center ${isActiveLink('/monasteries') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              <Building className="h-4 w-4 mr-1" />
+              Mănăstiri
             </Link>
             <Link href="/orthodox-calendar" className={`font-medium flex items-center ${isActiveLink('/orthodox-calendar') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
               <Calendar className="h-4 w-4 mr-1" />
