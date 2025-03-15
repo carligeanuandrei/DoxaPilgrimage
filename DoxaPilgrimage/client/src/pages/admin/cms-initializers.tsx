@@ -455,7 +455,7 @@ export const FooterInitializer: React.FC<{refetch: () => Promise<any>}> = ({ ref
     // Destinații
     { key: 'footer_destinations_title', contentType: 'text', value: 'Destinații populare' },
     { key: 'footer_destination_moldova', contentType: 'text', value: 'Moldova' },
-    { key: 'footer_destination_moldova_url', contentType: 'text', value: '/pilgrimages?region=moldova' },
+    { key: 'footer_destination_moldova_url', contentType: 'text', value: '/monasteries?region=moldova' },
     { key: 'footer_destination_athos', contentType: 'text', value: 'Muntele Athos' },
     { key: 'footer_destination_athos_url', contentType: 'text', value: '/pilgrimages?destination=athos' },
     { key: 'footer_destination_israel', contentType: 'text', value: 'Israel' },

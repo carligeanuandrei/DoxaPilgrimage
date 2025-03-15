@@ -124,10 +124,10 @@ export default function Footer() {
               <li>
                 <a href="#" onClick={(e) => { 
                   e.preventDefault(); 
-                  const href = document.querySelector('[data-cms-key="footer_destination_moldova_url"]')?.textContent || '/pilgrimages?location=România';
+                  const href = document.querySelector('[data-cms-key="footer_destination_moldova_url"]')?.textContent || '/monasteries?region=moldova';
                   window.location.href = href;
                 }} className="text-neutral-400 hover:text-white transition duration-300">
-                  <DirectCmsText contentKey="footer_destination_moldova_url" fallback="/pilgrimages?location=România" className="hidden" />
+                  <DirectCmsText contentKey="footer_destination_moldova_url" fallback="/monasteries?region=moldova" className="hidden" />
                   <DirectCmsText contentKey="footer_destination_moldova" fallback="Mănăstirile din Moldova" />
                 </a>
               </li>

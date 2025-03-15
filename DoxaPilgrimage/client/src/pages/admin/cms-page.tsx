@@ -699,7 +699,7 @@ export default function CmsPage() {
                     { key: "footer_destination_athos", contentType: "text", value: "Muntele Athos", description: "Text pentru link-ul Muntele Athos" },
                     { key: "footer_destination_athos_url", contentType: "text", value: "/pilgrimages?location=Grecia", description: "URL pentru link-ul Muntele Athos" },
                     { key: "footer_destination_moldova", contentType: "text", value: "Mănăstirile din Moldova", description: "Text pentru link-ul Mănăstirile din Moldova" },
-                    { key: "footer_destination_moldova_url", contentType: "text", value: "/pilgrimages?location=România", description: "URL pentru link-ul Mănăstirile din Moldova" },
+                    { key: "footer_destination_moldova_url", contentType: "text", value: "/monasteries?region=moldova", description: "URL pentru link-ul Mănăstirile din Moldova" },
                     { key: "footer_destination_vatican", contentType: "text", value: "Vatican", description: "Text pentru link-ul Vatican" },
                     { key: "footer_destination_vatican_url", contentType: "text", value: "/pilgrimages?location=Vatican", description: "URL pentru link-ul Vatican" },
                     { key: "footer_destination_lourdes", contentType: "text", value: "Lourdes", description: "Text pentru link-ul Lourdes" },
