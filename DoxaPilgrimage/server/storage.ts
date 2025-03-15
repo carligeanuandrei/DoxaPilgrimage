@@ -1,6 +1,7 @@
 import { 
   users, pilgrimages, reviews, bookings, messages,
-  products, orders, orderItems, productReviews, cmsContent
+  products, orders, orderItems, productReviews, cmsContent,
+  monasteries
 } from "@shared/schema";
 import type { 
   User, InsertUser, Pilgrimage, InsertPilgrimage, 
@@ -8,7 +9,7 @@ import type {
   Message, InsertMessage, VerificationData,
   Product, InsertProduct, Order, InsertOrder,
   OrderItem, InsertOrderItem, ProductReview, InsertProductReview,
-  CmsContent, InsertCmsContent
+  CmsContent, InsertCmsContent, Monastery, InsertMonastery
 } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
@@ -80,6 +81,13 @@ export interface IStorage {
   updateCmsContent(key: string, content: Partial<CmsContent>): Promise<CmsContent | undefined>;
   deleteCmsContent(key: string): Promise<boolean>;
   
+  // Monastery operations
+  getMonastery(id: number): Promise<Monastery | undefined>;
+  getMonasteryBySlug(slug: string): Promise<Monastery | undefined>;
+  getMonasteries(filters?: Partial<Monastery>): Promise<Monastery[]>;
+  createMonastery(monastery: InsertMonastery): Promise<Monastery>;
+  updateMonastery(id: number, monasteryData: Partial<Monastery>): Promise<Monastery | undefined>;
+  
   // Session store
   sessionStore: any;
 }
@@ -90,6 +98,7 @@ export class MemStorage implements IStorage {
   private reviews: Map<number, Review>;
   private bookings: Map<number, Booking>;
   private messages: Map<number, Message>;
+  private monasteries: Map<number, Monastery>;
   
   sessionStore: any;
   
@@ -98,6 +107,7 @@ export class MemStorage implements IStorage {
   private currentReviewId: number;
   private currentBookingId: number;
   private currentMessageId: number;
+  private currentMonasteryId: number;
 
   constructor() {
     this.users = new Map();
