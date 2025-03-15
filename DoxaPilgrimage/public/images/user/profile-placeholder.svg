@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="60" cy="60" r="60" fill="#E0E0E0"/>
+  
+  <!-- Head -->
+  <circle cx="60" cy="45" r="25" fill="#BDBDBD"/>
+  
+  <!-- Body -->
+  <path d="M30,115 C30,85 90,85 90,115" fill="#BDBDBD"/>
+  
+  <!-- Optional Orthodox Cross on chest -->
+  <g transform="translate(60, 80)">
+    <rect x="-1.5" y="-10" width="3" height="12" fill="#9E9E9E"/>
+    <rect x="-5" y="-4" width="10" height="3" fill="#9E9E9E"/>
+  </g>
+</svg>

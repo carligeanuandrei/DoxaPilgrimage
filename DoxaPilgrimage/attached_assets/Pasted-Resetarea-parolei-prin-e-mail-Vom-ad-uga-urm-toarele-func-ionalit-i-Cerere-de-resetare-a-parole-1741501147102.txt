@@ -1,0 +1,125 @@
+Resetarea parolei prin e-mail
+
+Vom adăuga următoarele funcționalități:
+✅ Cerere de resetare a parolei → utilizatorul introduce e-mailul și primește un link cu un token
+✅ Resetarea propriu-zisă → utilizatorul dă click pe link, introduce noua parolă, iar parola este resetată
+
+
+---
+
+1. Adăugăm un câmp pentru tokenul de resetare în baza de date
+
+Pentru a putea reseta parola, avem nevoie de un câmp suplimentar în tabelul utilizatorilor.
+Dacă nu l-ai adăugat deja, îl poți crea astfel:
+
+ALTER TABLE users ADD COLUMN reset_token TEXT;
+ALTER TABLE users ADD COLUMN reset_token_expiry TIMESTAMP;
+
+✅ reset_token → un token unic pentru resetare
+✅ reset_token_expiry → expiră după 15 minute
+
+
+---
+
+2. Endpoint pentru cererea de resetare a parolei
+
+Când utilizatorul cere resetarea parolei, generăm un token unic și îl trimitem prin e-mail.
+
+from datetime import datetime, timedelta
+
+@app.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.json
+    email = data.get("email")
+
+    cursor.execute("SELECT id FROM users WHERE email = %s;", (email,))
+    user = cursor.fetchone()
+
+    if user:
+        token = generate_token()
+        expiry_time = datetime.utcnow() + timedelta(minutes=15)
+
+        cursor.execute("UPDATE users SET reset_token = %s, reset_token_expiry = %s WHERE id = %s;", 
+                       (token, expiry_time, user[0]))
+        conn.commit()
+
+        send_reset_email(email, token)
+
+    return {"message": "Dacă adresa de e-mail există în baza de date, un link de resetare a fost trimis."}
+
+✅ Dacă utilizatorul există, generăm un token și îl stocăm cu expirare în 15 minute
+✅ Dacă nu există, nu dăm eroare (pentru securitate)
+✅ Trimitem un e-mail cu link-ul de resetare
+
+
+---
+
+3. Funcția pentru trimiterea e-mailului de resetare
+
+def send_reset_email(email, token):
+    sender_email = "emailultau@gmail.com"
+    sender_password = "parolaemailului"
+    subject = "Resetare parolă Doxa"
+    body = f"Click pe link pentru a-ți reseta parola: http://localhost:5000/reset-password?token={token}"
+
+    message = f"Subject: {subject}\n\n{body}"
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, email, message)
+
+✅ E-mailul conține un link de resetare
+✅ Utilizatorul trebuie să dea click pentru a introduce noua parolă
+
+
+---
+
+4. Endpoint pentru resetarea parolei
+
+Când utilizatorul dă click pe link, verificăm dacă token-ul este valid și resetăm parola.
+
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.json
+    token = data.get("token")
+    new_password = data.get("new_password")
+
+    cursor.execute("SELECT id FROM users WHERE reset_token = %s AND reset_token_expiry > NOW();", (token,))
+    user = cursor.fetchone()
+
+    if user:
+        hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+        
+        cursor.execute("UPDATE users SET password = %s, reset_token = NULL, reset_token_expiry = NULL WHERE id = %s;", 
+                       (hashed_password, user[0]))
+        conn.commit()
+
+        return {"message": "Parola a fost resetată cu succes. Acum te poți autentifica."}
+
+    return {"message": "Token invalid sau expirat."}, 400
+
+✅ Verificăm dacă token-ul există și nu a expirat
+✅ Criptăm noua parolă cu bcrypt
+✅ Ștergem token-ul după resetare
+
+
+---
+
+5. Cum funcționează resetarea parolei?
+
+1️⃣ Utilizatorul cere resetarea (introduce e-mailul)
+2️⃣ Primește un link de resetare prin e-mail
+3️⃣ Dă click pe link și introduce noua parolă
+4️⃣ Noua parolă este salvată și token-ul este șters
+5️⃣ Se poate autentifica cu noua parolă
+
+
+---
+
+Acum ai un sistem de autentificare complet cu:
+✅ Înregistrare și verificare prin e-mail
+✅ Autentificare cu JWT
+✅ Resetare parolă prin e-mail
+
+Dacă vrei să adăugăm și 2FA (autentificare în doi pași), spune-mi!
+

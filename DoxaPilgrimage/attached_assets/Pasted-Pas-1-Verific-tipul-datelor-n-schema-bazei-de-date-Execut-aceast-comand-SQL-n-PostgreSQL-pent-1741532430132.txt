@@ -1,0 +1,112 @@
+Pas 1: Verifică tipul datelor în schema bazei de date
+Execută această comandă SQL în PostgreSQL pentru a vedea tipurile de date efective:
+
+sql
+Copiază
+Editează
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'pilgrimages';
+Dacă startDate și endDate sunt încă text, atunci migrările nu au fost aplicate corect.
+
+Dacă folosești SQLite, rulează:
+
+sh
+Copiază
+Editează
+sqlite3 dev.db ".schema pilgrimages"
+🔹 Dacă încă sunt TEXT, trecem la următorul pas pentru a corecta acest lucru.
+
+🔧 Pas 2: Șterge și recreează migrările Drizzle
+În terminal, rulează:
+
+sh
+Copiază
+Editează
+rm -rf drizzle/migrations
+npx drizzle-kit generate:pg
+npx drizzle-kit push
+sau pentru SQLite:
+
+sh
+Copiază
+Editează
+rm -rf drizzle/migrations
+npx drizzle-kit generate:sqlite
+npx drizzle-kit push
+Acest lucru forțează Drizzle să regenereze corect tipurile coloanelor.
+
+🔄 Pas 3: Verifică dacă schema este corectă în shared/schema.ts
+Modifică schema pentru a te asigura că startDate și endDate sunt timestamp():
+
+typescript
+Copiază
+Editează
+import { pgTable, serial, text, timestamp, numeric } from "drizzle-orm/pg-core";
+
+export const pilgrimages = pgTable("pilgrimages", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  startDate: timestamp("start_date", { mode: "date" }).notNull(),
+  endDate: timestamp("end_date", { mode: "date" }).notNull(),
+  price: numeric("price").notNull(),
+  description: text("description"),
+  status: text("status").default("pending"),
+});
+🔹 Adăugarea { mode: "date" } asigură că timestamp-ul va fi tratat doar ca dată, fără ora exactă.
+
+🔧 Pas 4: Verifică datele primite de backend (server/routes.ts)
+Înainte de salvare, adaugă un console.log() pentru a vedea ce date primește serverul:
+
+typescript
+Copiază
+Editează
+console.log("Received data:", req.body);
+Modifică și conversia datei astfel:
+
+typescript
+Copiază
+Editează
+const startDate = new Date(req.body.startDate);
+const endDate = new Date(req.body.endDate);
+
+if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+  return res.status(400).json({ message: "Invalid date format", received: req.body });
+}
+
+await db.insert(pilgrimages).values({
+  title: req.body.title,
+  startDate,
+  endDate,
+  price: parseFloat(req.body.price),
+  description: req.body.description,
+  status: req.body.status || "pending",
+});
+🔹 Dacă console.log(req.body) arată datele în format string ("2025-03-10T00:00:00.000Z"), atunci problema e în Drizzle ORM.
+
+🔄 Pas 5: Trimite datele corect în frontend (create-pilgrimage-new.tsx)
+În loc de toISOString(), încearcă să trimiți data într-un format mai simplu:
+
+typescript
+Copiază
+Editează
+const formData = {
+  title,
+  startDate: startDate.split("T")[0], // Trunchiază ora pentru a evita problemele
+  endDate: endDate.split("T")[0],
+  price: parseFloat(price),
+  description,
+  status,
+};
+
+await fetch("/api/create-pilgrimage", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(formData),
+});
+🔹 Dacă serverul așteaptă un timestamp, atunci încearcă să trimiți un Date în loc de string.
+
+📌 Recapitulare finală:
+✅ Verifică tipul coloanelor în baza de date (timestamp() sau text()).
+✅ Șterge și recreează migrările cu npx drizzle-kit push.
+✅ Folosește { mode: "date" } în schema Drizzle pentru timestamp-uri.
+✅ Adaugă console.log(req.body) în backend pentru a verifica ce se trimite.
+✅ În frontend, evită toISOString() și trunchiază ora (split("T")[0]).

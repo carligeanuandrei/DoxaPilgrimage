@@ -1,0 +1,121 @@
+Pentru a adăuga o secțiune în partea de sus a platformei care să afișeze informațiile despre utilizatorul logat (numele utilizatorului și tipul său de rol, de exemplu, "Administrator" sau "Utilizator"), poți folosi următoarele abordări.
+
+1. Modificarea backend-ului pentru a include informațiile utilizatorului logat
+
+Atunci când un utilizator se autentifică, stocăm informațiile relevante (numele și rolul utilizatorului). Aceste date vor fi accesibile pe frontend printr-un API.
+
+Backend (Python/Flask)
+
+Modificăm endpoint-ul pentru a returna informațiile utilizatorului autentificat:
+
+@app.route('/profile', methods=['GET'])
+def get_profile():
+    user_id = get_authenticated_user()  # Verificăm că utilizatorul este autentificat
+    cursor.execute("SELECT username, role FROM users WHERE id = %s;", (user_id,))
+    user = cursor.fetchone()
+    
+    if user:
+        return jsonify({
+            'username': user[0], 
+            'role': user[1]
+        })
+    else:
+        return jsonify({'message': 'Nu există utilizator autenticat'}), 401
+
+Explicație:
+
+Endpoint-ul /profile returnează numele de utilizator și rolul utilizatorului logat.
+
+Dacă utilizatorul nu este autentificat sau nu există, va returna un mesaj de eroare.
+
+
+2. Frontend - Afișarea numelui de utilizator și a rolului
+
+Acum că avem un API care furnizează aceste informații, putem adăuga un mic banner sau un meniu de profil în partea de sus a site-ului.
+
+Frontend (HTML/JavaScript)
+
+În partea de sus a paginii, adăugăm un container care va afișa aceste informații.
+
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Platformă - Autentificare</title>
+</head>
+<body>
+    <header>
+        <div id="user-info" style="text-align: right; padding: 10px;">
+            <span id="user-greeting"></span>
+        </div>
+    </header>
+
+    <script>
+        // Funcția pentru a obține informațiile utilizatorului logat
+        async function getUserProfile() {
+            const response = await fetch('/profile');
+            const data = await response.json();
+
+            if (data.username && data.role) {
+                document.getElementById("user-greeting").textContent = `Bun venit, ${data.username} (${data.role})`;
+            } else {
+                document.getElementById("user-greeting").textContent = 'Nu sunteți autentificat.';
+            }
+        }
+
+        // Apelăm funcția pentru a obține și a afișa informațiile la încărcarea paginii
+        getUserProfile();
+    </script>
+</body>
+</html>
+
+Explicație:
+
+1. Contenitorul #user-info: Acesta va fi plasat în partea de sus a paginii pentru a arăta informațiile utilizatorului logat.
+
+
+2. Funcția getUserProfile(): Aceasta face un apel la endpoint-ul /profile pentru a obține datele utilizatorului și le afișează în secțiunea #user-greeting. Dacă utilizatorul este autentificat, vor apărea numele său și rolul (de exemplu, "Administrator"). Dacă utilizatorul nu este autentificat, va apărea mesajul „Nu sunteți autentificat.”
+
+
+
+3. Design mai avansat (opțional)
+
+Dacă vrei să îmbunătățești aspectul vizual, poți adăuga stiluri CSS pentru a personaliza secțiunea.
+
+#user-info {
+    background-color: #f4f4f4;
+    padding: 10px;
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+}
+
+#user-info span {
+    color: #007bff; /* Culoare albastră pentru nume și rol */
+}
+
+Poți adăuga acest cod CSS într-un fișier extern sau în cadrul unei etichete <style> în documentul HTML.
+
+4. Completarea funcționalității
+
+În acest moment, sistemul de autentificare ar trebui să arate informațiile utilizatorului logat pe toate paginile, de fiecare dată când se autentifică.
+
+Pasii esențiali pentru integrarea completă:
+
+1. Autentificare: Utilizatorul se autentifică și este stocat într-o sesiune.
+
+
+2. Afisare informații: Sistemul oferă, la fiecare cerere, informații despre utilizatorul curent, precum numele și rolul său.
+
+
+3. Actualizare frontend: JavaScript-ul preia aceste date și le afișează într-un mod vizibil.
+
+
+
+
+---
+
+Concluzie:
+
+Prin acest sistem, vei putea să afișezi în mod dinamic numele utilizatorului și rolul său în partea de sus a platformei. Astfel, utilizatorul va ști întotdeauna dacă este logat și în ce calitate.
+

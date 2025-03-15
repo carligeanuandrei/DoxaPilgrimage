@@ -1,0 +1,58 @@
+500: {"message":"Eroare la crearea pelerinajului","details","pilgrimages not defined"}
+ChatGPT a spus:
+Eroarea indică o problemă la inserarea datelor în baza de date. Hai să verificăm și să rezolvăm:
+
+🔹 Pași pentru depanare:
+Verifică dacă baza de date există
+
+În directorul proiectului, ar trebui să ai fișierul pelerinaje.db. Dacă nu există, șterge și rulează din nou aplicația pentru a-l reinițializa.
+Verifică schema bazei de date
+
+Deschide terminalul și rulează:
+bash
+Copiază
+Editează
+sqlite3 pelerinaje.db
+Apoi execută:
+sql
+Copiază
+Editează
+.schema pelerinaje
+Trebuie să vezi structura corectă a tabelului:
+sql
+Copiază
+Editează
+CREATE TABLE pelerinaje (id INTEGER PRIMARY KEY AUTOINCREMENT, titlu TEXT, data TEXT, pret REAL, descriere TEXT, status TEXT);
+Verifică dacă formularul trimite toate datele corect
+
+Adaugă acest print() în funcția adauga_pelerinaj pentru a vedea exact ce date sunt transmise:
+python
+Copiază
+Editează
+@app.route('/adauga', methods=['POST'])
+def adauga_pelerinaj():
+    titlu = request.form.get('titlu')
+    data = request.form.get('data')
+    pret = request.form.get('pret')
+    descriere = request.form.get('descriere')
+    status = request.form.get('status')
+
+    print(f"Titlu: {titlu}, Data: {data}, Pret: {pret}, Descriere: {descriere}, Status: {status}")  # Debugging
+
+    if not all([titlu, data, pret, descriere, status]):
+        return {"message": "Eroare la crearea pelerinajului", "details": "Lipsesc date din formular"}, 400
+
+    try:
+        with sqlite3.connect(\"pelerinaje.db\") as conn:
+            cursor = conn.cursor()
+            cursor.execute(\"INSERT INTO pelerinaje (titlu, data, pret, descriere, status) VALUES (?, ?, ?, ?, ?)\", 
+                           (titlu, data, float(pret), descriere, status))
+            conn.commit()
+    except Exception as e:
+        return {"message": "Eroare la crearea pelerinajului", "details": str(e)}, 500
+
+    return redirect('/organizer/dashboard')
+Restart Flask și verifică log-urile
+
+Rulează din nou aplicația și verifică ce apare în consolă după completarea formularului.
+📌 Dacă problema persistă, spune-mi exact ce eroare apare în terminal!

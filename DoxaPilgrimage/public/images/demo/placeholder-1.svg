@@ -1,0 +1,7 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#f5f6f8"/>
+  <text x="400" y="200" font-family="Arial" font-size="32" text-anchor="middle" fill="#546e7a">Doxa Pilgrimage Image</text>
+  <rect x="100" y="220" width="600" height="30" fill="#6b4c9a"/>
+  <path d="M400 100 L450 190 L350 190 Z" fill="#6b4c9a"/>
+  <circle cx="400" cy="300" r="40" fill="#6b4c9a" opacity="0.7"/>
+</svg>

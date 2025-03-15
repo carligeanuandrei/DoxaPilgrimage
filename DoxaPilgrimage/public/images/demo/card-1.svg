@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#f7f3eb"/>
+  
+  <!-- Background scene with mountains -->
+  <path d="M0,350 Q200,150 400,300 Q600,100 800,380 L800,600 L0,600 Z" fill="#8c9fa9"/>
+  
+  <!-- Putna Monastery simplified -->
+  <rect x="200" y="280" width="400" height="140" fill="#e6d6bd"/>
+  
+  <!-- Main chapel -->
+  <rect x="300" y="200" width="200" height="80" fill="#e6d6bd"/>
+  
+  <!-- Main dome -->
+  <path d="M300,200 Q400,120 500,200" stroke="#e6d6bd" stroke-width="20" fill="none"/>
+  <circle cx="400" cy="120" r="20" fill="#e6d6bd"/>
+  <path d="M400,100 L400,70 M380,85 L420,85" stroke="#e6d6bd" stroke-width="6" fill="none"/>
+  
+  <!-- Side towers -->
+  <rect x="220" y="240" width="40" height="40" fill="#e6d6bd"/>
+  <path d="M220,240 Q240,210 260,240" stroke="#e6d6bd" stroke-width="10" fill="none"/>
+  <circle cx="240" cy="210" r="8" fill="#e6d6bd"/>
+  <path d="M240,202 L240,190 M235,196 L245,196" stroke="#e6d6bd" stroke-width="3" fill="none"/>
+  
+  <rect x="540" y="240" width="40" height="40" fill="#e6d6bd"/>
+  <path d="M540,240 Q560,210 580,240" stroke="#e6d6bd" stroke-width="10" fill="none"/>
+  <circle cx="560" cy="210" r="8" fill="#e6d6bd"/>
+  <path d="M560,202 L560,190 M555,196 L565,196" stroke="#e6d6bd" stroke-width="3" fill="none"/>
+  
+  <!-- Trees -->
+  <path d="M150,330 C140,280 160,280 150,330 Z" fill="#4f6d4f"/>
+  <path d="M650,330 C640,280 660,280 650,330 Z" fill="#4f6d4f"/>
+  
+  <path d="M120,350 C110,300 130,300 120,350 Z" fill="#4f6d4f"/>
+  <path d="M680,350 C670,300 690,300 680,350 Z" fill="#4f6d4f"/>
+  
+  <!-- Pilgrimage label -->
+  <text x="400" y="500" font-family="serif" font-size="28" text-anchor="middle" fill="#5d4037">Putna Monastery Pilgrimage</text>
+</svg>

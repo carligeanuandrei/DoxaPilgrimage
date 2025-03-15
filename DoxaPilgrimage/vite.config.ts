@@ -10,7 +10,11 @@ const __dirname = dirname(__filename);
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // Asigurăm că React este folosit, nu Preact
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react'
+    }),
     runtimeErrorOverlay(),
     themePlugin(),
     ...(process.env.NODE_ENV !== "production" &&
@@ -32,5 +36,18 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
+  },
+  // Dezactivăm optimizarea pentru anumite module
+  optimizeDeps: {
+    exclude: [
+      '@radix-ui/react-toast',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-label',
+      '@radix-ui/react-select',
+      '@radix-ui/react-popover'
+    ]
   },
 });

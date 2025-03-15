@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#f9f1df"/>
+  
+  <!-- Desert and hills -->
+  <path d="M0,350 Q200,300 400,370 Q600,320 800,350 L800,600 L0,600 Z" fill="#e6ccad"/>
+  
+  <!-- Jerusalem old city -->
+  <rect x="150" y="250" width="500" height="120" rx="5" ry="5" fill="#d9c095"/>
+  
+  <!-- Dome of the Rock -->
+  <circle cx="400" cy="220" r="80" fill="#d9c095"/>
+  <circle cx="400" cy="220" r="60" fill="#e8d296"/>
+  <circle cx="400" cy="220" r="20" fill="#d4a642"/>
+  <rect x="385" y="160" width="30" height="30" fill="#d9c095"/>
+  <circle cx="400" cy="150" r="10" fill="#d9c095"/>
+  
+  <!-- Church of the Holy Sepulchre -->
+  <rect x="230" y="220" width="80" height="100" fill="#c9b5a4"/>
+  <rect x="260" y="180" width="20" height="40" fill="#c9b5a4"/>
+  <path d="M260,180 Q270,160 280,180" fill="#b49d8c"/>
+  <path d="M270,160 L270,145 M260,155 L280,155" stroke="#c9b5a4" stroke-width="4" fill="none"/>
+  
+  <!-- Western Wall -->
+  <rect x="500" y="280" width="100" height="90" fill="#e0d2b8"/>
+  <line x1="510" y1="290" x2="510" y2="370" stroke="#c3b397" stroke-width="2"/>
+  <line x1="530" y1="290" x2="530" y2="370" stroke="#c3b397" stroke-width="2"/>
+  <line x1="550" y1="290" x2="550" y2="370" stroke="#c3b397" stroke-width="2"/>
+  <line x1="570" y1="290" x2="570" y2="370" stroke="#c3b397" stroke-width="2"/>
+  <line x1="590" y1="290" x2="590" y2="370" stroke="#c3b397" stroke-width="2"/>
+  
+  <!-- Old City Walls -->
+  <path d="M150,370 L650,370" stroke="#b5a585" stroke-width="15" fill="none"/>
+  <rect x="200" y="355" width="15" height="30" fill="#b5a585"/>
+  <rect x="300" y="355" width="15" height="30" fill="#b5a585"/>
+  <rect x="400" y="355" width="15" height="30" fill="#b5a585"/>
+  <rect x="500" y="355" width="15" height="30" fill="#b5a585"/>
+  <rect x="600" y="355" width="15" height="30" fill="#b5a585"/>
+  
+  <!-- Palm trees -->
+  <path d="M100,380 L100,430" stroke="#8b5a2b" stroke-width="8"/>
+  <path d="M70,380 Q100,360 130,380" stroke="#6b8e23" stroke-width="6" fill="none"/>
+  <path d="M70,390 Q100,370 130,390" stroke="#6b8e23" stroke-width="6" fill="none"/>
+  <path d="M70,400 Q100,380 130,400" stroke="#6b8e23" stroke-width="6" fill="none"/>
+  
+  <path d="M700,390 L700,440" stroke="#8b5a2b" stroke-width="8"/>
+  <path d="M670,390 Q700,370 730,390" stroke="#6b8e23" stroke-width="6" fill="none"/>
+  <path d="M670,400 Q700,380 730,400" stroke="#6b8e23" stroke-width="6" fill="none"/>
+  <path d="M670,410 Q700,390 730,410" stroke="#6b8e23" stroke-width="6" fill="none"/>
+  
+  <!-- Sun -->
+  <circle cx="700" cy="100" r="50" fill="#f5d76e"/>
+  <circle cx="700" cy="100" r="40" fill="#f7dc6f"/>
+  
+  <!-- Labels -->
+  <text x="400" y="470" font-family="serif" font-size="35" text-anchor="middle" fill="#825d38">Terra Sfântă</text>
+  <text x="400" y="510" font-family="serif" font-size="20" text-anchor="middle" fill="#825d38">Israel • Palestina • Iordania</text>
+</svg>

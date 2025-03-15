@@ -76,16 +76,10 @@ if (process.env.NODE_ENV === "development") {
     }
   }));
   
-  // Servim și fișiere din directorul public/src pentru versiunea simplificată React
-  app.use('/src', express.static(path.resolve("public/src"), {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.js') || filePath.endsWith('.mjs') || 
-          filePath.endsWith('.ts') || filePath.endsWith('.tsx') || 
-          filePath.endsWith('.jsx')) {
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-      }
-    }
-  }));
+  // Adăugăm o redirecționare de la pagina principală către aplicația React completă
+  app.get('/', (req, res) => {
+    res.redirect('/client/');
+  });
 }
 
 // Middleware pentru gestionarea timeout-urilor

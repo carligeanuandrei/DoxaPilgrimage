@@ -1,0 +1,177 @@
+Pentru a implementa funcționalitatea în care organizatorii autentificați pot crea, gestiona și vizualiza detalii despre pelerinajele lor, putem împărți procesul în mai multe etape:
+
+1. Structura bazei de date pentru gestionarea pelerinajelor
+
+Primul pas este crearea unui model de bază de date care să susțină pelerinajele și rezervările. Iată un exemplu de structură a tabelelor:
+
+Tabel pilgrimages (pelerinaje):
+
+Acesta va stoca informațiile legate de fiecare pelerinaj.
+
+Tabel reservations (rezervări):
+
+Acesta va stoca informațiile despre rezervările efectuate pentru fiecare pelerinaj.
+
+2. Backend - Crearea și gestionarea pelerinajelor
+
+Pentru a permite organizatorilor să creeze și să gestioneze pelerinajele, trebuie să avem endpoint-uri pentru:
+
+Crearea unui pelerinaj
+
+Vizualizarea pelerinajelor proprii
+
+Vizualizarea rezervărilor pentru fiecare pelerinaj
+
+Vizualizarea sumelor totale din rezervări
+
+Generarea unui raport complet
+
+
+Endpointuri pentru API (Flask)
+
+Crearea unui pelerinaj
+
+@app.route('/pilgrimage', methods=['POST'])
+@auth_required  # Autentificare necesară
+def create_pilgrimage():
+    data = request.get_json()
+    name = data['name']
+    description = data['description']
+    start_date = data['start_date']
+    end_date = data['end_date']
+    price = data['price']
+    organizer_id = get_authenticated_user()  # Obținem ID-ul utilizatorului logat
+
+    cursor.execute("INSERT INTO pilgrimages (name, description, start_date, end_date, price, organizer_id) VALUES (%s, %s, %s, %s, %s, %s)", 
+                   (name, description, start_date, end_date, price, organizer_id))
+    conn.commit()
+    return jsonify({'message': 'Pelerinaj creat cu succes!'}), 201
+
+Obținerea pelerinajelor organizatorului
+
+@app.route('/pilgrimages', methods=['GET'])
+@auth_required  # Autentificare necesară
+def get_user_pilgrimages():
+    organizer_id = get_authenticated_user()
+    cursor.execute("SELECT * FROM pilgrimages WHERE organizer_id = %s", (organizer_id,))
+    pilgrimages = cursor.fetchall()
+    return jsonify(pilgrimages)
+
+Vizualizarea rezervărilor pentru un pelerinaj
+
+@app.route('/pilgrimage/<int:pilgrimage_id>/reservations', methods=['GET'])
+@auth_required
+def get_reservations_for_pilgrimage(pilgrimage_id):
+    organizer_id = get_authenticated_user()
+    cursor.execute("SELECT * FROM reservations WHERE pilgrimage_id = %s", (pilgrimage_id,))
+    reservations = cursor.fetchall()
+    return jsonify(reservations)
+
+Calcularea sumei totale din rezervări
+
+@app.route('/pilgrimage/<int:pilgrimage_id>/total', methods=['GET'])
+@auth_required
+def get_total_revenue(pilgrimage_id):
+    cursor.execute("""
+        SELECT SUM(price) FROM reservations 
+        JOIN pilgrimages ON reservations.pilgrimage_id = pilgrimages.id
+        WHERE pilgrimages.id = %s AND reservations.status = 'confirmed'
+    """, (pilgrimage_id,))
+    total_revenue = cursor.fetchone()[0]
+    return jsonify({'total_revenue': total_revenue})
+
+3. Frontend - Interfață pentru gestionarea pelerinajelor
+
+Crearea unui pelerinaj
+
+Formularul pentru crearea unui pelerinaj ar putea arăta astfel:
+
+<form id="createPilgrimageForm">
+    <input type="text" id="name" placeholder="Numele pelerinajului" required>
+    <textarea id="description" placeholder="Descriere" required></textarea>
+    <input type="datetime-local" id="start_date" required>
+    <input type="datetime-local" id="end_date" required>
+    <input type="number" id="price" placeholder="Preț pe persoană" required>
+    <button type="submit">Creează Pelerinaj</button>
+</form>
+
+<script>
+document.getElementById('createPilgrimageForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const response = await fetch('/pilgrimage', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            start_date: document.getElementById('start_date').value,
+            end_date: document.getElementById('end_date').value,
+            price: document.getElementById('price').value
+        })
+    });
+    const data = await response.json();
+    alert(data.message);
+});
+</script>
+
+Vizualizarea pelerinajelor și rezervărilor
+
+Pentru a vizualiza pelerinajele organizatorului și rezervările acestora, poți implementa o interfață similară.
+
+<div id="pilgrimagesList"></div>
+
+<script>
+async function fetchPilgrimages() {
+    const response = await fetch('/pilgrimages');
+    const pilgrimages = await response.json();
+
+    const pilgrimagesList = document.getElementById('pilgrimagesList');
+    pilgrimagesList.innerHTML = '';
+    pilgrimages.forEach(pilgrimage => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <h3>${pilgrimage.name}</h3>
+            <p>${pilgrimage.description}</p>
+            <p>Data început: ${pilgrimage.start_date}</p>
+            <p>Data sfârșit: ${pilgrimage.end_date}</p>
+            <p>Preț: ${pilgrimage.price}</p>
+            <button onclick="viewReservations(${pilgrimage.id})">Vizualizează Rezervări</button>
+        `;
+        pilgrimagesList.appendChild(div);
+    });
+}
+
+async function viewReservations(pilgrimageId) {
+    const response = await fetch(`/pilgrimage/${pilgrimageId}/reservations`);
+    const reservations = await response.json();
+    console.log(reservations);  // Sau adaugă un alt mod de a vizualiza rezervările
+}
+
+fetchPilgrimages();
+</script>
+
+4. Raport complet
+
+Pentru a crea un raport complet, ce include detalii despre rezervări, venituri și alte statistici, poți combina datele din tabelele pilgrimages și reservations într-un API care returnează un sumar complet. De exemplu:
+
+@app.route('/report', methods=['GET'])
+@auth_required
+def generate_report():
+    organizer_id = get_authenticated_user()
+    cursor.execute("""
+        SELECT pilgrimages.name, COUNT(reservations.id) AS num_reservations, 
+               SUM(reservations.price) AS total_revenue
+        FROM pilgrimages
+        LEFT JOIN reservations ON pilgrimages.id = reservations.pilgrimage_id
+        WHERE pilgrimages.organizer_id = %s
+        GROUP BY pilgrimages.id
+    """, (organizer_id,))
+    report = cursor.fetchall()
+    return jsonify(report)
+
+Concluzie
+
+Acestea sunt pașii pentru a permite organizatorilor să creeze și să gestioneze pelerinajele pe platforma ta. După ce implementezi această structură, utilizatorii autentificați în rol de organizatori vor putea să creeze pelerinaje, să vizualizeze rezervările și veniturile, și să genereze rapoarte complete.
+

@@ -1,0 +1,11 @@
+{
+  "name": "doxa-ai",
+  "version": "1.0.0",
+  "description": "Asistent AI pentru pelerinaje ortodoxe",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "DOXA Team",
+  "license": "MIT"
+}

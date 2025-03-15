@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with Italian colors inspiration -->
+  <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" style="stop-color:#a4c3e3;stop-opacity:1" />
+    <stop offset="100%" style="stop-color:#e5ded1;stop-opacity:1" />
+  </linearGradient>
+  <rect width="800" height="600" fill="url(#bgGradient)"/>
+  
+  <!-- St. Peter's Square -->
+  <ellipse cx="400" cy="380" rx="250" ry="100" fill="#d9d4c9" stroke="#c9c4b9" stroke-width="5"/>
+  <path d="M300,380 Q400,330 500,380" stroke="#d9d4c9" stroke-width="10" fill="none"/>
+  <path d="M250,380 Q400,300 550,380" stroke="#d9d4c9" stroke-width="10" fill="none"/>
+  
+  <!-- Vatican City St. Peter's Basilica -->
+  <rect x="250" y="220" width="300" height="160" rx="5" ry="5" fill="#ece5d8"/>
+  
+  <!-- Central structure -->
+  <rect x="325" y="180" width="150" height="40" fill="#ece5d8"/>
+  
+  <!-- Main dome -->
+  <ellipse cx="400" cy="180" rx="90" ry="40" fill="#ece5d8"/>
+  <path d="M310,180 Q400,90 490,180" stroke="#ece5d8" stroke-width="30" fill="none"/>
+  
+  <!-- Cross on top -->
+  <path d="M400,80 L400,50 M385,65 L415,65" stroke="#ece5d8" stroke-width="8" fill="none"/>
+  
+  <!-- Columns on facade -->
+  <rect x="280" y="260" width="15" height="120" fill="#d6cfc0"/>
+  <rect x="320" y="260" width="15" height="120" fill="#d6cfc0"/>
+  <rect x="360" y="260" width="15" height="120" fill="#d6cfc0"/>
+  <rect x="400" y="260" width="15" height="120" fill="#d6cfc0"/>
+  <rect x="440" y="260" width="15" height="120" fill="#d6cfc0"/>
+  <rect x="480" y="260" width="15" height="120" fill="#d6cfc0"/>
+  <rect x="520" y="260" width="15" height="120" fill="#d6cfc0"/>
+  
+  <!-- Side domes -->
+  <circle cx="300" cy="200" r="30" fill="#ece5d8"/>
+  <circle cx="500" cy="200" r="30" fill="#ece5d8"/>
+  
+  <!-- Steps -->
+  <rect x="250" y="380" width="300" height="15" fill="#d6cfc0"/>
+  <rect x="270" y="395" width="260" height="15" fill="#d6cfc0"/>
+  <rect x="290" y="410" width="220" height="15" fill="#d6cfc0"/>
+  
+  <!-- Obelisk in square -->
+  <rect x="398" y="350" width="5" height="70" fill="#d6cfc0"/>
+  <polygon points="395,350 405,350 400,330" fill="#d6cfc0"/>
+  
+  <!-- Fountain -->
+  <circle cx="310" cy="380" r="15" fill="#b0c4de"/>
+  <circle cx="490" cy="380" r="15" fill="#b0c4de"/>
+  
+  <!-- Cypress trees -->
+  <path d="M150,330 C130,250 170,250 150,330 Z" fill="#556b2f"/>
+  <path d="M650,330 C630,250 670,250 650,330 Z" fill="#556b2f"/>
+  
+  <!-- Colonnade -->
+  <path d="M150,380 Q200,340 250,380" stroke="#d9d4c9" stroke-width="20" fill="none"/>
+  <path d="M550,380 Q600,340 650,380" stroke="#d9d4c9" stroke-width="20" fill="none"/>
+  
+  <!-- Labels -->
+  <text x="400" y="490" font-family="serif" font-size="35" text-anchor="middle" fill="#3c3224">Italia Catolică</text>
+  <text x="400" y="530" font-family="serif" font-size="20" text-anchor="middle" fill="#3c3224">Vatican • Roma • Assisi • Padova</text>
+</svg>
