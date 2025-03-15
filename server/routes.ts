@@ -12,9 +12,7 @@ import { registerMonasteryRegionsRoutes } from './routes/monastery-regions';
 import { registerMonasteryRecommendationsRoutes } from './routes/monastery-recommendations';
 import { registerUploadRoutes } from './routes/upload';
 import { registerFastingRecipesRoutes } from './routes/fasting-recipes';
-import { registerPilgrimageAssistantRoutes } from './routes/pilgrimage-assistant';
 import { registerPilgrimageMapRoutes } from './routes/pilgrimage-map';
-import { registerDoxaAIRoutes } from './routes/doxa-ai';
 import { registerServerStatusRoutes } from './routes/server-status';
 import { 
   insertPilgrimageSchema, 
@@ -96,14 +94,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sets up /api/register, /api/login, /api/logout, /api/user
   setupAuth(app);
 
-  // Înregistrăm rutele pentru Asistentul AI de Pelerinaje
-  await registerPilgrimageAssistantRoutes(app);
-  
   // Înregistrăm rutele pentru harta interactivă
   await registerPilgrimageMapRoutes(app);
-  
-  // Înregistrăm rutele pentru DOXA AI
-  await registerDoxaAIRoutes(app);
   
   // Înregistrăm rutele pentru verificarea statusului serverului
   registerServerStatusRoutes(app);

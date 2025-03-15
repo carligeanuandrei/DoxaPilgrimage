@@ -57,7 +57,7 @@ app.use((req, res, next) => {
   }
 
   // Simplified approach to starting server on an available port
-  const preferredPort = 5000;
+  const preferredPort = 3000;
   
   // Close the server if it's already listening (which might happen during hot reload)
   if (server.listening) {

@@ -5,14 +5,33 @@
       "name": "DOXA Platform",
       "description": "Rulează platforma principală DOXA",
       "command": "node doxa-platform-run.js",
-      "persistent": true
+      "persistent": true,
+      "restartOn": {
+        "files": ["server/**/*.ts", "client/**/*.tsx", "client/**/*.ts", "shared/**/*.ts", "doxa-platform-run.js", "package.json"]
+      },
+      "runOnStart": true
     },
     {
-      "id": "doxa-ai",
-      "name": "DOXA AI",
-      "description": "Rulează asistentul AI DOXA",
-      "command": "node doxa-ai-run.js",
-      "persistent": true
+      "id": "doxa-pilgrimage",
+      "name": "DOXA Pilgrimage",
+      "description": "Rulează aplicația completă DOXA Pilgrimage",
+      "command": "node start-doxa-pilgrimage.js",
+      "persistent": true,
+      "restartOn": {
+        "files": ["DoxaPilgrimage/**/*.ts", "DoxaPilgrimage/**/*.tsx", "DoxaPilgrimage/**/*.js", "DoxaPilgrimage/package.json", "start-doxa-pilgrimage.js"]
+      },
+      "runOnStart": true
+    },
+    {
+      "id": "doxa-services",
+      "name": "DOXA Services",
+      "description": "Rulează toate serviciile DOXA (Platform și Pilgrimage)",
+      "command": "bash start-doxa.sh",
+      "persistent": true,
+      "restartOn": {
+        "files": ["server/**/*.ts", "client/**/*.tsx", "client/**/*.ts", "shared/**/*.ts", "DoxaPilgrimage/**/*.ts", "DoxaPilgrimage/**/*.tsx", "start-doxa.sh", "doxa-platform-run.js", "start-doxa-pilgrimage.js", "package.json", "DoxaPilgrimage/package.json"]
+      },
+      "runOnStart": true
     }
   ]
 }

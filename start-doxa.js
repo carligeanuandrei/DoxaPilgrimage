@@ -20,12 +20,10 @@ console.log(`
 const args = process.argv.slice(2);
 const startAll = args.length === 0 || args.includes('all');
 const startPlatform = startAll || args.includes('platform');
-const startAI = startAll || args.includes('ai');
 
 // Afișăm ce componente vor fi pornite
 console.log(`Pornirea serviciilor DOXA...`);
 if (startPlatform) console.log(`- ✓ Platforma principală`);
-if (startAI) console.log(`- ✓ Asistentul AI`);
 console.log('');
 
 // Funcție pentru a verifica dacă un port este disponibil
@@ -54,32 +52,12 @@ function startDoxaPlatform() {
   return platformProcess;
 }
 
-// Funcție care pornește asistentul AI
-function startDoxaAI() {
-  console.log('🤖 Pornire asistent DOXA AI...');
-  
-  const aiProcess = spawn('node', ['doxa-ai-run.js'], {
-    stdio: 'inherit',
-    detached: false
-  });
-  
-  aiProcess.on('error', (err) => {
-    console.error(`⛔ Eroare la pornirea asistentului AI: ${err.message}`);
-  });
-  
-  return aiProcess;
-}
-
 // Lista proceselor pornite
 const processes = [];
 
 // Pornim procesele conform configurației
 if (startPlatform) {
   processes.push(startDoxaPlatform());
-}
-
-if (startAI) {
-  processes.push(startDoxaAI());
 }
 
 // Handler pentru închidere gracefully
@@ -104,6 +82,5 @@ process.on('SIGINT', () => {
 setTimeout(() => {
   console.log('\n✅ Informații acces:');
   console.log('   - Platformă DOXA: http://localhost:5001');
-  console.log('   - Asistent DOXA AI: http://localhost:3333');
   console.log('\n📌 Pentru a opri serviciile, apăsați Ctrl+C');
 }, 2000);
