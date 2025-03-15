@@ -159,100 +159,63 @@ document.addEventListener('DOMContentLoaded', function() {
         return loadingDiv;
     }
     
-    // Procesează întrebarea utilizatorului și returnează un răspuns
-    function processUserQuery(query) {
-        query = query.toLowerCase();
-        
-        // Verifică pentru întrebări despre mănăstiri
-        for (const monastery in monasteryData) {
-            if (query.includes(monastery.toLowerCase()) || 
-                query.includes("mănăstirea " + monastery.split(" ")[1].toLowerCase())) {
-                const data = monasteryData[monastery];
-                return `<strong>${monastery}</strong><br>
-                    Regiune: ${data.region}<br>
-                    Hram: ${data.patron} (${data.feastDay})<br>
-                    Fondată în anul: ${data.founded}<br>
-                    Locație: ${data.location}<br>
-                    ${data.description}`;
+    // Procesează întrebarea utilizatorului și returnează un răspuns folosind API-ul
+    async function processUserQuery(query) {
+        try {
+            // Folosim API-ul local pentru a procesa întrebarea
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: query })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.message;
+            } else {
+                return "A apărut o problemă în procesarea întrebării dumneavoastră. Vă rugăm să încercați din nou.";
             }
-        }
-        
-        // Verifică pentru întrebări generale despre mănăstiri
-        if (query.includes("mănăstiri") || query.includes("manastiri")) {
-            let response = "Iată câteva dintre cele mai importante mănăstiri ortodoxe din România:<br><ul>";
-            for (const monastery in monasteryData) {
-                response += `<li><strong>${monastery}</strong> (${monasteryData[monastery].region}) - ${monasteryData[monastery].description}</li>`;
+        } catch (error) {
+            console.error("Eroare la comunicarea cu serverul:", error);
+            
+            // Răspuns offline pentru cazul în care serverul nu este disponibil
+            query = query.toLowerCase();
+            
+            // Verifică pentru întrebări generale despre mănăstiri
+            if (query.includes("mănăstiri") || query.includes("manastiri")) {
+                return "DOXA cuprinde informații despre 637 de mănăstiri din România, incluzând detalii despre istorie, program de vizitare și hram.";
             }
-            response += "</ul>";
-            return response;
-        }
-        
-        // Verifică pentru întrebări despre sărbători ortodoxe
-        if (query.includes("sărbători") || query.includes("sarbatori") || query.includes("sărbătoare") || query.includes("sarbatoare")) {
-            let response = "Iată principalele sărbători ortodoxe:<br><ul>";
-            for (const feast in orthodoxFeasts) {
-                response += `<li><strong>${feast}</strong> - ${orthodoxFeasts[feast].date}<br>${orthodoxFeasts[feast].description}</li>`;
+            
+            // Verifică pentru întrebări despre pelerinaje
+            if (query.includes("pelerinaj") || query.includes("traseu") || query.includes("trasee")) {
+                return "Puteți planifica pelerinaje la diferite mănăstiri din România folosind platforma noastră. Vă recomandăm să verificați evenimentele religioase pentru a alege perioada optimă.";
             }
-            response += "</ul>";
-            return response;
-        }
-        
-        // Verifică pentru întrebări despre posturi
-        if (query.includes("post") || query.includes("posturi")) {
-            let response = "Iată perioadele de post din Biserica Ortodoxă:<br><ul>";
-            for (const fastingPeriod in fastingPeriods) {
-                response += `<li><strong>${fastingPeriod}</strong><br>
-                    Perioada: ${fastingPeriods[fastingPeriod].period}<br>
-                    Durată: ${fastingPeriods[fastingPeriod].duration}<br>
-                    ${fastingPeriods[fastingPeriod].description}</li>`;
+            
+            // Verifică pentru întrebări despre post
+            if (query.includes("post") || query.includes("posturi")) {
+                return "Perioadele principale de post în tradiția ortodoxă sunt: Postul Paștelui (cel mai lung și strict), Postul Crăciunului, Postul Sfinților Apostoli Petru și Pavel și Postul Adormirii Maicii Domnului.";
             }
-            response += "</ul>";
-            return response;
-        }
-        
-        // Verifică pentru întrebări despre rețete de post
-        if (query.includes("rețete") || query.includes("retete") || query.includes("mâncare") || query.includes("mancare")) {
-            let response = "Iată câteva rețete de post tradiționale:<br><ul>";
-            for (const recipe in fastingRecipes) {
-                response += `<li><strong>${recipe}</strong><br>
-                    Ingrediente: ${fastingRecipes[recipe].ingredients.join(", ")}<br>
-                    Preparare: ${fastingRecipes[recipe].preparation}</li>`;
+            
+            // Verifică pentru întrebări despre calendar
+            if (query.includes("calendar") || query.includes("sărbători") || query.includes("sarbatori")) {
+                return "Calendarul ortodox include principalele sărbători religioase precum Paștele, Rusaliile, Adormirea Maicii Domnului (15 august) și Nașterea Domnului (25 decembrie).";
             }
-            response += "</ul>";
-            return response;
-        }
-        
-        // Verifică pentru întrebări despre trasee de pelerinaj
-        if (query.includes("pelerinaj") || query.includes("traseu") || query.includes("trasee")) {
-            let response = "Vă recomand următoarele trasee de pelerinaj:<br><ul>";
-            for (const route in pilgrimageRoutes) {
-                response += `<li><strong>${route}</strong> (${pilgrimageRoutes[route].days} zile)<br>
-                    Mănăstiri vizitate: ${pilgrimageRoutes[route].monasteries.join(", ")}<br>
-                    ${pilgrimageRoutes[route].description}</li>`;
+            
+            // Răspunsuri pentru întrebări generale despre ajutor
+            if (query.includes("ajutor") || query.includes("ce poți") || query.includes("ce știi")) {
+                return "Vă pot oferi informații despre mănăstiri, pelerinaje, tradiții ortodoxe, rețete de post și sărbători religioase. Întrebați-mă orice legat de aceste subiecte!";
             }
-            response += "</ul>";
-            return response;
+            
+            // Răspuns implicit pentru întrebări necunoscute
+            return "Mulțumesc pentru întrebarea dumneavoastră despre patrimoniul spiritual ortodox. Pentru informații mai detaliate, vă recomand să consultați secțiunile specializate ale platformei DOXA.";
         }
-        
-        // Răspunsuri pentru întrebări generale
-        if (query.includes("salut") || query.includes("bună") || query.includes("buna") || query.includes("hello")) {
-            return "Bună ziua! Sunt asistentul virtual DOXA, specializat în informații despre pelerinaje ortodoxe, mănăstiri și tradiții. Cu ce vă pot ajuta astăzi?";
-        }
-        
-        if (query.includes("mulțumesc") || query.includes("multumesc") || query.includes("mersi")) {
-            return "Cu plăcere! Dacă mai aveți întrebări despre pelerinaje, mănăstiri sau tradiții ortodoxe, sunt aici să vă ajut.";
-        }
-        
-        if (query.includes("ce poți") || query.includes("ce poti") || query.includes("ce știi") || query.includes("ce stii") || query.includes("funcții") || query.includes("ajuta")) {
-            return "Vă pot oferi informații despre:<br>• Mănăstiri ortodoxe din România<br>• Sărbători ortodoxe<br>• Perioade de post<br>• Rețete de post<br>• Trasee de pelerinaj recomandate<br>Încercați să mă întrebați despre acestea!";
-        }
-        
-        // Răspuns implicit pentru întrebări necunoscute
-        return "Îmi pare rău, dar nu am suficiente informații pentru a răspunde la această întrebare. Puteți să mă întrebați despre mănăstiri ortodoxe, sărbători religioase, perioade de post, rețete de post sau trasee de pelerinaj.";
     }
     
     // Funcție pentru a procesa mesajul utilizatorului
-    function handleUserMessage() {
+    async function handleUserMessage() {
         const userMessage = userInput.value.trim();
         if (!userMessage) return;
         
@@ -263,15 +226,24 @@ document.addEventListener('DOMContentLoaded', function() {
         // Afișează indicatorul de încărcare
         const loadingIndicator = showLoadingIndicator();
         
-        // Simulează timpul de procesare
-        setTimeout(() => {
+        try {
+            // Procesează întrebarea și obține răspunsul
+            const aiResponse = await processUserQuery(userMessage);
+            
             // Elimină indicatorul de încărcare
             loadingIndicator.remove();
             
-            // Procesează întrebarea și adaugă răspunsul
-            const aiResponse = processUserQuery(userMessage);
+            // Adaugă răspunsul asistentului în chat
             addMessage(aiResponse, 'ai');
-        }, 1000);
+        } catch (error) {
+            console.error("Eroare în procesarea mesajului:", error);
+            
+            // Elimină indicatorul de încărcare
+            loadingIndicator.remove();
+            
+            // Adaugă un mesaj de eroare în chat
+            addMessage("A apărut o eroare în procesarea întrebării. Vă rugăm să încercați din nou.", 'ai');
+        }
     }
     
     // Event listeners

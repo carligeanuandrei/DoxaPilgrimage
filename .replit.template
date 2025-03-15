@@ -1,0 +1,51 @@
+modules = ["nodejs-20"]
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+DATABASE_URL = "postgres://postgres:postgres@localhost:5432/doxa"
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 3333
+externalPort = 3000
+
+[[ports]]
+localPort = 5000
+externalPort = 5000
+
+[deployment]
+run = ["sh", "-c", "node doxa-ai-run.js"]
+deploymentTarget = "cloudrun"
+
+[languages.javascript]
+pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
+syntax = "javascript"
+
+[languages.javascript.languageServer]
+start = ["typescript-language-server", "--stdio"]
+
+[runOnSave]
+command = "node doxa-ai-run.js"
+
+[hosting]
+route = "/"
+directory = "./public"
+
+# Server pentru Platforma DOXA
+[[deployment.server]]
+name = "DOXA Platform"
+[deployment.server.run]
+cmd = ["bash", "start-doxa.sh"]
+waitForPort = 5000
+
+# Server pentru Asistentul AI DOXA
+[[deployment.server]]
+name = "DOXA AI Assistant"
+[deployment.server.run]
+cmd = ["node", "doxa-ai-run.js"]
+waitForPort = 3333

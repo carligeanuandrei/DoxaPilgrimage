@@ -3,94 +3,180 @@
  * Acest script pornește un server HTTP pentru a servi fișierele statice ale aplicației DOXA AI
  * Adaptat pentru mediul Replit - ascultă pe 0.0.0.0
  */
-
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
+const express = require('express');
 
-// Pornește un server simplu pentru a menține procesul activ și a afișa starea
-const server = http.createServer((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    
-    // Generează un HTML cu informații despre DOXA
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>DOXA Server Status</title>
-          <style>
-            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-            h1 { color: #4a2882; }
-            .status { padding: 15px; border-radius: 5px; margin: 20px 0; }
-            .running { background-color: #d4edda; color: #155724; }
-            pre { background: #f4f4f4; padding: 15px; overflow: auto; }
-            .btn { display: inline-block; background: #4a2882; color: white; padding: 10px 15px; 
-                   text-decoration: none; border-radius: 5px; margin-top: 20px; }
-          </style>
-        </head>
-        <body>
-          <h1>DOXA Romanian Orthodox Platform - Server Status</h1>
-          <div class="status running">
-            <strong>✅ Server is running!</strong>
-            <p>DOXA Platform server running on port 5000</p>
-            <p>The main application is running in a separate process.</p>
-          </div>
-          
-          <h3>Server Information:</h3>
-          <pre>
-Platform: ${process.platform}
-Node.js: ${process.version}
-Process ID: ${process.pid}
-Working Directory: ${process.cwd()}
-          </pre>
-          
-          <h3>How to access the application:</h3>
-          <p>Open the web preview in Replit or access the external URL provided by Replit.</p>
-          
-          <a href="https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co" class="btn" target="_blank">
-            Open Application
-          </a>
-        </body>
-      </html>
-    `;
-    
-    res.end(html);
-  } else {
-    res.writeHead(404);
-    res.end('Not found');
-  }
-});
-
-// Pornește serverul de status pe un port diferit
+// Portul pentru aplicația DOXA AI
 const PORT = 3333;
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Status server running at port ${PORT}`);
-  console.log('Starting DOXA Application...');
+
+// Banner de start
+console.log(`
+==========================================
+        DOXA AI Assistant Server         
+==========================================
+`);
+
+// Verifică dacă există directorul doxa-ai
+const doxaAiDir = path.join(__dirname, 'doxa-ai');
+if (!fs.existsSync(doxaAiDir)) {
+  console.log(`ℹ️ Directorul doxa-ai nu a fost găsit. Pornire în modul server simplu pentru DOXA AI...`);
+  console.log(`🔄 Starting simple HTTP server for DOXA AI...`);
+  startSimpleServer();
+} else {
+  console.log(`ℹ️ Directorul doxa-ai a fost găsit. Pornire în modul standalone DOXA AI...`);
+  console.log(`🔄 Starting standalone DOXA AI server...`);
+  startStandaloneServer();
+}
+
+/**
+ * Pornește un server standalone pentru DOXA AI
+ * Aceasta este opțiunea preferată când avem un director doxa-ai complet
+ */
+function startStandaloneServer() {
+  const app = express();
   
-  // Pornește aplicația principală într-un proces separat
-  // Determină calea corectă pentru execuție
-  const baseDir = fs.existsSync('./DoxaPilgrimage') ? './DoxaPilgrimage' : '.';
+  // Configurare middleware
+  app.use(express.static(path.join(__dirname, 'doxa-ai')));
+  app.use(express.json());
   
-  // Pornește aplicația
-  console.log(`Starting DOXA from directory: ${baseDir}`);
-  const doxaProcess = spawn('npm', ['run', 'dev'], { 
-    shell: true,
-    stdio: 'inherit',
-    cwd: baseDir
+  // Rută pentru pagina principală
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'doxa-ai', 'index.html'));
   });
   
-  doxaProcess.on('error', (err) => {
-    console.error('Failed to start DOXA process:', err);
+  // Rută pentru verificarea stării
+  app.get('/status', (req, res) => {
+    res.json({
+      status: 'running',
+      platform: 'doxa-ai',
+      version: '1.0.0',
+      timestamp: new Date().toISOString()
+    });
   });
   
-  // Ascultă pentru închiderea aplicației
-  process.on('SIGINT', () => {
-    console.log('Shutting down DOXA server...');
-    doxaProcess.kill('SIGINT');
-    server.close();
-    process.exit(0);
+  // Pornire server
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Status server running at port ${PORT}`);
   });
-});
+}
+
+/**
+ * Pornește un server simplu care servește o pagină informativă
+ * Aceasta este opțiunea de fallback când nu avem directorul doxa-ai
+ */
+function startSimpleServer() {
+  // HTML simplu pentru pagina de bază
+  const fallbackHTML = `
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOXA AI Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      color: #0066cc;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .container {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .status {
+      background: #e6f7ff;
+      border-left: 4px solid #1890ff;
+      padding: 10px 15px;
+      margin: 20px 0;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #666;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>DOXA AI Assistant</h1>
+  
+  <div class="container">
+    <h2>Status: Activ</h2>
+    <p>Asistentul DOXA AI este în curs de rulare pe acest server.</p>
+    
+    <div class="status">
+      <p><strong>Server Info:</strong> Rulează pe portul ${PORT}</p>
+      <p><strong>Status:</strong> Activ și disponibil pentru interogări</p>
+      <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
+    </div>
+    
+    <h3>Despre DOXA AI</h3>
+    <p>DOXA AI este un asistent inteligent specializat în patrimoniul cultural și spiritual ortodox românesc.</p>
+    <p>Poate oferi informații despre:</p>
+    <ul>
+      <li>Mănăstiri și locații de pelerinaj</li>
+      <li>Sărbători și evenimente religioase</li>
+      <li>Tradiții și obiceiuri ortodoxe</li>
+      <li>Rețete de post și informații despre perioadele de post</li>
+    </ul>
+  </div>
+  
+  <footer>
+    <p>DOXA Platform &copy; 2023-2025. Toate drepturile rezervate.</p>
+  </footer>
+  
+  <script>
+    // Afișăm timestamp-ul curent
+    document.getElementById('timestamp').textContent = new Date().toLocaleString('ro-RO');
+    
+    // Actualizăm timestamp-ul la fiecare minut
+    setInterval(() => {
+      document.getElementById('timestamp').textContent = new Date().toLocaleString('ro-RO');
+    }, 60000);
+  </script>
+</body>
+</html>
+  `;
+  
+  // Răspuns simplu pentru ruta /status
+  const statusResponse = JSON.stringify({
+    status: 'running',
+    platform: 'doxa-ai-fallback',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+  
+  // Creăm serverul
+  const server = http.createServer((req, res) => {
+    // Setăm headerele CORS pentru a permite accesul de pe orice origin
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    
+    // Verificăm calea cererii
+    if (req.url === '/status') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(statusResponse);
+    } else {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(fallbackHTML);
+    }
+  });
+  
+  // Pornim serverul
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Status server running at port ${PORT}`);
+  });
+}

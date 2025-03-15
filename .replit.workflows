@@ -1,0 +1,18 @@
+{
+  "workflows": [
+    {
+      "id": "doxa-platform",
+      "name": "DOXA Platform",
+      "description": "Rulează platforma principală DOXA",
+      "command": "node doxa-platform-run.js",
+      "persistent": true
+    },
+    {
+      "id": "doxa-ai",
+      "name": "DOXA AI",
+      "description": "Rulează asistentul AI DOXA",
+      "command": "node doxa-ai-run.js",
+      "persistent": true
+    }
+  ]
+}
