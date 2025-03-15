@@ -1,43 +1,57 @@
-
 [
   {
     "id": 1,
-    "name": "Mănăstirea Voroneț",
-    "location": "Voroneț, Suceava",
-    "yearFounded": 1488,
-    "description": "Celebră pentru albastrul de Voroneț și picturile exterioare unice",
-    "image": "/images/monastery-placeholder.jpg"
+    "name": "Mănăstirea Putna",
+    "location": "Putna, Suceava",
+    "foundingYear": 1466,
+    "description": "Mănăstirea Putna a fost ctitorită de Ștefan cel Mare între anii 1466 și 1469.",
+    "imageUrl": "/images/monastery-placeholder.jpg",
+    "accommodationAvailable": true,
+    "contact": "info@manastirea-putna.ro",
+    "region": "Moldova"
   },
   {
     "id": 2,
-    "name": "Mănăstirea Putna",
-    "location": "Putna, Suceava",
-    "yearFounded": 1469,
-    "description": "Necropola lui Ștefan cel Mare, important centru spiritual și cultural",
-    "image": "/images/monastery-placeholder.jpg"
+    "name": "Mănăstirea Voroneț",
+    "location": "Voroneț, Suceava",
+    "foundingYear": 1488,
+    "description": "Mănăstirea Voroneț este renumită pentru culoarea albastră unică a picturilor sale exterioare.",
+    "imageUrl": "/images/monastery-placeholder.jpg",
+    "accommodationAvailable": true,
+    "contact": "contact@manastireavoronet.ro",
+    "region": "Moldova"
   },
   {
     "id": 3,
-    "name": "Mănăstirea Sucevița",
-    "location": "Sucevița, Suceava",
-    "yearFounded": 1582,
-    "description": "Ctitorie a fraților Movileşti, remarcabilă pentru fortificațiile sale",
-    "image": "/images/monastery-placeholder.jpg"
+    "name": "Mănăstirea Cozia",
+    "location": "Călimănești, Vâlcea",
+    "foundingYear": 1388,
+    "description": "Una dintre cele mai vechi și mai importante mănăstiri din România.",
+    "imageUrl": "/images/monastery-placeholder.jpg",
+    "accommodationAvailable": true,
+    "contact": "office@manastirea-cozia.ro",
+    "region": "Muntenia"
   },
   {
     "id": 4,
-    "name": "Mănăstirea Moldovița",
-    "location": "Moldovița, Suceava",
-    "yearFounded": 1532,
-    "description": "Construită în timpul domniei lui Petru Rareș, cu fresce excepționale",
-    "image": "/images/monastery-placeholder.jpg"
+    "name": "Mănăstirea Curtea de Argeș",
+    "location": "Curtea de Argeș, Argeș",
+    "foundingYear": 1512,
+    "description": "Mănăstirea este legată de legenda Meșterului Manole și este cunoscută pentru arhitectura unică.",
+    "imageUrl": "/images/monastery-placeholder.jpg",
+    "accommodationAvailable": true,
+    "contact": "info@manastireacurteadearges.ro",
+    "region": "Muntenia"
   },
   {
     "id": 5,
-    "name": "Mănăstirea Humor",
-    "location": "Mănăstirea Humorului, Suceava",
-    "yearFounded": 1530,
-    "description": "Renumită pentru frescele sale în nuanțe predominant roșiatice",
-    "image": "/images/monastery-placeholder.jpg"
+    "name": "Mănăstirea Sâmbăta de Sus",
+    "location": "Sâmbăta de Sus, Brașov",
+    "foundingYear": 1696,
+    "description": "Mănăstire construită de Constantin Brâncoveanu, un important centru spiritual ortodox din Transilvania.",
+    "imageUrl": "/images/monastery-placeholder.jpg",
+    "accommodationAvailable": true,
+    "contact": "contact@manastireasambata.ro",
+    "region": "Transilvania"
   }
 ]
