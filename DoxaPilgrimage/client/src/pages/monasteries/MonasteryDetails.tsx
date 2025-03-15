@@ -23,14 +23,20 @@ import {
 import { Monastery } from '@shared/schema';
 import { motion } from 'framer-motion';
 
-interface MonasteryDetailsPageProps {
-  slug?: string;
+// Pentru compatibilitate cu wouter Route
+export interface RouteComponentProps<Params> {
+  params: Params;
 }
 
-export default function MonasteryDetailsPage({ slug: propSlug }: MonasteryDetailsPageProps) {
+// Props-uri pentru pagina de detalii
+interface MonasteryDetailsPageProps {
+  params?: { slug: string };
+}
+
+export default function MonasteryDetailsPage(props: MonasteryDetailsPageProps) {
   // Extragem slug-ul din URL sau folosim prop
   const [match, params] = useRoute<{ slug: string }>("/monasteries/:slug");
-  const slug = propSlug || params?.slug;
+  const slug = props?.params?.slug || params?.slug;
 
   // Încărcăm datele mănăstirii
   const { isLoading, data: monastery } = useQuery<Monastery>({
@@ -118,7 +124,7 @@ export default function MonasteryDetailsPage({ slug: propSlug }: MonasteryDetail
               {monastery.county && (
                 <Badge variant="secondary">{monastery.county}</Badge>
               )}
-              {monastery.verification === 'verified' && (
+              {monastery.verification && (
                 <Badge variant="default" className="bg-green-500">
                   <Star className="h-3 w-3 mr-1 fill-white" /> Verificat
                 </Badge>
@@ -213,7 +219,7 @@ export default function MonasteryDetailsPage({ slug: propSlug }: MonasteryDetail
                 <div className="prose max-w-none">
                   <h2 className="text-2xl font-semibold mb-4">Moaște și obiecte sacre</h2>
                   <ul>
-                    {monastery.relics.map((relic, index) => (
+                    {monastery.relics.map((relic: string, index: number) => (
                       <li key={index}>{relic}</li>
                     ))}
                   </ul>
@@ -237,7 +243,7 @@ export default function MonasteryDetailsPage({ slug: propSlug }: MonasteryDetail
             <div>
               <h2 className="text-2xl font-semibold mb-4">Galerie foto</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {monastery.images.map((image, index) => (
+                {monastery.images.map((image: string, index: number) => (
                   <div 
                     key={index} 
                     className="aspect-square rounded-lg overflow-hidden bg-muted"
