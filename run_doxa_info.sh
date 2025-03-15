@@ -1,6 +1,13 @@
 #!/bin/bash
 
 # Script pentru afișarea informațiilor despre serviciile DOXA
+# Versiune actualizată cu verificare detaliată
+
+if [ "$1" == "--js" ] || [ "$1" == "-j" ]; then
+  # Folosim verificarea avansată din Node.js
+  node check-doxa-services.js
+  exit 0
+fi
 
 cat << "EOF"
 ╔════════════════════════════════════════════════════╗
@@ -65,3 +72,4 @@ echo -e "\n💡 Sfaturi:"
 echo "  - Pentru a porni serviciile, folosiți meniul Workflows din Replit"
 echo "  - Pentru a vedea log-urile complete: cat doxa_platform.log sau cat doxa_pilgrimage.log"
 echo "  - Pentru a reseta serviciile: utilizați butonul Stop din Replit și apoi reporniți"
+echo "  - Pentru verificări detaliate: bash run_doxa_info.sh --js"

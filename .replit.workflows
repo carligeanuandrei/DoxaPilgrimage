@@ -4,10 +4,10 @@
       "id": "doxa-platform",
       "name": "DOXA Platform",
       "description": "Rulează platforma principală DOXA",
-      "command": "node doxa-platform-run.js",
+      "command": "node start-doxa-platform.js",
       "persistent": true,
       "restartOn": {
-        "files": ["server/**/*.ts", "client/**/*.tsx", "client/**/*.ts", "shared/**/*.ts", "doxa-platform-run.js", "package.json"]
+        "files": ["server/**/*.ts", "client/**/*.tsx", "client/**/*.ts", "shared/**/*.ts", "doxa-platform-run.js", "start-doxa-platform.js", "package.json"]
       },
       "runOnStart": true
     },
