@@ -110,16 +110,16 @@
   {
     "id": 1,
     "name": "Mănăstirea Putna",
-    "description": "Mănăstirea Putna, ctitorie a lui Ștefan cel Mare (1466-1469), este unul dintre cele mai importante centre spirituale și culturale ale Ortodoxiei românești, supranumită și \"Ierusalimul neamului românesc\".",
+    "description": "Mănăstirea Putna, ctitorie a lui Ștefan cel Mare (1466-1469), este unul dintre cele mai importante centre spirituale și culturale ale Ortodoxiei românești.",
     "location": "Putna, Suceava",
     "yearFounded": 1466,
     "image": "/images/monastery-placeholder.jpg",
-    "region": "bucovina"
+    "region": "moldova"
   },
   {
     "id": 2,
     "name": "Mănăstirea Voroneț",
-    "description": "Mănăstirea Voroneț, cunoscută pentru „albastrul de Voroneț" - culoarea unică a frescelor exterioare, este una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare.",
+    "description": "Mănăstirea Voroneț, cunoscută pentru albastrul de Voroneț - culoarea unică a frescelor exterioare, este una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare.",
     "location": "Gura Humorului, Suceava",
     "yearFounded": 1488,
     "image": "/images/monastery-placeholder.jpg",
@@ -128,28 +128,10 @@
   {
     "id": 3,
     "name": "Mănăstirea Neamț",
-    "description": "Mănăstirea Neamț, cunoscută și ca „Lavra Neamțului", este una dintre cele mai vechi și mai importante mănăstiri din Moldova, cu o tradiție culturală și spirituală de peste șase secole.",
+    "description": "Mănăstirea Neamț, cunoscută și ca Lavra Neamțului, este una dintre cele mai vechi și mai importante mănăstiri din Moldova.",
     "location": "Târgu Neamț, Neamț",
     "yearFounded": 1407,
     "image": "/images/monastery-placeholder.jpg",
     "region": "moldova"
-  },
-  {
-    "id": 4,
-    "name": "Mănăstirea Tismana",
-    "description": "Mănăstirea Tismana, cea mai veche din Țara Românească, este ctitoria Sfântului Nicodim de la Tismana. Așezată într-un cadru natural deosebit, pe un pisc stâncos, lângă o cascadă, mănăstirea impresionează prin arhitectura sa specifică medievală românească.",
-    "location": "Tismana, Gorj",
-    "yearFounded": 1376,
-    "image": "/images/monastery-placeholder.jpg",
-    "region": "oltenia"
-  },
-  {
-    "id": 5,
-    "name": "Mănăstirea Cozia",
-    "description": "Mănăstirea Cozia, situată pe malul drept al Oltului, este unul dintre cele mai importante monumente de arhitectură și artă medievală din România. Construită între 1387-1388 de către Mircea cel Bătrân, mănăstirea este un exemplu reprezentativ al stilului arhitectonic bizantin.",
-    "location": "Călimănești, Vâlcea",
-    "yearFounded": 1387,
-    "image": "/images/monastery-placeholder.jpg",
-    "region": "oltenia"
   }
 ]
