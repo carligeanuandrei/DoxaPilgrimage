@@ -102,3 +102,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node recover-app.js"
+
+[[workflows.workflow]]
+name = "Recuperare DOXA 13.03.2025"
+author = 40326232
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node recover-doxa-prev-version.js"
