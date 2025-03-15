@@ -23,10 +23,10 @@ type CountryGroup = {
  */
 export function registerMonasteryRegionsRoutes(app: Express) {
   /**
-   * GET /api/monasteries/regions
+   * GET /api/monastery-regions
    * Returnează toate regiunile grupate pe țări, cu numărul de mănăstiri din fiecare
    */
-  app.get("/api/monasteries/regions", async (req: Request, res: Response) => {
+  app.get("/api/monastery-regions", async (req: Request, res: Response) => {
     try {
       // Obține toate mănăstirile din baza de date
       const allMonasteries = await db.query.monasteries.findMany({
@@ -118,11 +118,11 @@ export function registerMonasteryRegionsRoutes(app: Express) {
   });
 
   /**
-   * GET /api/monasteries/by-region
+   * GET /api/monastery-regions/by-region
    * Returnează toate mănăstirile dintr-o regiune specifică
    * Query params: region
    */
-  app.get("/api/monasteries/by-region", async (req: Request, res: Response) => {
+  app.get("/api/monastery-regions/by-region", async (req: Request, res: Response) => {
     try {
       const { region } = req.query;
       
