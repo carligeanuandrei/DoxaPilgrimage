@@ -1,114 +1,6 @@
 [
   {
     "id": 1,
-    "name": "Mănăstirea Voroneț",
-    "location": "Voroneț, Suceava",
-    "yearFounded": 1488,
-    "description": "Celebră pentru albastrul de Voroneț",
-    "image": "/public/images/monasteries/voronet.jpg"
-  },
-  {
-    "id": 2,
-    "name": "Mănăstirea Putna",
-    "location": "Putna, Suceava",
-    "yearFounded": 1469,
-    "description": "Necropola lui Ștefan cel Mare",
-    "image": "/public/images/monasteries/putna.jpg"
-  },
-  {
-    "id": 3,
-    "name": "Mănăstirea Moldovița",
-    "location": "Moldovița, Suceava",
-    "yearFounded": 1532,
-    "description": "Monument istoric UNESCO",
-    "image": "/public/images/monasteries/moldovita.jpg"
-  },
-  {
-    "id": 4,
-    "name": "Mănăstirea Humor",
-    "location": "Gura Humorului, Suceava",
-    "yearFounded": 1530,
-    "description": "Monument istoric UNESCO",
-    "image": "/public/images/monasteries/humor.jpg"
-  },
-  {
-    "id": 5,
-    "name": "Mănăstirea Sucevița",
-    "location": "Sucevița, Suceava",
-    "yearFounded": 1585,
-    "description": "Monument istoric UNESCO",
-    "image": "/public/images/monasteries/sucevita.jpg"
-  }
-]
-[
-  {
-    "id": 1,
-    "name": "Mănăstirea Voroneț",
-    "location": "Voroneț, Suceava",
-    "yearFounded": 1488,
-    "description": "Celebră pentru albastrul de Voroneț",
-    "image": "/images/monasteries/voronet.jpg"
-  },
-  {
-    "id": 2,
-    "name": "Mănăstirea Putna",
-    "location": "Putna, Suceava",
-    "yearFounded": 1469,
-    "description": "Necropola lui Ștefan cel Mare",
-    "image": "/images/monasteries/putna.jpg"
-  },
-  {
-    "id": 3,
-    "name": "Mănăstirea Moldovița",
-    "location": "Moldovița, Suceava",
-    "yearFounded": 1532,
-    "description": "Monument istoric UNESCO",
-    "image": "/images/monasteries/moldovita.jpg"
-  },
-  {
-    "id": 4,
-    "name": "Mănăstirea Humor",
-    "location": "Gura Humorului, Suceava",
-    "yearFounded": 1530,
-    "description": "Monument istoric UNESCO",
-    "image": "/images/monasteries/humor.jpg"
-  },
-  {
-    "id": 5,
-    "name": "Mănăstirea Sucevița",
-    "location": "Sucevița, Suceava",
-    "yearFounded": 1585,
-    "description": "Monument istoric UNESCO",
-    "image": "/images/monasteries/sucevita.jpg"
-  },
-  {
-    "id": 6,
-    "name": "Mănăstirea Cozia",
-    "location": "Călimănești, Vâlcea",
-    "yearFounded": 1388,
-    "description": "Ctitorie a lui Mircea cel Bătrân",
-    "image": "/images/monasteries/cozia.jpg"
-  },
-  {
-    "id": 7,
-    "name": "Mănăstirea Neamț",
-    "location": "Vânători-Neamț, Neamț",
-    "yearFounded": 1407,
-    "description": "Una din cele mai vechi mănăstiri din Moldova",
-    "image": "/images/monasteries/neamt.jpg"
-  },
-  {
-    "id": 8,
-    "name": "Mănăstirea Bistrița",
-    "location": "Bistrița, Neamț",
-    "yearFounded": 1407,
-    "description": "Ctitorie a lui Alexandru cel Bun",
-    "image": "/images/monasteries/bistrita.jpg"
-  }
-]
-[
-  {
-    "id": 1,
     "name": "Mănăstirea Putna",
     "description": "Mănăstirea Putna, ctitorie a lui Ștefan cel Mare (1466-1469), este unul dintre cele mai importante centre spirituale și culturale ale Ortodoxiei românești.",
     "location": "Putna, Suceava",
@@ -119,11 +11,11 @@
   {
     "id": 2,
     "name": "Mănăstirea Voroneț",
-    "description": "Mănăstirea Voroneț, cunoscută pentru albastrul de Voroneț - culoarea unică a frescelor exterioare, este una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare.",
+    "description": "Mănăstirea Voroneț, cunoscută pentru albastrul de Voroneț - culoarea specială a frescelor exterioare, este una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare.",
     "location": "Gura Humorului, Suceava",
     "yearFounded": 1488,
     "image": "/images/monastery-placeholder.jpg",
-    "region": "bucovina"
+    "region": "moldova"
   },
   {
     "id": 3,
@@ -133,5 +25,23 @@
     "yearFounded": 1407,
     "image": "/images/monastery-placeholder.jpg",
     "region": "moldova"
+  },
+  {
+    "id": 4,
+    "name": "Mănăstirea Tismana",
+    "description": "Mănăstirea Tismana, cea mai veche din Țara Românească, este ctitoria Sfântului Nicodim de la Tismana.",
+    "location": "Tismana, Gorj",
+    "yearFounded": 1376,
+    "image": "/images/monastery-placeholder.jpg",
+    "region": "oltenia"
+  },
+  {
+    "id": 5,
+    "name": "Mănăstirea Cozia",
+    "description": "Mănăstirea Cozia, situată pe malul drept al Oltului, este unul dintre cele mai importante monumente de arhitectură și artă medievală din România.",
+    "location": "Călimănești, Vâlcea",
+    "yearFounded": 1387,
+    "image": "/images/monastery-placeholder.jpg",
+    "region": "oltenia"
   }
 ]

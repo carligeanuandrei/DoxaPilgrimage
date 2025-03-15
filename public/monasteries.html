@@ -17,7 +17,7 @@
       color: #666;
       text-align: center;
     }
-    
+
     .filters-container {
       background-color: #f8f9fa;
       padding: 1.5rem;
@@ -25,37 +25,37 @@
       margin-bottom: 2rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
-    
+
     .filters-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 1rem;
     }
-    
+
     .filter-group {
       margin-bottom: 1rem;
     }
-    
+
     .filter-group label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 500;
     }
-    
+
     .filter-group select {
       width: 100%;
       padding: 0.5rem;
       border: 1px solid #ddd;
       border-radius: 4px;
     }
-    
+
     .regions-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.5rem;
       margin-bottom: 3rem;
     }
-    
+
     .region-card {
       background-color: #fff;
       border-radius: 8px;
@@ -63,37 +63,37 @@
       overflow: hidden;
       transition: var(--transition);
     }
-    
+
     .region-card:hover {
       transform: translateY(-5px);
     }
-    
+
     .region-image {
       height: 150px;
       overflow: hidden;
     }
-    
+
     .region-image img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    
+
     .region-content {
       padding: 1.5rem;
     }
-    
+
     .region-title {
       font-size: 1.25rem;
       color: var(--primary-color);
       margin-bottom: 0.5rem;
     }
-    
+
     .region-count {
       color: var(--light-text);
       margin-bottom: 1rem;
     }
-    
+
     .empty-state {
       text-align: center;
       padding: 3rem;
@@ -101,12 +101,12 @@
       border-radius: 8px;
       margin: 2rem 0;
     }
-    
+
     @media (max-width: 768px) {
       .filters-grid {
         grid-template-columns: 1fr;
       }
-      
+
       .regions-grid {
         grid-template-columns: 1fr;
       }
@@ -137,7 +137,7 @@
         <p>Datele afișate sunt demonstrative și nu reflectă informațiile reale din baza de date.</p>
       </div>
     `;
-    
+
     // Verificăm dacă există elementul main, iar dacă nu, adăugăm la root
     const targetElement = document.querySelector('main') || document.getElementById('root');
     if (targetElement) {
@@ -153,7 +153,7 @@
     try {
       // Încercăm să obținem datele de la API
       const response = await fetch('/api/monasteries');
-      
+
       // Verificăm dacă API-ul a răspuns cu succes
       if (response.ok) {
         const monasteries = await response.json();
@@ -163,18 +163,18 @@
       }
     } catch (error) {
       console.error("Eroare la încărcarea mănăstirilor:", error);
-      
+
       // Dacă API-ul eșuează, încărcăm datele de rezervă
       console.log("Folosim date de rezervă pentru mănăstiri");
       showConnectionError();
-      
+
       try {
         const fallbackResponse = await fetch('/fallback-data/monasteries.json');
         const fallbackData = await fallbackResponse.json();
         displayMonasteries(fallbackData);
       } catch (fallbackError) {
         console.error("Eroare la încărcarea datelor de rezervă:", fallbackError);
-        
+
         // Folosim date hardcoded ca ultimă soluție
         const backupData = [
           {
@@ -213,13 +213,13 @@
   // Funcție pentru a afișa mănăstirile
   function displayMonasteries(monasteries) {
     let container = document.getElementById('monasteries-container');
-    
+
     // Dacă containerul nu există, îl creăm
     if (!container) {
       container = document.createElement('div');
       container.id = 'monasteries-container';
       container.className = 'row mt-4';
-      
+
       // Adăugăm structura de bază dacă nu există
       const mainContent = document.createElement('main');
       mainContent.className = 'container py-4';
@@ -236,13 +236,13 @@
           </div>
         </div>
       `;
-      
+
       mainContent.appendChild(container);
       document.getElementById('root').appendChild(mainContent);
     }
-    
+
     container.innerHTML = '';
-    
+
     monasteries.forEach(monastery => {
       const card = document.createElement('div');
       card.className = 'col-md-4 mb-4';
