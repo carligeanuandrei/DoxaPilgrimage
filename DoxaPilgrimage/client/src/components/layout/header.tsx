@@ -74,6 +74,10 @@ export default function Header() {
               <Building className="h-4 w-4 mr-1" />
               Mănăstiri
             </Link>
+            <Link href="/fasting-recipes" className={`font-medium flex items-center ${isActiveLink('/fasting-recipes') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
+              <Utensils className="h-4 w-4 mr-1" />
+              Rețete de Post
+            </Link>
             <Link href="/orthodox-calendar" className={`font-medium flex items-center ${isActiveLink('/orthodox-calendar') ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}>
               <Calendar className="h-4 w-4 mr-1" />
               Calendar Ortodox
@@ -196,6 +200,14 @@ export default function Header() {
               </Link>
               <Link href="/pilgrimages" className={`px-4 font-medium ${isActiveLink('/pilgrimages') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
                 Pelerinaje
+              </Link>
+              <Link href="/monasteries" className={`px-4 font-medium flex items-center ${isActiveLink('/monasteries') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                <Building className="h-4 w-4 mr-1" />
+                Mănăstiri
+              </Link>
+              <Link href="/fasting-recipes" className={`px-4 font-medium flex items-center ${isActiveLink('/fasting-recipes') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
+                <Utensils className="h-4 w-4 mr-1" />
+                Rețete de Post
               </Link>
               <Link href="/orthodox-calendar" className={`px-4 font-medium flex items-center ${isActiveLink('/orthodox-calendar') ? 'text-primary' : 'text-neutral-700'}`} onClick={closeMobileMenu}>
                 <Calendar className="h-4 w-4 mr-1" />
