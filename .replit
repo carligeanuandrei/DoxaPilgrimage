@@ -24,7 +24,7 @@ localPort = 5001
 externalPort = 3001
 
 [workflows]
-runButton = "Repară Tailwind Typography"
+runButton = "DOXA Services"
 
 [[workflows.workflow]]
 name = "Run DOXA"
