@@ -169,11 +169,43 @@
       showConnectionError();
       
       try {
-        const fallbackResponse = await fetch('/public/fallback-data/monasteries.json');
+        const fallbackResponse = await fetch('/fallback-data/monasteries.json');
         const fallbackData = await fallbackResponse.json();
         displayMonasteries(fallbackData);
       } catch (fallbackError) {
         console.error("Eroare la încărcarea datelor de rezervă:", fallbackError);
+        
+        // Folosim date hardcoded ca ultimă soluție
+        const backupData = [
+          {
+            id: 1,
+            name: "Mănăstirea Putna",
+            description: "Mănăstirea Putna, ctitorie a lui Ștefan cel Mare (1466-1469), este unul dintre cele mai importante centre spirituale și culturale ale Ortodoxiei românești.",
+            location: "Putna, Suceava",
+            yearFounded: 1466,
+            image: "/images/monastery-placeholder.jpg",
+            region: "moldova"
+          },
+          {
+            id: 2,
+            name: "Mănăstirea Voroneț",
+            description: "Mănăstirea Voroneț, cunoscută pentru „albastrul de Voroneț" - culoarea unică a frescelor exterioare, este una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare.",
+            location: "Gura Humorului, Suceava",
+            yearFounded: 1488,
+            image: "/images/monastery-placeholder.jpg",
+            region: "bucovina"
+          },
+          {
+            id: 3,
+            name: "Mănăstirea Neamț",
+            description: "Mănăstirea Neamț, cunoscută și ca „Lavra Neamțului", este una dintre cele mai vechi și mai importante mănăstiri din Moldova.",
+            location: "Târgu Neamț, Neamț",
+            yearFounded: 1407,
+            image: "/images/monastery-placeholder.jpg",
+            region: "moldova"
+          }
+        ];
+        displayMonasteries(backupData);
       }
     }
   }
