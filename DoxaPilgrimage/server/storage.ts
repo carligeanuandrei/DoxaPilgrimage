@@ -115,16 +115,21 @@ export class MemStorage implements IStorage {
     this.reviews = new Map();
     this.bookings = new Map();
     this.messages = new Map();
+    this.monasteries = new Map();
     
     this.currentUserId = 1;
     this.currentPilgrimageId = 1;
     this.currentReviewId = 1;
     this.currentBookingId = 1;
     this.currentMessageId = 1;
+    this.currentMonasteryId = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000 // 24 hours
     });
+    
+    // Adăugăm date demo pentru mănăstiri
+    this.addDemoMonasteries();
     
     // Add an admin user for initial setup
     this.createUser({
@@ -544,6 +549,276 @@ export class MemStorage implements IStorage {
 
     this.cmsContent.delete(key);
     return true;
+  }
+  
+  // Monastery operations
+  async getMonastery(id: number): Promise<Monastery | undefined> {
+    return this.monasteries.get(id);
+  }
+  
+  async getMonasteryBySlug(slug: string): Promise<Monastery | undefined> {
+    return Array.from(this.monasteries.values()).find(
+      (monastery) => monastery.slug === slug
+    );
+  }
+  
+  async getMonasteries(filters?: Partial<Monastery>): Promise<Monastery[]> {
+    let results = Array.from(this.monasteries.values());
+    
+    if (filters) {
+      // Filter monasteries based on provided filters
+      results = results.filter(monastery => {
+        for (const [key, value] of Object.entries(filters)) {
+          // Skip undefined filters
+          if (value === undefined) continue;
+          
+          // Handle special cases for partial text matching
+          if (typeof value === 'string' && typeof monastery[key as keyof Monastery] === 'string') {
+            if (!(monastery[key as keyof Monastery] as string).toLowerCase().includes(value.toLowerCase())) {
+              return false;
+            }
+          } 
+          // Exact match for other types
+          else if (monastery[key as keyof Monastery] !== value) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+    
+    return results;
+  }
+  
+  async createMonastery(insertMonastery: InsertMonastery): Promise<Monastery> {
+    const id = this.currentMonasteryId++;
+    const now = new Date();
+    const monastery: Monastery = { 
+      ...insertMonastery, 
+      id, 
+      createdAt: now,
+      updatedAt: now,
+      verification: insertMonastery.verification || false,
+    };
+    this.monasteries.set(id, monastery);
+    return monastery;
+  }
+  
+  async updateMonastery(id: number, monasteryData: Partial<Monastery>): Promise<Monastery | undefined> {
+    const monastery = this.monasteries.get(id);
+    if (!monastery) return undefined;
+    
+    const updatedMonastery = { 
+      ...monastery, 
+      ...monasteryData,
+      updatedAt: new Date()
+    };
+    this.monasteries.set(id, updatedMonastery);
+    return updatedMonastery;
+  }
+  
+  // Helper method to add demo monasteries
+  private addDemoMonasteries(): void {
+    // 1. Moldova region
+    this.createMonastery({
+      name: "Mănăstirea Putna",
+      slug: "manastirea-putna",
+      description: "Mănăstirea Putna este una dintre cele mai importante mănăstiri din Moldova și din România, fiind ctitoria voievodului Ștefan cel Mare. A fost construită între anii 1466-1469 și este loc de pelerinaj și rugăciune pentru credincioși din întreaga țară.",
+      shortDescription: "Ctitoria lui Ștefan cel Mare din 1469, un important centru cultural și spiritual.",
+      address: "Sat Putna, Comuna Putna, Județul Suceava, România",
+      region: "moldova",
+      city: "Putna",
+      county: "Suceava",
+      patronSaint: "Adormirea Maicii Domnului",
+      patronSaintDate: "2025-08-15",
+      foundedYear: 1469,
+      history: "Mănăstirea Putna a fost ctitorită de Ștefan cel Mare între anii 1466-1469 ca necropolă domnească. În timpul istoriei sale îndelungate, mănăstirea a trecut prin numeroase încercări, fiind jefuită și incendiată de mai multe ori, dar a fost de fiecare dată restaurată. Este locul unde se află mormântul lui Ștefan cel Mare.",
+      specialFeatures: "Biserica principală, Turnul Tezaur, Muzeul Mănăstirii Putna care găzduiește o colecție impresionantă de artă medievală, broderii, manuscrise și carte veche.",
+      relics: ["Părticele din moaștele Sf. Ghenadie de la Putna", "Racla cu părticele din moaștele unor sfinți"],
+      type: "monastery",
+      coverImage: "putna-aerial.jpg",
+      images: ["putna1.jpg", "putna2.jpg", "putna3.jpg"],
+      website: "https://www.manastirea-putna.ro",
+      contactPhone: "+40230414055",
+      contactEmail: "contact@manastirea-putna.ro",
+      verification: true,
+      country: "România",
+      latitude: 47.8689,
+      longitude: 25.5956,
+      access: "Acces rutier, parcare pentru autocare și automobile. Cea mai apropiată gară este la Rădăuți (25 km)."
+    });
+    
+    this.createMonastery({
+      name: "Mănăstirea Voroneț",
+      slug: "manastirea-voronet",
+      description: "Mănăstirea Voroneț, cunoscută pentru culoarea unică albastră a picturilor sale exterioare, este una dintre cele mai valoroase ctitorii ale lui Ștefan cel Mare. Construită în 1488 în doar 3 luni și 3 săptămâni, mănăstirea este inclusă pe lista Patrimoniului UNESCO.",
+      shortDescription: "Faimoasă pentru 'albastrul de Voroneț' și frescele sale exterioare unice.",
+      address: "Sat Voroneț, Oraș Gura Humorului, Județul Suceava, România",
+      region: "moldova",
+      city: "Gura Humorului",
+      county: "Suceava",
+      patronSaint: "Sfântul Gheorghe",
+      patronSaintDate: "2025-04-23",
+      foundedYear: 1488,
+      history: "Ctitorită de Ștefan cel Mare în 1488 după o victorie împotriva turcilor, mănăstirea a fost ridicată în numai trei luni și trei săptămâni. Frescele exterioare au fost adăugate în perioada lui Petru Rareș și sunt faimoase pentru 'albastrul de Voroneț'.",
+      specialFeatures: "Frescele exterioare de o frumusețe rară, în special celebra scenă a 'Judecății de Apoi' de pe peretele vestic, considerată o capodoperă a artei medievale românești.",
+      relics: ["Moaștele Sf. Daniil Sihastrul"],
+      type: "monastery",
+      coverImage: "voronet-exterior.jpg",
+      images: ["voronet1.jpg", "voronet2.jpg", "voronet3.jpg"],
+      website: "https://www.manastirea-voronet.ro",
+      contactPhone: "+40230234912",
+      contactEmail: "contact@manastirea-voronet.ro",
+      verification: true,
+      country: "România",
+      latitude: 47.5178,
+      longitude: 25.8633,
+      access: "Acces ușor cu mașina sau autocarul. Se află la aproximativ 5 km de orașul Gura Humorului."
+    });
+    
+    this.createMonastery({
+      name: "Mănăstirea Moldovița",
+      slug: "manastirea-moldovita",
+      description: "Mănăstirea Moldovița, parte din patrimoniul UNESCO, a fost construită în 1532 de Petru Rareș. Este faimoasă pentru frescele sale exterioare bine conservate, în special 'Asediul Constantinopolului'.",
+      shortDescription: "Remarcabilă pentru frescele sale, inclusiv celebrul 'Asediul Constantinopolului'.",
+      address: "Comuna Vatra Moldoviței, Județul Suceava, România",
+      region: "moldova",
+      city: "Vatra Moldoviței",
+      county: "Suceava",
+      patronSaint: "Buna Vestire",
+      patronSaintDate: "2025-03-25",
+      foundedYear: 1532,
+      history: "A fost ctitorită în 1532 de voievodul Petru Rareș, fiul lui Ștefan cel Mare, pe locul unei vechi mănăstiri din lemn din secolul al XIV-lea.",
+      specialFeatures: "Frescele exterioare reprezentând 'Asediul Constantinopolului', 'Arborele lui Iesei' și 'Imnul Acatist'.",
+      relics: ["Părticele din moaștele Sf. Ioan cel Nou de la Suceava"],
+      type: "monastery",
+      coverImage: "moldovita-exterior.jpg",
+      images: ["moldovita1.jpg", "moldovita2.jpg", "moldovita3.jpg"],
+      website: "https://www.manastirea-moldovita.ro",
+      contactPhone: "+40230336443",
+      contactEmail: "contact@manastirea-moldovita.ro",
+      verification: true,
+      country: "România",
+      latitude: 47.6550,
+      longitude: 25.5367,
+      access: "Acces rutier bun, cu parcare pentru autocare și automobile particulare."
+    });
+    
+    // 2. Muntenia region
+    this.createMonastery({
+      name: "Mănăstirea Curtea de Argeș",
+      slug: "manastirea-curtea-de-arges",
+      description: "Mănăstirea Curtea de Argeș, cunoscută și ca Biserica Episcopală, este un monument de arhitectură reprezentativ pentru stilul bizantin din Țara Românească. Este locul de înmormântare al regilor și reginelor României.",
+      shortDescription: "Capodoperă a arhitecturii religioase, necropolă regală a României.",
+      address: "Strada Basarabilor nr. 1, Curtea de Argeș, Județul Argeș, România",
+      region: "muntenia",
+      city: "Curtea de Argeș",
+      county: "Argeș",
+      patronSaint: "Adormirea Maicii Domnului",
+      patronSaintDate: "2025-08-15",
+      foundedYear: 1517,
+      history: "Construită între 1515-1517 de domnitorul Neagoe Basarab, biserica a fost restaurată în secolul al XIX-lea și transformată în necropolă regală. Aici sunt înmormântați regii Carol I, Ferdinand I și reginele Elisabeta și Maria.",
+      specialFeatures: "Arhitectura unică în stil bizantin, cu elemente decorative elaborate. Necropola regală a României.",
+      relics: ["Moaștele Sfintei Mucenițe Filofteia"],
+      type: "monastery",
+      coverImage: "curtea-de-arges-exterior.jpg",
+      images: ["curtea-de-arges1.jpg", "curtea-de-arges2.jpg", "curtea-de-arges3.jpg"],
+      website: "https://www.manastirea-arges.ro",
+      contactPhone: "+40248721694",
+      contactEmail: "contact@manastirea-arges.ro",
+      verification: true,
+      country: "România",
+      latitude: 45.1431,
+      longitude: 24.6728,
+      access: "Acces rutier excelent, parcare pentru autocare și automobile. Se află în centrul orașului Curtea de Argeș."
+    });
+    
+    // 3. Transilvania region
+    this.createMonastery({
+      name: "Mănăstirea Sâmbăta de Sus",
+      slug: "manastirea-sambata-de-sus",
+      description: "Mănăstirea Sâmbăta de Sus, cunoscută și ca 'Mănăstirea Brâncoveanu', este una dintre cele mai importante mănăstiri din Transilvania. A fost construită de Constantin Brâncoveanu și restaurată de Mitropolitul Nicolae Bălan.",
+      shortDescription: "Centru spiritual și cultural important al Transilvaniei.",
+      address: "Comuna Sâmbăta de Sus, Județul Brașov, România",
+      region: "transilvania",
+      city: "Sâmbăta de Sus",
+      county: "Brașov",
+      patronSaint: "Adormirea Maicii Domnului",
+      patronSaintDate: "2025-08-15",
+      foundedYear: 1696,
+      history: "A fost ctitorită de Constantin Brâncoveanu la sfârșitul secolului al XVII-lea, distrusă ulterior de autoritățile austro-ungare, și reconstruită în perioada interbelică de Mitropolitul Nicolae Bălan.",
+      specialFeatures: "Arhitectură în stil brâncovenesc, bibliotecă valoroasă, peisaj montan spectaculos la poalele Munților Făgăraș.",
+      relics: ["Părticele din moaștele unor sfinți"],
+      type: "monastery",
+      coverImage: "sambata-exterior.jpg",
+      images: ["sambata1.jpg", "sambata2.jpg", "sambata3.jpg"],
+      website: "https://www.manastireasambata.ro",
+      contactPhone: "+40268286701",
+      contactEmail: "contact@manastireasambata.ro",
+      verification: true,
+      country: "România",
+      latitude: 45.7214,
+      longitude: 24.8003,
+      access: "Acces rutier bun, parcare disponibilă. Se află la aproximativ 70 km de Brașov."
+    });
+    
+    // 4. Oltenia region
+    this.createMonastery({
+      name: "Mănăstirea Tismana",
+      slug: "manastirea-tismana",
+      description: "Mănăstirea Tismana este una dintre cele mai vechi și importante mănăstiri din Țara Românească. A fost fondată de Sfântul Nicodim în secolul al XIV-lea și este situată într-un cadru natural spectaculos.",
+      shortDescription: "Cea mai veche mănăstire din Oltenia, situată într-un peisaj montan impresionant.",
+      address: "Orașul Tismana, Județul Gorj, România",
+      region: "oltenia",
+      city: "Tismana",
+      county: "Gorj",
+      patronSaint: "Sfânta Treime",
+      patronSaintDate: "2025-06-16",
+      foundedYear: 1377,
+      history: "A fost întemeiată în secolul al XIV-lea de Sfântul Nicodim de la Tismana, fiind una dintre cele mai vechi mănăstiri din România. A avut un rol important în cultura și spiritualitatea românească de-a lungul secolelor.",
+      specialFeatures: "Biserică în stil bizantin, pădure seculară, cascadă naturală în apropiere.",
+      relics: ["Moaștele Sf. Nicodim de la Tismana"],
+      type: "monastery",
+      coverImage: "tismana-aerial.jpg",
+      images: ["tismana1.jpg", "tismana2.jpg", "tismana3.jpg"],
+      website: "https://www.manastirea-tismana.ro",
+      contactPhone: "+40253374315",
+      contactEmail: "contact@manastirea-tismana.ro",
+      verification: true,
+      country: "România",
+      latitude: 45.0417,
+      longitude: 22.8506,
+      access: "Acces rutier, pe DN67 Târgu Jiu - Baia de Aramă. Parcare disponibilă pentru autocare și automobile."
+    });
+    
+    // 5. Dobrogea region
+    this.createMonastery({
+      name: "Mănăstirea Dervent",
+      slug: "manastirea-dervent",
+      description: "Mănăstirea Dervent este un important loc de pelerinaj din Dobrogea, cunoscută pentru izvorul cu apă tămăduitoare și pentru crucea formată natural în stâncă.",
+      shortDescription: "Mănăstire cu izvor tămăduitor și o cruce apărută natural în stâncă.",
+      address: "Comuna Ostrov, Județul Constanța, România",
+      region: "dobrogea",
+      city: "Ostrov",
+      county: "Constanța",
+      patronSaint: "Sfântul Mare Mucenic Gheorghe",
+      patronSaintDate: "2025-04-23",
+      foundedYear: 1936,
+      history: "Pe locul actual al mănăstirii a existat un străvechi lăcaș de închinare, distrus în timpul invaziilor. Mănăstirea a fost reînființată în 1936.",
+      specialFeatures: "Crucea din piatră apărută în mod natural, izvorul cu apă tămăduitoare.",
+      relics: ["Părticele din moaștele Sf. Mare Mucenic Gheorghe"],
+      type: "monastery",
+      coverImage: "dervent-exterior.jpg",
+      images: ["dervent1.jpg", "dervent2.jpg", "dervent3.jpg"],
+      website: "https://www.manastirea-dervent.ro",
+      contactPhone: "+40241857696",
+      contactEmail: "contact@manastirea-dervent.ro",
+      verification: true,
+      country: "România",
+      latitude: 44.1161,
+      longitude: 27.3653,
+      access: "Acces rutier pe DN3 București - Constanța, apoi DJ223 spre Ostrov."
+    });
   }
   
   // Helper method to add demo pilgrimages
