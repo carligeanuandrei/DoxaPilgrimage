@@ -20,7 +20,7 @@ localPort = 5001
 externalPort = 3001
 
 [workflows]
-runButton = "Recuperare completă DOXA"
+runButton = "Repară DOXA"
 
 [[workflows.workflow]]
 name = "Run DOXA"

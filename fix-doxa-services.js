@@ -85,7 +85,8 @@ async function installMissingPackages() {
   return new Promise((resolve) => {
     const pilgrimageDir = path.join(__dirname, 'DoxaPilgrimage');
     
-    const installProcess = spawn('npm', ['install', '--save-dev', ...packagesToInstall], {
+    // Folosim --force pentru a evita problemele de compatibilitate
+    const installProcess = spawn('npm', ['install', '--save-dev', '--force', ...packagesToInstall], {
       cwd: pilgrimageDir,
       stdio: 'inherit'
     });
@@ -95,8 +96,33 @@ async function installMissingPackages() {
         console.log('✅ Pachete instalate cu succes');
         resolve(true);
       } else {
-        console.log('⚠️ Eroare la instalarea pachetelor');
-        resolve(false);
+        console.log('⚠️ Eroare la instalarea pachetelor, încercăm alternative...');
+        
+        // Încercăm cu yarn dacă npm eșuează
+        const yarnProcess = spawn('yarn', ['add', '--dev', ...packagesToInstall], {
+          cwd: pilgrimageDir,
+          stdio: 'inherit'
+        });
+        
+        yarnProcess.on('close', (yarnCode) => {
+          if (yarnCode === 0) {
+            console.log('✅ Pachete instalate cu succes folosind yarn');
+            resolve(true);
+          } else {
+            console.log('⚠️ Eșec la instalarea pachetelor. Încercăm metoda directă...');
+            
+            // Încercăm să copiem direct fișierele necesare dacă instalarea eșuează
+            const npx = spawn('npx', ['tailwindcss', 'init', '-p'], {
+              cwd: pilgrimageDir,
+              stdio: 'inherit'
+            });
+            
+            npx.on('close', () => {
+              console.log('🔄 Configurare Tailwind reinițializată');
+              resolve(false);
+            });
+          }
+        });
       }
     });
   });
@@ -140,6 +166,21 @@ function checkAndFixConfigs() {
       } else {
         console.log('ℹ️ Configurare Tailwind nu folosește typography plugin');
       }
+      
+      // Verificăm dacă trebuie să reparăm configurarea Tailwind
+      if (!checkPackageInstalled('@tailwindcss/typography') && tailwindConfig.includes('@tailwindcss/typography')) {
+        // Opțional: putem modifica temporar configurarea pentru a face aplicația să funcționeze
+        const updatedConfig = tailwindConfig.replace(
+          /require\(["']@tailwindcss\/typography["']\)/g, 
+          '/* temporar dezactivat: require("@tailwindcss/typography") */'
+        );
+        
+        // Salvăm o copie de backup înainte de a modifica
+        fs.writeFileSync(tailwindConfigPath + '.backup', tailwindConfig);
+        // Aplicăm modificarea temporară
+        fs.writeFileSync(tailwindConfigPath, updatedConfig);
+        console.log('🔧 Am creat o configurare temporară pentru a permite pornirea aplicației');
+      }
     } catch (err) {
       console.log(`⚠️ Eroare la citirea fișierului de configurare Tailwind: ${err.message}`);
     }
@@ -182,6 +223,28 @@ function startPlatform() {
 function startPilgrimage() {
   console.log('\n🚀 Pornire DOXA Pilgrimage...');
   
+  // Înainte de a porni, verificăm dacă avem un script de backup pentru pornire
+  const pilgrimageDir = path.join(__dirname, 'DoxaPilgrimage');
+  const packageJsonPath = path.join(pilgrimageDir, 'package.json');
+  
+  try {
+    if (fs.existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      
+      // Verificăm dacă există script de dev în package.json
+      if (packageJson.scripts && packageJson.scripts.dev) {
+        console.log('✅ Script de dezvoltare găsit în package.json');
+      } else {
+        console.log('⚠️ Nu s-a găsit script de dezvoltare în package.json, adăugăm unul temporar');
+        packageJson.scripts = packageJson.scripts || {};
+        packageJson.scripts.dev = 'tsx server/index.ts';
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+      }
+    }
+  } catch (err) {
+    console.log(`⚠️ Eroare la verificarea package.json: ${err.message}`);
+  }
+  
   const pilgrimageProcess = spawn('node', ['start-doxa-pilgrimage.js'], {
     detached: true,
     stdio: 'ignore'
@@ -208,6 +271,26 @@ function startPilgrimage() {
   });
 }
 
+// Restaurează configurările originale după ce s-au instalat pachetele
+function restoreConfigs() {
+  console.log('\n🔄 Restaurare configurări originale...');
+  
+  const tailwindConfigPath = path.join(__dirname, 'DoxaPilgrimage', 'tailwind.config.ts');
+  const backupPath = tailwindConfigPath + '.backup';
+  
+  if (fs.existsSync(backupPath)) {
+    try {
+      fs.copyFileSync(backupPath, tailwindConfigPath);
+      fs.unlinkSync(backupPath);
+      console.log('✅ Configurare Tailwind restaurată la original');
+    } catch (err) {
+      console.log(`⚠️ Eroare la restaurarea configurării: ${err.message}`);
+    }
+  }
+  
+  return true;
+}
+
 // Funcția principală
 async function fixDoxaServices() {
   // Oprește serviciile existente
@@ -217,7 +300,12 @@ async function fixDoxaServices() {
   checkAndFixConfigs();
   
   // Instalează pachetele lipsă
-  await installMissingPackages();
+  const packagesInstalled = await installMissingPackages();
+  
+  // Restaurează configurările originale dacă pachetele au fost instalate
+  if (packagesInstalled) {
+    restoreConfigs();
+  }
   
   // Pornește serviciile
   const platformStarted = await startPlatform();
@@ -226,7 +314,7 @@ async function fixDoxaServices() {
   console.log(`
 ╔════════════════════════════════════════════════════╗
 ║                                                    ║
-║    DOXA - Rezultat Diagnosticare                 ║
+║    DOXA - Rezultat Diagnosticare                  ║
 ║                                                    ║
 ╚════════════════════════════════════════════════════╝
   
@@ -239,6 +327,7 @@ async function fixDoxaServices() {
 - DOXA Pilgrimage: http://0.0.0.0:3000
 
 📝 Recomandări:
+${packagesInstalled ? '✅ Pachetul @tailwindcss/typography a fost instalat cu succes' : '⚠️ Pachetul @tailwindcss/typography nu a putut fi instalat complet, s-a folosit o configurare temporară'}
 - Verificați logs pentru detalii: doxa_platform.log și doxa_pilgrimage.log
 - Dacă serviciile nu pornesc corect, rulați 'node recover-doxa-prev-version.js'
 - Pentru a verifica status-ul curent, folosiți 'node check-doxa-services.js'
